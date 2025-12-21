@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "coudelarialm",
   "version": "0.1.0",
   "private": true,
@@ -10,25 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.0.8",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "next": "16.0.5",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.0.8",
+    "eslint-config-next": "16.0.5",
+    "prisma": "^6.19.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-=======
-  "devDependencies": {
-    "prisma": "^6.19.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.0.1"
->>>>>>> 1c32f3085eda24bce2b801ef985db4c795bfc651
   }
 }
