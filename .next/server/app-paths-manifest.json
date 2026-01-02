@@ -1,3 +1,6 @@
 {
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/politica-cookies/page": "app/politica-cookies/page.js",
+  "/politica-privacidade/page": "app/politica-privacidade/page.js",
+  "/termos-condicoes/page": "app/termos-condicoes/page.js"
 }

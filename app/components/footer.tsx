@@ -1,65 +1,57 @@
-// components/Footer.tsx
-import { FaFacebookF, FaInstagram } from "react-icons/fa";
+import Link from "next/link";
+import { Facebook, Instagram } from "lucide-react";
 
-type FooterProps = {
-  siteName?: string;
-  tagline?: string;
-  instagramUrl?: string;
-  facebookUrl?: string;
-  year?: number;
-};
-
-export default function Footer({
-  siteName = "Coudelaria Lima Monteiro",
-  tagline = "Tradição no campo. Cavalos com alma.",
-  instagramUrl = "https://www.instagram.com/coudelaria_lima_monteiro/",
-  facebookUrl = "https://www.facebook.com/coudelarialimamonteiro/",
-  year = new Date().getFullYear(),
-}: FooterProps) {
+export default function Footer() {
   return (
-    <footer className="bg-[#0F172A] text-[#E5E7EB]">
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="text-sm font-semibold tracking-wide text-white">
-            {siteName}
-          </span>
+    <footer className="w-full bg-[#232540] text-[#FFFFFF] px-6 py-12">
+      <div className="max-w-5xl mx-auto flex flex-col items-center gap-6 text-center">
 
-          <span className="text-xs opacity-80">{tagline}</span>
+        {/* Nome da Coudelaria */}
+        <h2 className="text-xl font-semibold tracking-wide">
+          Coudelaria Lima Monteiro
+        </h2>
 
-          {/* Ícones */}
-          <div className="flex items-center gap-4">
-            <a
-              href={instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              title="Instagram"
-              className="rounded-full border border-white/10 p-2 transition-colors hover:border-[#16A34A]/40 hover:text-[#16A34A]"
-            >
-              <FaInstagram className="h-4 w-4" />
-            </a>
+        {/* Redes sociais */}
+        <div className="flex gap-6">
+          <Link
+            href="https://www.facebook.com/"
+            target="_blank"
+            aria-label="Facebook"
+            className="text-[#E5E7EB] hover:text-[#16A34A] transition-colors"
+          >
+            <Facebook size={22} />
+          </Link>
 
-            <a
-              href={facebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              title="Facebook"
-              className="rounded-full border border-white/10 p-2 transition-colors hover:border-[#16A34A]/40 hover:text-[#16A34A]"
-            >
-              <FaFacebookF className="h-4 w-4" />
-            </a>
-          </div>
+          <Link
+            href="https://www.instagram.com/"
+            target="_blank"
+            aria-label="Instagram"
+            className="text-[#E5E7EB] hover:text-[#16A34A] transition-colors"
+          >
+            <Instagram size={22} />
+          </Link>
         </div>
 
-        <div className="mx-auto mt-6 h-px w-40 bg-[#16A34A] opacity-35" />
-
-        <div className="mt-4 text-center">
-          <span className="text-[11px] opacity-70">
-            © {year} · Todos os direitos reservados
-          </span>
+        {/* Links legais */}
+        <div className="flex flex-wrap justify-center gap-4 text-sm text-[#E5E7EB]">
+          <Link href="/termos-condicoes" className="hover:text-[#16A34A]">
+            Termos e Condições
+          </Link>
+          <Link href="/politica-privacidade" className="hover:text-[#16A34A]">
+            Política de Privacidade
+          </Link>
+          <Link href="/politica-cookies" className="hover:text-[#16A34A]">
+            Política de Cookies
+          </Link>
         </div>
+
+        {/* Direitos reservados */}
+        <p className="text-xs text-[#E5E7EB] mt-4">
+          © {new Date().getFullYear()} Coudelaria Lima Monteiro. Todos os direitos reservados.
+        </p>
       </div>
     </footer>
   );
 }
+
+

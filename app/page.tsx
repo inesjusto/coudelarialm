@@ -1,7 +1,10 @@
 export default function Home() {
   return (
-    <main>
-      <h1>Vai para o caralho.</h1>
-    </main>
+    <section className="text-white p-10">
+      <h1 className="text-4xl font-bold text-[#1ecb73]">
+        Bem-vindo à Coudelaria Lima Monteiro
+      </h1>
+    </section>
   )
 }
+
