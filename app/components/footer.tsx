@@ -14,7 +14,7 @@ export default function Footer() {
         {/* Redes sociais */}
         <div className="flex gap-6">
           <Link
-            href="https://www.facebook.com/"
+            href="https://www.facebook.com/coudelarialimamonteiro"
             target="_blank"
             aria-label="Facebook"
             className="text-[#E5E7EB] hover:text-[#16A34A] transition-colors"
@@ -23,7 +23,7 @@ export default function Footer() {
           </Link>
 
           <Link
-            href="https://www.instagram.com/"
+            href="https://www.instagram.com/coudelaria_lima_monteiro/"
             target="_blank"
             aria-label="Instagram"
             className="text-[#E5E7EB] hover:text-[#16A34A] transition-colors"
