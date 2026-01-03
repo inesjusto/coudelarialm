@@ -1,6 +1,8 @@
 {
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js",
-  "/politica-cookies/page": "app/politica-cookies/page.js",
   "/politica-privacidade/page": "app/politica-privacidade/page.js",
-  "/termos-condicoes/page": "app/termos-condicoes/page.js"
+  "/historia/page": "app/historia/page.js",
+  "/garanhoes/page": "app/garanhoes/page.js",
+  "/cavalos-venda/page": "app/cavalos-venda/page.js"
 }
