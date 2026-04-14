@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Coudelaria Lima Monteiro | Cavalos</title>
+
+  <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="container nav">
+      <a href="index.html" class="logo">Coudelaria<span>Lima Monteiro</span></a>
+
+      <nav class="navbar" id="navbar">
+        <a href="index.html">Início</a>
+        <a href="historia.html">História</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="cavalos.html" class="active">Cavalos</a>
+        <a href="contactos.html">Contactos</a>
+      </nav>
+
+      <a href="cavalos.html" class="btn btn-primary">Ver Cavalos</a>
+
+      <button class="menu-toggle" id="menu-toggle">☰</button>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <span class="section-tag">Cavalos</span>
+      <h1>Conheça os nossos exemplares</h1>
+      <p>
+        Consulte os cavalos disponíveis na Coudelaria Lima Monteiro com informação atualizada diretamente a partir da base de dados.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-heading center">
+        <span class="section-tag">Disponíveis</span>
+        <h2>Os nossos cavalos</h2>
+        <p>
+          Esta listagem é carregada automaticamente a partir da base de dados.
+        </p>
+      </div>
+
+      <div id="loading-cavalos" class="status-box">
+        <p>A carregar cavalos...</p>
+      </div>
+
+      <div id="erro-cavalos" class="status-box status-error" style="display: none;">
+        <p>Não foi possível carregar os cavalos neste momento.</p>
+      </div>
+
+      <div id="sem-cavalos" class="status-box" style="display: none;">
+        <p>De momento não existem cavalos registados.</p>
+      </div>
+
+      <div class="horse-grid" id="lista-cavalos"></div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container cta-box">
+      <div>
+        <span class="section-tag">Interesse</span>
+        <h2>Quer saber mais sobre um dos nossos cavalos?</h2>
+        <p>
+          Entre em contacto connosco para receber mais informações e acompanhamento personalizado.
+        </p>
+      </div>
+      <a href="contactos.html" class="btn btn-primary">Entrar em Contacto</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <h3>Coudelaria Lima Monteiro</h3>
+        <p>Excelência e tradição equestre.</p>
+      </div>
+
+      <div>
+        <h4>Links</h4>
+        <ul>
+          <li><a href="index.html">Início</a></li>
+          <li><a href="historia.html">História</a></li>
+          <li><a href="servicos.html">Serviços</a></li>
+          <li><a href="cavalos.html">Cavalos</a></li>
+          <li><a href="contactos.html">Contactos</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Contactos</h4>
+        <p>Email: geral@coudelaria.pt</p>
+        <p>Telefone: +351 912 345 678</p>
+        <p>Portugal</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Coudelaria Lima Monteiro</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
