@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Coudelaria Lima Monteiro | Início</title>
+
+  <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="container nav">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo.png" alt="Coudelaria Lima Monteiro" class="logo-img">
+        Coudelaria<span>Lima Monteiro</span>
+      </a>
+
+      <nav class="navbar" id="navbar">
+        <a href="index.html" class="active">Início</a>
+        <a href="historia.html">História</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="cavalos.html">Cavalos</a>
+        <a href="contactos.html">Contactos</a>
+      </nav>
+
+      <a href="cavalos.html" class="btn btn-primary">Ver Cavalos</a>
+
+      <button class="menu-toggle" id="menu-toggle">☰</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-content">
+      <p class="hero-kicker">Tradição, elegância e excelência</p>
+
+      <h1>Coudelaria Lima Monteiro</h1>
+
+      <p class="hero-text">
+        Dedicamo-nos à criação, treino e valorização de cavalos com paixão,
+        rigor e respeito pela tradição equestre.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="historia.html" class="btn btn-primary">Conhecer a História</a>
+        <a href="contactos.html" class="btn btn-secondary">Entrar em Contacto</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container about-grid">
+      <div class="about-text">
+        <span class="section-tag">Sobre Nós</span>
+
+        <h2>Uma tradição construída com paixão</h2>
+
+        <p>
+          A Coudelaria Lima Monteiro nasce do amor pelo cavalo e da dedicação
+          à excelência na criação e acompanhamento equestre.
+        </p>
+
+        <p>
+          Trabalhamos com rigor e respeito pelo bem-estar animal, garantindo
+          qualidade e confiança em todos os nossos serviços.
+        </p>
+
+        <a href="historia.html" class="btn btn-outline">Ler Mais</a>
+      </div>
+
+      <div class="about-card">
+        <div class="info-box">
+          <h3>Missão</h3>
+          <p>Promover excelência e bem-estar na criação de cavalos.</p>
+        </div>
+
+        <div class="info-box">
+          <h3>Visão</h3>
+          <p>Ser referência no setor equestre pela qualidade e confiança.</p>
+        </div>
+
+        <div class="info-box">
+          <h3>Valores</h3>
+          <p>Dedicação, respeito, profissionalismo e tradição.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <div class="section-heading center">
+        <span class="section-tag">Serviços</span>
+        <h2>O que oferecemos</h2>
+        <p>
+          Serviços especializados para garantir qualidade e acompanhamento profissional.
+        </p>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <h3>Criação</h3>
+          <p>Seleção e acompanhamento de cavalos com elevados padrões de qualidade.</p>
+        </div>
+
+        <div class="card">
+          <h3>Treino</h3>
+          <p>Preparação e desenvolvimento com métodos profissionais.</p>
+        </div>
+
+        <div class="card">
+          <h3>Venda</h3>
+          <p>Disponibilizamos cavalos com informação clara e acompanhamento.</p>
+        </div>
+
+        <div class="card">
+          <h3>Acompanhamento</h3>
+          <p>Suporte personalizado para cada cliente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <div class="section-heading center">
+        <span class="section-tag">Destaques</span>
+        <h2>Cavalos em destaque</h2>
+        <p>
+          Alguns dos nossos exemplares disponíveis.
+        </p>
+      </div>
+
+      <div id="loading-cavalos-destaque" class="status-box">
+        <p>A carregar cavalos em destaque...</p>
+      </div>
+
+      <div id="erro-cavalos-destaque" class="status-box status-error" style="display: none;">
+        <p>Não foi possível carregar os cavalos em destaque.</p>
+      </div>
+
+      <div id="sem-cavalos-destaque" class="status-box" style="display: none;">
+        <p>De momento não existem cavalos registados.</p>
+      </div>
+
+      <div class="horse-grid" id="lista-cavalos-destaque"></div>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container cta-box">
+      <div>
+        <span class="section-tag">Contacto</span>
+        <h2>Fale connosco</h2>
+        <p>
+          Entre em contacto para mais informações sobre os nossos cavalos e serviços.
+        </p>
+      </div>
+
+      <a href="contactos.html" class="btn btn-primary">Contactar</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-box">
+
+      <div class="footer-brand-center">
+        <h3>Coudelaria Lima Monteiro</h3>
+        <p>Excelência e tradição equestre.</p>
+      </div>
+
+      <div class="footer-social">
+        <a href="https://www.facebook.com/coudelarialimamonteiro/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+
+        <a href="https://www.instagram.com/coudelaria_lima_monteiro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Coudelaria Lima Monteiro | Todos os direitos reservados</p>
+
+        <div class="footer-extra">
+          <p>Feito com dedicação no mundo equestre</p>
+          <a href="../admin/login.php" class="admin-link">Área Reservada</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
