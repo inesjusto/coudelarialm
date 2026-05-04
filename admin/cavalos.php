@@ -26,6 +26,7 @@ include __DIR__ . '/../backend/proteger.php';
                 <a href="dashboard.php" class="nav-link">Dashboard</a>
                 <a href="cavalos.php" class="nav-link ativo">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
+                <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
             </nav>
         </aside>
@@ -34,7 +35,7 @@ include __DIR__ . '/../backend/proteger.php';
             <header class="admin-header admin-header-flex">
                 <div class="admin-header-texto">
                     <h1>Gestão de Cavalos</h1>
-                    <p>Gerencie todos os cavalos disponíveis para venda.</p>
+                    <p>Gerencie todos os cavalos disponíveis para venda/aluguer.</p>
                 </div>
 
                 <a href="adicionar-cavalo.php" class="botao-adicionar">+ Adicionar Cavalo</a>
@@ -50,12 +51,13 @@ include __DIR__ . '/../backend/proteger.php';
                             <th>Idade</th>
                             <th>Raça</th>
                             <th>Preço</th>
+                            <th>Estado</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-cavalos">
                         <tr>
-                            <td colspan="7" class="mensagem-vazia">A carregar cavalos...</td>
+                            <td colspan="8" class="mensagem-vazia">A carregar cavalos...</td>
                         </tr>
                     </tbody>
                 </table>

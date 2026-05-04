@@ -118,19 +118,20 @@ async function carregarTabelaCavalos() {
             const linha = document.createElement('tr');
 
             linha.innerHTML = `
-                <td>${cavalo.id ?? '-'}</td>
-                <td><strong>${cavalo.nome ?? '-'}</strong></td>
-                <td>${formatarTextoApresentacao(cavalo.sexo)}</td>
-                <td>${cavalo.idade ?? '-'}</td>
-                <td>${formatarTextoApresentacao(cavalo.raca)}</td>
-                <td>${formatarPreco(cavalo.preco)}</td>
-                <td>
-                    <div class="acoes">
-                        <button class="btn-editar" onclick="editarCavalo(${cavalo.id})">Editar</button>
-                        <button class="btn-apagar" onclick="apagarCavalo(${cavalo.id})">Apagar</button>
-                    </div>
-                </td>
-            `;
+    <td>${cavalo.id ?? '-'}</td>
+    <td><strong>${cavalo.nome ?? '-'}</strong></td>
+    <td>${formatarTextoApresentacao(cavalo.sexo)}</td>
+    <td>${cavalo.idade ?? '-'}</td>
+    <td>${formatarTextoApresentacao(cavalo.raca)}</td>
+    <td>${formatarPreco(cavalo.preco)}</td>
+    <td>${cavalo.estado_aluguer === 'alugado' ? 'Alugado' : 'Disponível'}</td>
+    <td>
+        <div class="acoes">
+            <button class="btn-editar" onclick="editarCavalo(${cavalo.id})">Editar</button>
+            <button class="btn-apagar" onclick="apagarCavalo(${cavalo.id})">Apagar</button>
+        </div>
+    </td>
+`;
 
             tabela.appendChild(linha);
         });

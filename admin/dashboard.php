@@ -1,5 +1,74 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
+require_once __DIR__ . '/../backend/conexao.php';
+
+function calcularDias($dataInicio, $dataFim = null) {
+    if (empty($dataInicio)) {
+        return 0;
+    }
+
+    $inicio = new DateTime($dataInicio);
+    $fim = !empty($dataFim) ? new DateTime($dataFim) : new DateTime();
+
+    if ($fim < $inicio) {
+        return 0;
+    }
+
+    return $inicio->diff($fim)->days + 1;
+}
+
+function calcularReceitaAteHoje($dataInicio, $dataFim, $precoDiario) {
+    if (empty($dataInicio)) {
+        return 0;
+    }
+
+    $hoje = new DateTime();
+    $inicio = new DateTime($dataInicio);
+    $fim = !empty($dataFim) ? new DateTime($dataFim) : $hoje;
+
+    if ($hoje < $inicio) {
+        return 0;
+    }
+
+    $limite = $hoje < $fim ? $hoje : $fim;
+    $diasDecorridos = calcularDias($dataInicio, $limite->format('Y-m-d'));
+
+    return $diasDecorridos * (float)$precoDiario;
+}
+
+$stmtAlugueresAtivos = $conn->query("SELECT COUNT(*) FROM alugueres WHERE estado = 'ativo'");
+$totalAlugueresAtivos = (int) $stmtAlugueresAtivos->fetchColumn();
+
+$stmtAlugueresConcluidos = $conn->query("SELECT COUNT(*) FROM alugueres WHERE estado = 'concluido'");
+$totalAlugueresConcluidos = (int) $stmtAlugueresConcluidos->fetchColumn();
+
+$stmtAlugueresReceita = $conn->query("
+    SELECT data_inicio, data_fim, preco_diario, estado
+    FROM alugueres
+    WHERE estado != 'cancelado'
+");
+
+$alugueresReceita = $stmtAlugueresReceita->fetchAll(PDO::FETCH_ASSOC);
+$receitaAlugueres = 0;
+
+foreach ($alugueresReceita as $aluguer) {
+    $receitaAlugueres += calcularReceitaAteHoje(
+        $aluguer['data_inicio'],
+        $aluguer['data_fim'],
+        $aluguer['preco_diario']
+    );
+}
+
+$stmtCavalosDisponiveis = $conn->query("
+    SELECT COUNT(*) 
+    FROM cavalos 
+    WHERE id NOT IN (
+        SELECT cavalo_id 
+        FROM alugueres 
+        WHERE estado = 'ativo'
+    )
+");
+$totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -27,6 +96,7 @@ include __DIR__ . '/../backend/proteger.php';
                 <a href="dashboard.php" class="nav-link ativo">Dashboard</a>
                 <a href="cavalos.php" class="nav-link">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
+                <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
             </nav>
         </aside>
@@ -42,6 +112,7 @@ include __DIR__ . '/../backend/proteger.php';
                     <div class="admin-header-acoes">
                         <a href="cavalos.php" class="botao-secundario">Gerir Cavalos</a>
                         <a href="clientes.php" class="botao-principal">Gerir Clientes</a>
+                        <a href="alugueres.php" class="botao-secundario">Gerir Alugueres</a>
                     </div>
                 </div>
             </header>
@@ -56,10 +127,29 @@ include __DIR__ . '/../backend/proteger.php';
                     <span class="stat-label">Total de Clientes</span>
                     <strong class="stat-value" id="total-clientes">0</strong>
                 </div>
+
+                <div class="stat-card destaque-verde">
+                    <span class="stat-label">Alugueres Ativos</span>
+                    <strong class="stat-value"><?= htmlspecialchars($totalAlugueresAtivos) ?></strong>
+                </div>
+
+                <div class="stat-card destaque-azul">
+                    <span class="stat-label">Alugueres Concluídos</span>
+                    <strong class="stat-value"><?= htmlspecialchars($totalAlugueresConcluidos) ?></strong>
+                </div>
+
+                <div class="stat-card destaque-verde">
+                    <span class="stat-label">Cavalos Disponíveis</span>
+                    <strong class="stat-value"><?= htmlspecialchars($totalCavalosDisponiveis) ?></strong>
+                </div>
+
+                <div class="stat-card destaque-azul receita">
+                    <span class="stat-label">Receita de Alugueres Até Hoje</span>
+                    <strong class="stat-value"><?= number_format($receitaAlugueres, 2, ',', '.') ?> €</strong>
+                </div>
             </section>
 
             <section class="graficos-grid">
-                <!-- CAVALOS -->
                 <div class="grafico-box">
                     <div class="grafico-header">
                         <h3>Distribuição de Cavalos</h3>
@@ -75,7 +165,6 @@ include __DIR__ . '/../backend/proteger.php';
                     </div>
                 </div>
 
-                <!-- CLIENTES -->
                 <div class="grafico-box">
                     <div class="grafico-header">
                         <h3>Distribuição de Clientes</h3>

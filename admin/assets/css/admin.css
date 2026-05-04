@@ -273,9 +273,9 @@ a {
 .dashboard-cards,
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
-    margin: 18px 0 18px;
+    margin: 22px 0 24px;
 }
 
 .dashboard-card,
@@ -285,7 +285,8 @@ a {
     background: linear-gradient(145deg, #24283B, #1f2335);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
-    padding: 20px;
+    padding: 22px;
+    min-height: 130px;
     color: var(--texto-principal);
     transition: 0.25s;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
@@ -315,6 +316,37 @@ a {
     border-color: rgba(59, 130, 246, 0.18);
 }
 
+.stat-label {
+    display: block;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--texto-secundario);
+    margin-bottom: 14px;
+}
+
+.stat-value {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 30px;
+    line-height: 1.15;
+    color: var(--texto-principal);
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.stat-extra {
+    display: block;
+    font-size: 13px;
+    color: var(--texto-secundario);
+    line-height: 1.45;
+}
+
+.stat-link-title {
+    color: var(--cor-destaque);
+    font-size: 28px;
+}
+
 .card-icon {
     font-size: 32px;
     margin-bottom: 14px;
@@ -330,36 +362,6 @@ a {
 .dashboard-card p {
     color: var(--texto-secundario);
     line-height: 1.5;
-}
-
-.stat-label {
-    display: block;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: var(--texto-secundario);
-    margin-bottom: 10px;
-}
-
-.stat-value {
-    display: block;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 34px;
-    line-height: 1;
-    color: var(--texto-principal);
-    margin-bottom: 10px;
-}
-
-.stat-extra {
-    display: block;
-    font-size: 13px;
-    color: var(--texto-secundario);
-    line-height: 1.45;
-}
-
-.stat-link-title {
-    color: var(--cor-destaque);
-    font-size: 28px;
 }
 
 /* GRÁFICOS */
@@ -910,5 +912,142 @@ td strong {
 
     .stat-value {
         font-size: 30px;
+    }
+
+    .stats-grid,
+.dashboard-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+}
+
+/* ===== FLATPICKR (SEGURO E ISOLADO) ===== */
+
+.flatpickr-calendar {
+    background: #24283B !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+    font-family: inherit !important;
+}
+
+/* HEADER */
+.flatpickr-months {
+    background: #1F2335 !important;
+}
+
+.flatpickr-current-month {
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+}
+
+/* Dropdown mês */
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: #1F2335 !important;
+    color: #ffffff !important;
+}
+
+.flatpickr-monthDropdown-months option {
+    background: #1F2335 !important;
+    color: #ffffff !important;
+}
+
+/* Ano */
+.flatpickr-current-month input.cur-year {
+    color: #ffffff !important;
+    background: transparent !important;
+}
+
+/* Setas */
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Dias semana */
+span.flatpickr-weekday {
+    color: #A9B1D6 !important;
+    font-size: 12px !important;
+}
+
+/* Dias */
+.flatpickr-day {
+    color: #ffffff !important;
+    border-radius: 6px !important;
+}
+
+/* Hover */
+.flatpickr-day:hover {
+    background: rgba(0, 200, 83, 0.15) !important;
+}
+
+/* Hoje */
+.flatpickr-day.today {
+    border-color: #00C853 !important;
+    color: #00C853 !important;
+}
+
+/* Selecionado */
+.flatpickr-day.selected {
+    background: #00C853 !important;
+    border-color: #00C853 !important;
+    color: #ffffff !important;
+}
+
+/* Dias desativados */
+.flatpickr-day.disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ===== ESPAÇAMENTO ALUGUERES ===== */
+
+/* Espaço entre form e tabela */
+.admin-form-wrapper {
+    margin-bottom: 40px;
+}
+
+/* Espaço acima da tabela */
+.tabela-container {
+    margin-top: 20px;
+}
+
+/* Espaço no header */
+.admin-header-flex {
+    margin-bottom: 30px;
+}
+
+/* Melhorar espaçamento interno da tabela */
+.admin-tabela th,
+.admin-tabela td {
+    padding: 18px 20px;
+}
+
+/* Dar mais "respiração" às linhas */
+.admin-tabela tbody tr {
+    transition: background 0.2s;
+}
+
+.admin-tabela tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+}
+
+/* Espaço entre título do form e os campos */
+.form-container h2 {
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .stats-grid,
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-value {
+        white-space: normal;
+        font-size: 28px;
     }
 }

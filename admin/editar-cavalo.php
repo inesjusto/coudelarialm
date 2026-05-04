@@ -26,6 +26,7 @@ include __DIR__ . '/../backend/proteger.php';
                 <a href="dashboard.php" class="nav-link">Dashboard</a>
                 <a href="cavalos.php" class="nav-link ativo">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
+                <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
             </nav>
         </aside>
@@ -115,4 +116,22 @@ include __DIR__ . '/../backend/proteger.php';
 
                             <input type="file" id="imagem" name="imagem" accept="image/*" hidden>
 
-                            <p class="ajuda-upload">Formatos permitidos: JPG, JPEG, PNG, WEBP. Tamanho máximo 20MB .</p>
+                            <p class="ajuda-upload">Formatos permitidos: JPG, JPEG, PNG, WEBP. Tamanho máximo 20MB.</p>
+                            <p id="erro-imagem" class="mensagem-erro"></p>
+                        </div>
+
+                        <div id="mensagem-formulario" class="mensagem-formulario"></div>
+
+                        <div class="acoes-formulario">
+                            <button type="submit" class="btn-editar btn-form-principal">Guardar Alterações</button>
+                            <a href="cavalos.php" class="btn-cancelar">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

@@ -24,11 +24,12 @@ require_once __DIR__ . '/../backend/proteger.php';
         </a>
 
         <nav class="sidebar-nav">
-            <a href="dashboard.php" class="nav-link">Dashboard</a>
-            <a href="cavalos.php" class="nav-link">Cavalos</a>
-            <a href="clientes.php" class="nav-link ativo">Clientes</a>
-            <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
-        </nav>
+    <a href="dashboard.php" class="nav-link">Dashboard</a>
+    <a href="cavalos.php" class="nav-link">Cavalos</a>
+    <a href="clientes.php" class="nav-link ativo">Clientes</a>
+    <a href="alugueres.php" class="nav-link">Alugueres</a>
+    <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
+</nav>
     </aside>
 
     <main class="admin-main">
