@@ -6,7 +6,7 @@ require_once __DIR__ . '/../backend/proteger.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes</title>
+    <title>Fornecedores</title>
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -24,24 +24,24 @@ require_once __DIR__ . '/../backend/proteger.php';
         </a>
 
         <nav class="sidebar-nav">
-    <a href="dashboard.php" class="nav-link">Dashboard</a>
-    <a href="cavalos.php" class="nav-link">Cavalos</a>
-    <a href="clientes.php" class="nav-link ativo">Clientes</a>
-    <a href="alugueres.php" class="nav-link">Alugueres</a>
-    <a href="fornecedores.php" class="nav-link">Fornecedores</a>
-    <a href="despesas.php" class="nav-link">Despesas</a>
-    <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
-</nav>
+            <a href="dashboard.php" class="nav-link">Dashboard</a>
+            <a href="cavalos.php" class="nav-link">Cavalos</a>
+            <a href="clientes.php" class="nav-link">Clientes</a>
+            <a href="alugueres.php" class="nav-link">Alugueres</a>
+            <a href="fornecedores.php" class="nav-link ativo">Fornecedores</a>
+            <a href="despesas.php" class="nav-link">Despesas</a>
+            <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
+        </nav>
     </aside>
 
     <main class="admin-main">
         <header class="admin-header admin-header-flex">
             <div class="admin-header-texto">
-                <h1>Clientes</h1>
-                <p>Gestão de clientes registados.</p>
+                <h1>Fornecedores</h1>
+                <p>Gestão de fornecedores da coudelaria.</p>
             </div>
 
-            <a href="adicionar-cliente.php" class="botao-adicionar">+ Adicionar Cliente</a>
+            <a href="adicionar-fornecedor.php" class="botao-adicionar">+ Adicionar Fornecedor</a>
         </header>
 
         <section class="admin-tabela-wrapper">
@@ -51,18 +51,18 @@ require_once __DIR__ . '/../backend/proteger.php';
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
-                            <th>Email</th>
+                            <th>NIF</th>
                             <th>Telefone</th>
-                            <th>Tipo de Interesse</th>
-                            <th>Estado</th>
-                            <th>Cavalos</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Data</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
 
-                    <tbody id="tabela-clientes">
+                    <tbody id="tabela-fornecedores">
                         <tr>
-                            <td colspan="8" class="mensagem-vazia">A carregar clientes...</td>
+                            <td colspan="8" class="mensagem-vazia">A carregar fornecedores...</td>
                         </tr>
                     </tbody>
                 </table>

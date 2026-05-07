@@ -899,6 +899,301 @@ function configurarFiltrosGraficos() {
     ativarBotoes('filtro-clientes', carregarGraficoClientes);
 }
 
+async function carregarTabelaFornecedores() {
+    const tabela = document.getElementById('tabela-fornecedores');
+    if (!tabela) return;
+
+    try {
+        const resposta = await fetch('../backend/listar-fornecedores.php');
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
+        const fornecedores = await resposta.json();
+
+        tabela.innerHTML = '';
+
+        if (fornecedores.erro) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="8" class="mensagem-vazia">${fornecedores.erro}</td>
+                </tr>
+            `;
+            return;
+        }
+
+        if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="8" class="mensagem-vazia">Nenhum fornecedor registado.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        fornecedores.forEach(fornecedor => {
+            const linha = document.createElement('tr');
+
+            linha.innerHTML = `
+                <td>${fornecedor.id ?? '-'}</td>
+                <td><strong>${fornecedor.nome ?? '-'}</strong></td>
+                <td>${fornecedor.nif ?? '-'}</td>
+                <td>${fornecedor.telefone ?? '-'}</td>
+                <td>${fornecedor.email ?? '-'}</td>
+                <td>${fornecedor.tipo_fornecedor ?? '-'}</td>
+                <td>${fornecedor.data_criacao ?? '-'}</td>
+                <td>
+                    <div class="acoes">
+                        <button class="btn-editar" onclick="editarFornecedor(${fornecedor.id})">Editar</button>
+                        <button class="btn-apagar" onclick="apagarFornecedor(${fornecedor.id})">Apagar</button>
+                    </div>
+                </td>
+            `;
+
+            tabela.appendChild(linha);
+        });
+    } catch (erro) {
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="8" class="mensagem-vazia">Erro ao carregar fornecedores.</td>
+            </tr>
+        `;
+        console.error('Erro ao carregar fornecedores:', erro);
+    }
+}
+
+function editarFornecedor(id) {
+    window.location.href = `editar-fornecedor.php?id=${id}`;
+}
+
+async function apagarFornecedor(id) {
+    const confirmar = confirm('Tens a certeza que queres apagar este fornecedor?');
+    if (!confirmar) return;
+
+    try {
+        const resposta = await fetch('../backend/apagar-fornecedor.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: id })
+        });
+
+        const resultado = await resposta.json();
+
+        if (pedidoComSucesso(resultado)) {
+            alert(resultado.message || 'Fornecedor apagado com sucesso.');
+            carregarTabelaFornecedores();
+        } else {
+            alert(mensagemErroResultado(resultado, 'Erro ao apagar fornecedor.'));
+        }
+    } catch (erro) {
+        console.error('Erro ao apagar fornecedor:', erro);
+        alert('Erro ao apagar fornecedor.');
+    }
+}
+
+async function carregarTabelaDespesas() {
+    const tabela = document.getElementById('tabela-despesas');
+    if (!tabela) return;
+
+    try {
+        const resposta = await fetch('../backend/listar-despesas.php');
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
+        const despesas = await resposta.json();
+
+        tabela.innerHTML = '';
+
+        if (despesas.erro) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="10" class="mensagem-vazia">${despesas.erro}</td>
+                </tr>
+            `;
+            return;
+        }
+
+        if (!Array.isArray(despesas) || despesas.length === 0) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="10" class="mensagem-vazia">Nenhuma despesa registada.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        despesas.forEach(despesa => {
+            const linha = document.createElement('tr');
+
+            linha.innerHTML = `
+                <td>${despesa.id ?? '-'}</td>
+                <td>${despesa.fornecedor_nome ?? 'Sem fornecedor'}</td>
+                <td>${despesa.cavalo_nome ?? 'Despesa geral'}</td>
+                <td>${despesa.categoria ?? '-'}</td>
+                <td>${despesa.descricao ?? '-'}</td>
+                <td><strong>${parseFloat(despesa.valor).toFixed(2)} €</strong></td>
+                <td>${despesa.data_despesa ?? '-'}</td>
+                <td>${despesa.metodo_pagamento ?? '-'}</td>
+                <td>${despesa.estado_pagamento ?? '-'}</td>
+                <td>
+                    <div class="acoes">
+                        <button class="btn-editar" onclick="editarDespesa(${despesa.id})">Editar</button>
+                        <button class="btn-apagar" onclick="apagarDespesa(${despesa.id})">Apagar</button>
+                    </div>
+                </td>
+            `;
+
+            tabela.appendChild(linha);
+        });
+    } catch (erro) {
+        console.error('Erro ao carregar despesas:', erro);
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="10" class="mensagem-vazia">Erro ao carregar despesas.</td>
+            </tr>
+        `;
+    }
+}
+
+function editarDespesa(id) {
+    window.location.href = `editar-despesa.php?id=${id}`;
+}
+
+async function apagarDespesa(id) {
+    const confirmar = confirm('Tens a certeza que queres apagar esta despesa?');
+    if (!confirmar) return;
+
+    try {
+        const resposta = await fetch('../backend/apagar-despesa.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: id })
+        });
+
+        const resultado = await resposta.json();
+
+        if (resultado.sucesso) {
+            alert(resultado.message);
+            carregarTabelaDespesas();
+        } else {
+            alert(resultado.erro || 'Erro ao apagar despesa.');
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert('Erro ao apagar despesa.');
+    }
+}
+
+async function carregarSelectFornecedores() {
+    const select = document.getElementById('fornecedor_id');
+    if (!select) return;
+
+    try {
+        const resposta = await fetch('../backend/listar-fornecedores.php');
+        const fornecedores = await resposta.json();
+
+        if (!Array.isArray(fornecedores)) return;
+
+        fornecedores.forEach(fornecedor => {
+            const option = document.createElement('option');
+            option.value = fornecedor.id;
+            option.textContent = fornecedor.nome;
+            select.appendChild(option);
+        });
+    } catch (erro) {
+        console.error('Erro ao carregar fornecedores:', erro);
+    }
+}
+
+let graficoDespesasCategorias = null;
+let graficoCustoCavalos = null;
+
+function formatarEuros(valor) {
+    return `${Number(valor || 0).toFixed(2).replace('.', ',')} €`;
+}
+
+async function carregarStatsFinanceiro() {
+    const totalMes = document.getElementById('financeiro-total-mes');
+    const totalAno = document.getElementById('financeiro-total-ano');
+    const totalPendente = document.getElementById('financeiro-total-pendente');
+
+    const canvasCategorias = document.getElementById('grafico-despesas-categorias');
+    const canvasCavalos = document.getElementById('grafico-custo-cavalos');
+
+    if (!totalMes && !totalAno && !totalPendente && !canvasCategorias && !canvasCavalos) return;
+
+    try {
+        const resposta = await fetch('../backend/stats-financeiro.php');
+        const dados = await resposta.json();
+
+        if (!dados.sucesso) {
+            console.error(dados.erro || 'Erro ao carregar estatísticas financeiras.');
+            return;
+        }
+
+        if (totalMes) totalMes.textContent = formatarEuros(dados.total_mes);
+        if (totalAno) totalAno.textContent = formatarEuros(dados.total_ano);
+        if (totalPendente) totalPendente.textContent = formatarEuros(dados.total_pendente);
+
+        if (canvasCategorias) {
+            const labelsCategorias = dados.categorias.map(item => item.categoria || 'Sem categoria');
+            const valoresCategorias = dados.categorias.map(item => Number(item.total || 0));
+
+            if (graficoDespesasCategorias) {
+                graficoDespesasCategorias.destroy();
+            }
+
+            graficoDespesasCategorias = new Chart(canvasCategorias, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsCategorias,
+                    datasets: [{
+                        label: 'Despesas por Categoria',
+                        data: valoresCategorias
+                    }]
+                }
+            });
+        }
+
+        if (canvasCavalos) {
+            const labelsCavalos = dados.custos_cavalos.map(item => item.cavalo || 'Sem cavalo');
+            const valoresCavalos = dados.custos_cavalos.map(item => Number(item.total || 0));
+
+            if (graficoCustoCavalos) {
+                graficoCustoCavalos.destroy();
+            }
+
+            graficoCustoCavalos = new Chart(canvasCavalos, {
+                type: 'bar',
+                data: {
+                    labels: labelsCavalos,
+                    datasets: [{
+                        label: 'Custo mensal por cavalo (€)',
+                        data: valoresCavalos
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+    } catch (erro) {
+        console.error('Erro ao carregar dashboard financeiro:', erro);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     configurarPreviewImagem();
     configurarFormularioAdicionar();
@@ -910,4 +1205,8 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarGraficoCavalos();
     carregarGraficoClientes();
     carregarGraficoRacasDetalhe();
+    carregarTabelaFornecedores();
+    carregarTabelaDespesas();
+    carregarSelectFornecedores();
+    carregarStatsFinanceiro();
 });

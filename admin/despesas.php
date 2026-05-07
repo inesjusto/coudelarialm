@@ -6,7 +6,7 @@ include __DIR__ . '/../backend/proteger.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Cavalos</title>
+    <title>Despesas</title>
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -24,11 +24,11 @@ include __DIR__ . '/../backend/proteger.php';
 
             <nav class="sidebar-nav">
                 <a href="dashboard.php" class="nav-link">Dashboard</a>
-                <a href="cavalos.php" class="nav-link ativo">Cavalos</a>
+                <a href="cavalos.php" class="nav-link">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
-                <a href="despesas.php" class="nav-link">Despesas</a>
+                <a href="despesas.php" class="nav-link ativo">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
             </nav>
         </aside>
@@ -36,33 +36,38 @@ include __DIR__ . '/../backend/proteger.php';
         <main class="admin-main">
             <header class="admin-header admin-header-flex">
                 <div class="admin-header-texto">
-                    <h1>Gestão de Cavalos</h1>
-                    <p>Gerencie todos os cavalos disponíveis para venda/aluguer.</p>
+                    <h1>Despesas</h1>
+                    <p>Gestão financeira das despesas da coudelaria.</p>
                 </div>
 
-                <a href="adicionar-cavalo.php" class="botao-adicionar">+ Adicionar Cavalo</a>
+                <a href="adicionar-despesa.php" class="botao-adicionar">+ Adicionar Despesa</a>
             </header>
 
-            <section class="tabela-container">
-                <table class="admin-tabela">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Sexo</th>
-                            <th>Idade</th>
-                            <th>Raça</th>
-                            <th>Preço</th>
-                            <th>Estado</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-cavalos">
-                        <tr>
-                            <td colspan="8" class="mensagem-vazia">A carregar cavalos...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <section class="admin-tabela-wrapper">
+                <div class="tabela-container">
+                    <table class="admin-tabela">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fornecedor</th>
+                                <th>Cavalo</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Pagamento</th>
+                                <th>Estado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tabela-despesas">
+                            <tr>
+                                <td colspan="10" class="mensagem-vazia">A carregar despesas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     </div>
