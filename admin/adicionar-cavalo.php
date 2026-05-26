@@ -52,9 +52,57 @@ include __DIR__ . '/../backend/proteger.php';
                         </div>
 
                         <div class="campo">
-                            <label for="raca">Raça</label>
-                            <input type="text" id="raca" name="raca" required>
-                        </div>
+    <label for="raca">Raça</label>
+
+    <select id="raca" name="raca" required>
+        <option value="">Selecione</option>
+
+        <option value="Akhal-Teke">Akhal-Teke</option>
+        <option value="Alter-Real">Alter-Real</option>
+        <option value="Andaluz">Andaluz</option>
+        <option value="Anglo-Árabe">Anglo-Árabe</option>
+        <option value="Appaloosa">Appaloosa</option>
+        <option value="Árabe">Árabe</option>
+        <option value="Asturcón">Asturcón</option>
+        <option value="Azteca">Azteca</option>
+        <option value="Bretão">Bretão</option>
+        <option value="Campolina">Campolina</option>
+        <option value="Cavalo Crioulo">Cavalo Crioulo</option>
+        <option value="Cavalo de Desporto Português">Cavalo de Desporto Português</option>
+        <option value="Cavalo do Sorraia">Cavalo do Sorraia</option>
+        <option value="Clydesdale">Clydesdale</option>
+        <option value="Cruzado Português">Cruzado Português</option>
+        <option value="Falabella">Falabella</option>
+        <option value="Frísio">Frísio</option>
+        <option value="Garrano">Garrano</option>
+        <option value="Gypsy Vanner">Gypsy Vanner</option>
+        <option value="Haflinger">Haflinger</option>
+        <option value="Hanoveriano">Hanoveriano</option>
+        <option value="Holsteiner">Holsteiner</option>
+        <option value="Islandês">Islandês</option>
+        <option value="KWPN">KWPN</option>
+        <option value="Lipizzan">Lipizzan</option>
+        <option value="Mangalarga">Mangalarga</option>
+        <option value="Mangalarga Marchador">Mangalarga Marchador</option>
+        <option value="Mustang">Mustang</option>
+        <option value="Oldemburgo">Oldemburgo</option>
+        <option value="Paint Horse">Paint Horse</option>
+        <option value="Palomino">Palomino</option>
+        <option value="Percheron">Percheron</option>
+        <option value="Pônei">Pônei</option>
+        <option value="Pônei Shetland">Pônei Shetland</option>
+        <option value="Puro Sangue Inglês">Puro Sangue Inglês</option>
+        <option value="Puro Sangue Lusitano">Puro Sangue Lusitano</option>
+        <option value="Quarto de Milha">Quarto de Milha</option>
+        <option value="Saddlebred Americano">Saddlebred Americano</option>
+        <option value="Selle Français">Selle Français</option>
+        <option value="Sela Francês">Sela Francês</option>
+        <option value="Shire">Shire</option>
+        <option value="Trotador Francês">Trotador Francês</option>
+
+        <option value="Outro">Outro</option>
+    </select>
+</div>
 
                         <div class="campo">
                             <label for="sexo">Sexo</label>
@@ -66,10 +114,22 @@ include __DIR__ . '/../backend/proteger.php';
                             </select>
                         </div>
 
-                        <div class="campo">
-                            <label for="idade">Idade</label>
-                            <input type="number" id="idade" name="idade" min="0" required>
-                        </div>
+                        <div class="campo campo-data-idade">
+    <div>
+        <label for="data_nascimento">Data de Nascimento</label>
+        <input
+            type="date"
+            id="data_nascimento"
+            name="data_nascimento"
+            required
+        >
+    </div>
+
+    <div class="idade-preview">
+        <span>Idade:</span>
+        <strong id="idade-calculada">—</strong>
+    </div>
+</div>
 
                         <div class="campo">
                             <label for="altura">Altura (m)</label>
@@ -77,9 +137,46 @@ include __DIR__ . '/../backend/proteger.php';
                         </div>
 
                         <div class="campo">
-                            <label for="cor">Cor</label>
-                            <input type="text" id="cor" name="cor">
-                        </div>
+    <label for="cor">Pelagem</label>
+
+    <select id="cor" name="cor">
+        <option value="">Selecione</option>
+
+        <option value="Alazã">Alazã</option>
+        <option value="Alazã Amarilha">Alazã Amarilha</option>
+        <option value="Alazã Tostada">Alazã Tostada</option>
+
+        <option value="Baia">Baia</option>
+        <option value="Baia Amarilha">Baia Amarilha</option>
+        <option value="Baia Cerdeira">Baia Cerdeira</option>
+
+        <option value="Branca">Branca</option>
+
+        <option value="Castanha">Castanha</option>
+        <option value="Castanha Clara">Castanha Clara</option>
+        <option value="Castanha Escura">Castanha Escura</option>
+
+        <option value="Lobuna">Lobuna</option>
+
+        <option value="Preta">Preta</option>
+
+        <option value="Rosilha">Rosilha</option>
+
+        <option value="Ruça">Ruça</option>
+        <option value="Ruça Pedrês">Ruça Pedrês</option>
+
+        <option value="Tordilha">Tordilha</option>
+        <option value="Tordilha Negra">Tordilha Negra</option>
+        <option value="Tordilha Rodada">Tordilha Rodada</option>
+
+        <option value="Pampa">Pampa</option>
+        <option value="Palomina">Palomina</option>
+
+        <option value="Zaina">Zaina</option>
+
+        <option value="Outra">Outra</option>
+    </select>
+</div>
 
                         <div class="campo">
                             <label for="preco">Preço (€)</label>
@@ -91,8 +188,12 @@ include __DIR__ . '/../backend/proteger.php';
                             <select id="estado" name="estado">
                                 <option value="">Selecione</option>
                                 <option value="Disponível">Disponível</option>
+                                <option value="Alugado">Alugado</option>
                                 <option value="Reservado">Reservado</option>
                                 <option value="Vendido">Vendido</option>
+                                <option value="Indisponível">Indisponível</option>
+                                <option value="Em Tratamento">Em Tratamento</option>
+                                <option value="Reformado">Reformado</option>
                             </select>
                         </div>
 

@@ -1080,3 +1080,351 @@ span.flatpickr-weekday {
     font-weight: 500;
     line-height: 1.5;
 }
+
+.badge-tipo{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.3px;
+}
+
+.badge-geral{
+    background:#e5e7eb;
+    color:#374151;
+}
+
+.badge-cavalo{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-automática{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.texto-fraco{
+    color:#9ca3af;
+}
+
+/* =========================
+   CALENDÁRIO DE AULAS
+========================= */
+
+#calendario-aulas {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 18px;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+/* Estrutura geral */
+.fc {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+/* Altura */
+.fc .fc-view-harness {
+    min-height: 520px;
+}
+
+/* Toolbar */
+.fc .fc-toolbar {
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Título */
+.fc .fc-toolbar-title {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* Botões */
+.fc .fc-button {
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
+    font-weight: 600 !important;
+    border: none !important;
+}
+
+.fc .fc-button-primary {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: #ffffff !important;
+}
+
+.fc .fc-button-primary:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+}
+
+/* Cabeçalho dias */
+.fc .fc-col-header-cell {
+    background: #0f172a;
+    padding: 12px 0;
+    border-color: #334155 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Dias */
+.fc .fc-daygrid-day {
+    background: #1e293b;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px;
+}
+
+/* Dia atual */
+.fc .fc-day-today {
+    background: rgba(34, 197, 94, 0.12) !important;
+}
+
+/* Bordas */
+.fc .fc-scrollgrid,
+.fc .fc-scrollgrid td,
+.fc .fc-scrollgrid th {
+    border-color: #334155 !important;
+}
+
+/* Eventos */
+.fc-event {
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 4px 6px !important;
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+.fc-event:hover {
+    opacity: 0.9;
+}
+
+/* Texto eventos */
+.fc-event-title,
+.fc-event-time {
+    color: #ffffff !important;
+}
+
+/* Dias fora do mês */
+.fc .fc-day-other {
+    background: #172033;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+    color: #64748b;
+}
+
+/* Scroll */
+.fc-scroller {
+    overflow: hidden !important;
+}
+
+/* Evita que a tabela cole nas laterais */
+.admin-tabela-wrapper .admin-tabela {
+    margin-top: 0;
+}
+
+/* Calendário com espaço correto */
+#calendario-aulas {
+    margin-top: 0;
+}
+
+/* Corrigir espaçamento da lista de aulas */
+.admin-tabela-wrapper .tabela-container {
+    padding: 26px !important;
+    box-sizing: border-box;
+}
+
+.admin-tabela-wrapper .tabela-container .admin-tabela {
+    width: 100%;
+    margin-top: 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-tabela-wrapper .tabela-container h2 + .admin-tabela {
+    margin-top: 22px;
+}
+
+.campo-data-idade {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 16px;
+    align-items: end;
+}
+
+.idade-preview {
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid rgba(0, 200, 83, 0.35);
+    border-radius: 10px;
+    background: linear-gradient(145deg, #24283B, #1f2335);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.idade-preview span {
+    color: var(--texto-secundario);
+    font-size: 14px;
+}
+
+.idade-preview strong {
+    color: var(--cor-destaque);
+    font-size: 15px;
+}
+
+/* =========================
+   FORNECEDORES
+========================= */
+
+#tabela-fornecedores .telefone-fornecedor {
+    min-width: 170px;
+    white-space: nowrap;
+}
+
+#tabela-fornecedores td:nth-child(5),
+#tabela-fornecedores th:nth-child(5) {
+    min-width: 260px;
+    white-space: nowrap;
+}
+
+#tabela-fornecedores td:last-child,
+#tabela-fornecedores th:last-child {
+    min-width: 120px;
+}
+
+#tabela-fornecedores .acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* =========================
+   CLIENTES
+========================= */
+
+#tabela-clientes {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#tabela-clientes td,
+#tabela-clientes th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#tabela-clientes td:nth-child(4),
+#tabela-clientes th:nth-child(4) {
+    white-space: nowrap;
+    width: 140px;
+}
+
+#tabela-clientes td:nth-child(3),
+#tabela-clientes th:nth-child(3) {
+    width: 210px;
+}
+
+#tabela-clientes td:nth-child(7),
+#tabela-clientes th:nth-child(7) {
+    width: 180px;
+}
+
+#tabela-clientes .acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* =========================
+   DESPESAS
+========================= */
+
+#tabela-despesas {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#tabela-despesas th,
+#tabela-despesas td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+#tabela-despesas th:nth-child(1),
+#tabela-despesas td:nth-child(1) {
+    width: 45px;
+}
+
+#tabela-despesas th:nth-child(2),
+#tabela-despesas td:nth-child(2) {
+    width: 85px;
+}
+
+#tabela-despesas th:nth-child(3),
+#tabela-despesas td:nth-child(3) {
+    width: 130px;
+}
+
+#tabela-despesas th:nth-child(4),
+#tabela-despesas td:nth-child(4) {
+    width: 110px;
+}
+
+#tabela-despesas th:nth-child(5),
+#tabela-despesas td:nth-child(5) {
+    width: 115px;
+}
+
+#tabela-despesas th:nth-child(6),
+#tabela-despesas td:nth-child(6) {
+    width: auto;
+}
+
+#tabela-despesas th:nth-child(7),
+#tabela-despesas td:nth-child(7),
+#tabela-despesas .valor-despesa {
+    width: 100px;
+    white-space: nowrap;
+}
+
+#tabela-despesas th:nth-child(8),
+#tabela-despesas td:nth-child(8) {
+    width: 115px;
+}
+
+#tabela-despesas th:nth-child(9),
+#tabela-despesas td:nth-child(9) {
+    width: 100px;
+}
+
+#tabela-despesas th:nth-child(10),
+#tabela-despesas td:nth-child(10) {
+    width: 95px;
+}
+
+#tabela-despesas .acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

@@ -21,7 +21,7 @@ try {
                 nome,
                 raca,
                 sexo,
-                idade,
+                data_nascimento,
                 altura,
                 cor,
                 preco,

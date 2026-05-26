@@ -54,13 +54,18 @@ foreach ($alugueresReceita as $aluguer) {
 $stmtCavalosDisponiveis = $conn->query("
     SELECT COUNT(*) 
     FROM cavalos 
-    WHERE id NOT IN (
-        SELECT cavalo_id 
-        FROM alugueres 
-        WHERE estado = 'ativo'
-    )
+    WHERE TRIM(estado) = 'Disponível'
 ");
 $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
+
+$stmtCavalosIndisponiveis = $conn->query("
+    SELECT COUNT(*) 
+    FROM cavalos 
+    WHERE estado IS NULL 
+       OR TRIM(estado) = '' 
+       OR TRIM(estado) <> 'Disponível'
+");
+$totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -89,6 +94,7 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
                 <a href="cavalos.php" class="nav-link">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
+                <a href="aulas.php" class="nav-link">Aulas</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
                 <a href="despesas.php" class="nav-link">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -107,8 +113,12 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
                         <a href="cavalos.php" class="botao-principal">Gerir Cavalos</a>
                         <a href="clientes.php" class="botao-principal">Gerir Clientes</a>
                         <a href="alugueres.php" class="botao-principal">Gerir Alugueres</a>
+                        <a href="aulas.php" class="botao-principal">Gerir Aulas</a>
                         <a href="fornecedores.php" class="botao-principal">Gerir Fornecedores</a>
                         <a href="despesas.php" class="botao-principal">Gerir Despesas</a>
+                        <a href="exportar-financeiro.php?periodo=geral" target="_blank" class="botao-principal">PDF Geral</a>
+                        <a href="exportar-financeiro.php?periodo=mes" target="_blank" class="botao-principal">PDF do Mês</a>
+                        <a href="exportar-financeiro.php?periodo=ano" target="_blank" class="botao-principal">PDF do Ano</a>
                     </div>
                 </div>
             </header>
@@ -126,9 +136,14 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
                     </div>
 
                     <div class="stat-card destaque-verde">
-                        <span class="stat-label">Cavalos Disponíveis</span>
-                        <strong class="stat-value"><?= htmlspecialchars($totalCavalosDisponiveis) ?></strong>
-                    </div>
+    <span class="stat-label">Cavalos Disponíveis</span>
+    <strong class="stat-value"><?= htmlspecialchars($totalCavalosDisponiveis) ?></strong>
+</div>
+
+<div class="stat-card destaque-azul">
+    <span class="stat-label">Cavalos Indisponíveis</span>
+    <strong class="stat-value"><?= htmlspecialchars($totalCavalosIndisponiveis) ?></strong>
+</div>
                 </div>
 
                 <div class="graficos-grid">
@@ -138,7 +153,7 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
 
                             <div class="grafico-filtros" id="filtro-cavalos">
                                 <button class="filtro-btn ativo" data-value="sexo">Sexo</button>
-                                <button class="filtro-btn" data-value="raca">Raça</button>
+                                <button class="filtro-btn" data-value="idade">Idade</button>
                             </div>
                         </div>
 
@@ -160,34 +175,54 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
             </section>
 
             <section class="dashboard-secao">
-                <div class="dashboard-secao-header">
-                    <h2>Clientes</h2>
-                    <p>Resumo e distribuição dos clientes registados.</p>
-                </div>
+    <div class="dashboard-secao-header">
+        <h2>Clientes</h2>
+        <p>Resumo e distribuição dos clientes registados.</p>
+    </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card destaque-azul">
-                        <span class="stat-label">Total de Clientes</span>
-                        <strong class="stat-value" id="total-clientes">0</strong>
-                    </div>
-                </div>
+<div class="stats-grid">
 
-                <div class="graficos-grid">
-                    <div class="grafico-box grafico-box-largo">
-                        <div class="grafico-header">
-                            <h3>Distribuição de Clientes</h3>
+    <div class="stat-card destaque-verde">
+        <span class="stat-label">Clientes</span>
+        <strong class="stat-value" id="clientes-estado">0</strong>
+    </div>
 
-                            <div class="grafico-filtros" id="filtro-clientes">
-                                <button class="filtro-btn ativo" data-value="tipo">Tipo</button>
-                            </div>
-                        </div>
+    <div class="stat-card destaque-amarelo">
+        <span class="stat-label">Potenciais Clientes</span>
+        <strong class="stat-value" id="clientes-potenciais">0</strong>
+    </div>
 
-                        <div class="chart-container chart-container-largo">
-                            <canvas id="grafico-clientes"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <div class="stat-card destaque-roxo">
+        <span class="stat-label">Potenciais Clientes (Contactados)</span>
+        <strong class="stat-value" id="clientes-contactados">0</strong>
+    </div>
+
+</div>
+
+    <div class="graficos-grid">
+
+    <div class="grafico-box">
+        <div class="grafico-header">
+            <h3>Clientes por Tipo</h3>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="grafico-clientes-tipo"></canvas>
+        </div>
+    </div>
+
+    <div class="grafico-box">
+        <div class="grafico-header">
+            <h3>Clientes Interessados em Cavalos</h3>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="grafico-clientes-estado"></canvas>
+        </div>
+    </div>
+
+</div>
+</section>
 
             <section class="dashboard-secao">
                 <div class="dashboard-secao-header">
@@ -234,6 +269,22 @@ $totalCavalosDisponiveis = (int) $stmtCavalosDisponiveis->fetchColumn();
                         <span class="stat-label">Despesas Pendentes</span>
                         <strong class="stat-value" id="financeiro-total-pendente">0,00 €</strong>
                     </div>
+
+                    <div class="stat-card destaque-verde receita">
+    <span class="stat-label">Receita Total</span>
+    <strong class="stat-value" id="financeiro-receita-total">0,00 €</strong>
+</div>
+
+<div class="stat-card destaque-azul receita">
+    <span class="stat-label">Despesas Totais</span>
+    <strong class="stat-value" id="financeiro-despesas-total">0,00 €</strong>
+</div>
+
+<div class="stat-card destaque-verde receita">
+    <span class="stat-label">Lucro Geral</span>
+    <strong class="stat-value" id="financeiro-lucro-geral">0,00 €</strong>
+</div> 
+
                 </div>
 
                 <div class="graficos-grid">

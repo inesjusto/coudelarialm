@@ -5,75 +5,139 @@ require_once 'conexao.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Total de despesas do mês atual
-    $sqlMes = "SELECT COALESCE(SUM(valor), 0) AS total
-               FROM despesas
-               WHERE MONTH(data_despesa) = MONTH(CURDATE())
-               AND YEAR(data_despesa) = YEAR(CURDATE())";
 
-    $totalMes = $conn->query($sqlMes)->fetch(PDO::FETCH_ASSOC)['total'];
+    // RECEITA DE AULAS REALIZADAS
+    $sqlReceitaAulas = "
+        SELECT COALESCE(SUM(preco), 0) AS total
+        FROM aulas
+        WHERE estado = 'realizada'
+    ";
 
-    // Total de despesas do ano atual
-    $sqlAno = "SELECT COALESCE(SUM(valor), 0) AS total
-               FROM despesas
-               WHERE YEAR(data_despesa) = YEAR(CURDATE())";
+    $receitaAulas = $conn->query($sqlReceitaAulas)->fetch(PDO::FETCH_ASSOC)['total'];
 
-    $totalAno = $conn->query($sqlAno)->fetch(PDO::FETCH_ASSOC)['total'];
+    // RECEITA DE ALUGUERES ATÉ HOJE
+    // Conta alugueres ativos e concluídos.
+    // Ativos contam só até à data de hoje.
+    // Concluídos contam até à data real de fim.
+    $sqlReceitaAlugueres = "
+        SELECT COALESCE(SUM(
+            (
+                DATEDIFF(
+                    CASE
+                        WHEN estado = 'ativo' THEN CURDATE()
+                        ELSE data_fim
+                    END,
+                    data_inicio
+                ) + 1
+            ) * preco_diario
+        ), 0) AS total
+        FROM alugueres
+        WHERE estado IN ('ativo', 'concluido')
+          AND data_inicio IS NOT NULL
+          AND (
+              estado = 'ativo'
+              OR data_fim IS NOT NULL
+          )
+    ";
 
-    // Total pendente
-    $sqlPendente = "SELECT COALESCE(SUM(valor), 0) AS total
-                    FROM despesas
-                    WHERE estado_pagamento = 'pendente'";
+    $receitaAlugueres = $conn->query($sqlReceitaAlugueres)->fetch(PDO::FETCH_ASSOC)['total'];
 
-    $totalPendente = $conn->query($sqlPendente)->fetch(PDO::FETCH_ASSOC)['total'];
+    // TOTAL DE DESPESAS
+    $sqlDespesasTotal = "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM despesas
+        WHERE estado_pagamento != 'cancelado'
+    ";
 
-    // Despesas por categoria
-    $sqlCategorias = "SELECT 
-                        categoria,
-                        COALESCE(SUM(valor), 0) AS total
-                      FROM despesas
-                      GROUP BY categoria
-                      ORDER BY total DESC";
+    $despesasTotal = $conn->query($sqlDespesasTotal)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // DESPESAS DO MÊS
+    $sqlDespesasMes = "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM despesas
+        WHERE estado_pagamento != 'cancelado'
+          AND MONTH(data_despesa) = MONTH(CURDATE())
+          AND YEAR(data_despesa) = YEAR(CURDATE())
+    ";
+
+    $despesasMes = $conn->query($sqlDespesasMes)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // DESPESAS DO ANO
+    $sqlDespesasAno = "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM despesas
+        WHERE estado_pagamento != 'cancelado'
+          AND YEAR(data_despesa) = YEAR(CURDATE())
+    ";
+
+    $despesasAno = $conn->query($sqlDespesasAno)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // DESPESAS PENDENTES
+    $sqlPendentes = "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM despesas
+        WHERE estado_pagamento = 'pendente'
+    ";
+
+    $despesasPendentes = $conn->query($sqlPendentes)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // DESPESAS POR CATEGORIA
+    $sqlCategorias = "
+        SELECT 
+            categoria,
+            COALESCE(SUM(valor), 0) AS total
+        FROM despesas
+        WHERE estado_pagamento != 'cancelado'
+        GROUP BY categoria
+        ORDER BY total DESC
+    ";
 
     $categorias = $conn->query($sqlCategorias)->fetchAll(PDO::FETCH_ASSOC);
 
-    // Custo por cavalo no mês atual
-    $sqlCavalos = "SELECT 
-                        c.nome AS cavalo,
-                        COALESCE(SUM(d.valor), 0) AS total
-                   FROM despesas d
-                   INNER JOIN cavalos c ON d.cavalo_id = c.id
-                   WHERE MONTH(d.data_despesa) = MONTH(CURDATE())
-                   AND YEAR(d.data_despesa) = YEAR(CURDATE())
-                   GROUP BY d.cavalo_id, c.nome
-                   ORDER BY total DESC";
+    // CUSTO POR CAVALO
+    $sqlCustosCavalos = "
+        SELECT 
+            c.nome AS cavalo,
+            COALESCE(SUM(d.valor), 0) AS total
+        FROM despesas d
+        INNER JOIN cavalos c ON d.cavalo_id = c.id
+        WHERE d.estado_pagamento != 'cancelado'
+        GROUP BY d.cavalo_id, c.nome
+        ORDER BY total DESC
+    ";
 
-    $custosCavalos = $conn->query($sqlCavalos)->fetchAll(PDO::FETCH_ASSOC);
+    $custosCavalos = $conn->query($sqlCustosCavalos)->fetchAll(PDO::FETCH_ASSOC);
 
-    // Estados de pagamento
-    $sqlEstados = "SELECT 
-                        estado_pagamento,
-                        COUNT(*) AS quantidade,
-                        COALESCE(SUM(valor), 0) AS total
-                   FROM despesas
-                   GROUP BY estado_pagamento";
+    // RECEITA TOTAL
+    $receitaTotal = (float)$receitaAulas + (float)$receitaAlugueres;
 
-    $estados = $conn->query($sqlEstados)->fetchAll(PDO::FETCH_ASSOC);
+    // LUCRO GERAL
+    $lucroGeral = $receitaTotal - (float)$despesasTotal;
 
     echo json_encode([
         'sucesso' => true,
-        'total_mes' => (float) $totalMes,
-        'total_ano' => (float) $totalAno,
-        'total_pendente' => (float) $totalPendente,
+
+        'receita_aulas' => (float)$receitaAulas,
+        'receita_alugueres' => (float)$receitaAlugueres,
+        'receita_total' => (float)$receitaTotal,
+
+        'total_mes' => (float)$despesasMes,
+        'total_ano' => (float)$despesasAno,
+        'total_pendente' => (float)$despesasPendentes,
+        'despesas_total' => (float)$despesasTotal,
+
+        'lucro_geral' => (float)$lucroGeral,
+
         'categorias' => $categorias,
-        'custos_cavalos' => $custosCavalos,
-        'estados' => $estados
-    ]);
+        'custos_cavalos' => $custosCavalos
+
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
+
     echo json_encode([
         'sucesso' => false,
         'erro' => 'Erro ao carregar estatísticas financeiras: ' . $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
-?>x
+?>

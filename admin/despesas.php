@@ -11,6 +11,7 @@ include __DIR__ . '/../backend/proteger.php';
 </head>
 <body>
     <div class="admin-layout">
+
         <aside class="admin-sidebar">
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
@@ -27,6 +28,7 @@ include __DIR__ . '/../backend/proteger.php';
                 <a href="cavalos.php" class="nav-link">Cavalos</a>
                 <a href="clientes.php" class="nav-link">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
+                <a href="aulas.php" class="nav-link">Aulas</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
                 <a href="despesas.php" class="nav-link ativo">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -34,27 +36,34 @@ include __DIR__ . '/../backend/proteger.php';
         </aside>
 
         <main class="admin-main">
+
             <header class="admin-header admin-header-flex">
                 <div class="admin-header-texto">
                     <h1>Despesas</h1>
-                    <p>Gestão financeira das despesas da coudelaria.</p>
+                    <p>
+                        Gestão financeira das despesas gerais e despesas associadas aos cavalos.
+                    </p>
                 </div>
 
-                <a href="adicionar-despesa.php" class="botao-adicionar">+ Adicionar Despesa</a>
+                <a href="adicionar-despesa.php" class="botao-adicionar">
+                    + Adicionar Despesa
+                </a>
             </header>
 
             <section class="admin-tabela-wrapper">
                 <div class="tabela-container">
+
                     <table class="admin-tabela">
+
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Tipo</th>
                                 <th>Fornecedor</th>
                                 <th>Cavalo</th>
                                 <th>Categoria</th>
                                 <th>Descrição</th>
                                 <th>Valor</th>
-                                <th>Data</th>
                                 <th>Pagamento</th>
                                 <th>Estado</th>
                                 <th>Ações</th>
@@ -63,13 +72,19 @@ include __DIR__ . '/../backend/proteger.php';
 
                         <tbody id="tabela-despesas">
                             <tr>
-                                <td colspan="10" class="mensagem-vazia">A carregar despesas...</td>
+                                <td colspan="10" class="mensagem-vazia">
+                                    A carregar despesas...
+                                </td>
                             </tr>
                         </tbody>
+
                     </table>
+
                 </div>
             </section>
+
         </main>
+
     </div>
 
     <script src="assets/js/admin.js"></script>

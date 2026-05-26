@@ -10,6 +10,7 @@ require_once __DIR__ . '/../backend/proteger.php';
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
+
 <div class="admin-layout">
 
     <aside class="admin-sidebar">
@@ -28,6 +29,7 @@ require_once __DIR__ . '/../backend/proteger.php';
             <a href="cavalos.php" class="nav-link">Cavalos</a>
             <a href="clientes.php" class="nav-link">Clientes</a>
             <a href="alugueres.php" class="nav-link">Alugueres</a>
+            <a href="aulas.php" class="nav-link">Aulas</a>
             <a href="fornecedores.php" class="nav-link ativo">Fornecedores</a>
             <a href="despesas.php" class="nav-link">Despesas</a>
             <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -35,18 +37,23 @@ require_once __DIR__ . '/../backend/proteger.php';
     </aside>
 
     <main class="admin-main">
+
         <header class="admin-header admin-header-flex">
             <div class="admin-header-texto">
                 <h1>Fornecedores</h1>
                 <p>Gestão de fornecedores da coudelaria.</p>
             </div>
 
-            <a href="adicionar-fornecedor.php" class="botao-adicionar">+ Adicionar Fornecedor</a>
+            <a href="adicionar-fornecedor.php" class="botao-adicionar">
+                + Adicionar Fornecedor
+            </a>
         </header>
 
         <section class="admin-tabela-wrapper">
             <div class="tabela-container">
+
                 <table class="admin-tabela">
+
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -55,19 +62,23 @@ require_once __DIR__ . '/../backend/proteger.php';
                             <th>Telefone</th>
                             <th>Email</th>
                             <th>Tipo</th>
-                            <th>Data</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
 
                     <tbody id="tabela-fornecedores">
                         <tr>
-                            <td colspan="8" class="mensagem-vazia">A carregar fornecedores...</td>
+                            <td colspan="7" class="mensagem-vazia">
+                                A carregar fornecedores...
+                            </td>
                         </tr>
                     </tbody>
+
                 </table>
+
             </div>
         </section>
+
     </main>
 
 </div>

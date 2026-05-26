@@ -17,17 +17,18 @@ function calcularDias($dataInicio, $dataFim = null) {
     return $inicio->diff($fim)->days + 1;
 }
 
-$stmtClientes = $conn->query("SELECT id, nome FROM clientes ORDER BY nome ASC");
+$stmtClientes = $conn->query("
+    SELECT id, nome
+    FROM clientes
+    WHERE TRIM(estado) = 'Cliente'
+    ORDER BY nome ASC
+");
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
 $stmtCavalos = $conn->query("
-    SELECT id, nome 
-    FROM cavalos 
-    WHERE id NOT IN (
-        SELECT cavalo_id 
-        FROM alugueres 
-        WHERE estado = 'ativo'
-    )
+    SELECT id, nome
+    FROM cavalos
+    WHERE TRIM(estado) = 'Disponível'
     ORDER BY nome ASC
 ");
 $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
@@ -77,6 +78,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
             <a href="cavalos.php" class="nav-link">Cavalos</a>
             <a href="clientes.php" class="nav-link">Clientes</a>
             <a href="alugueres.php" class="nav-link ativo">Alugueres</a>
+            <a href="aulas.php" class="nav-link">Aulas</a>
             <a href="fornecedores.php" class="nav-link">Fornecedores</a>
             <a href="despesas.php" class="nav-link">Despesas</a>
             <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -101,24 +103,34 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                     <div class="campo">
                         <label>Cliente</label>
                         <select name="cliente_id" required>
-                            <option disabled selected>Selecionar</option>
-                            <?php foreach ($clientes as $c): ?>
-                                <option value="<?= htmlspecialchars($c['id']) ?>">
-                                    <?= htmlspecialchars($c['nome']) ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <option value="" disabled selected>Selecionar</option>
+
+                            <?php if (empty($clientes)): ?>
+                                <option value="" disabled>Não existem clientes disponíveis</option>
+                            <?php else: ?>
+                                <?php foreach ($clientes as $c): ?>
+                                    <option value="<?= htmlspecialchars($c['id']) ?>">
+                                        <?= htmlspecialchars($c['nome']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
 
                     <div class="campo">
                         <label>Cavalo</label>
                         <select name="cavalo_id" required>
-                            <option disabled selected>Selecionar</option>
-                            <?php foreach ($cavalos as $c): ?>
-                                <option value="<?= htmlspecialchars($c['id']) ?>">
-                                    <?= htmlspecialchars($c['nome']) ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <option value="" disabled selected>Selecionar</option>
+
+                            <?php if (empty($cavalos)): ?>
+                                <option value="" disabled>Não existem cavalos disponíveis</option>
+                            <?php else: ?>
+                                <?php foreach ($cavalos as $c): ?>
+                                    <option value="<?= htmlspecialchars($c['id']) ?>">
+                                        <?= htmlspecialchars($c['nome']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
 
@@ -145,7 +157,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                     <input type="hidden" name="estado" value="ativo">
 
                     <div class="acoes-formulario">
-                        <button class="btn-editar btn-form-principal">Criar</button>
+                        <button class="btn-editar btn-form-principal" type="submit">Criar</button>
                     </div>
 
                 </form>
@@ -164,7 +176,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                         <th>Fim</th>
                         <th>Preço diário</th>
                         <th>Dias</th>
-                        <th>Total previsto</th>
+                        <th>Total</th>
                         <th>Estado</th>
                         <th>Ações</th>
                     </tr>
@@ -181,6 +193,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                                 $diasTotais = calcularDias($a['data_inicio'], $a['data_fim']);
                                 $totalPrevisto = $diasTotais * (float)$a['preco_diario'];
                             ?>
+
                             <tr>
                                 <td><?= htmlspecialchars($a['id']) ?></td>
                                 <td><?= htmlspecialchars($a['nome_cliente']) ?></td>
@@ -191,19 +204,20 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?= htmlspecialchars($diasTotais) ?></td>
                                 <td><?= number_format($totalPrevisto, 2, ',', '.') ?> €</td>
                                 <td><?= ucfirst(htmlspecialchars($a['estado'])) ?></td>
+
                                 <td>
                                     <?php if ($a['estado'] === 'ativo'): ?>
                                         <div class="acoes">
                                             <form method="POST" action="../backend/alterar-estado-aluguer.php">
                                                 <input type="hidden" name="id" value="<?= htmlspecialchars($a['id']) ?>">
                                                 <input type="hidden" name="estado" value="concluido">
-                                                <button class="btn-editar">Concluir</button>
+                                                <button class="btn-editar" type="submit">Concluir</button>
                                             </form>
 
                                             <form method="POST" action="../backend/alterar-estado-aluguer.php">
                                                 <input type="hidden" name="id" value="<?= htmlspecialchars($a['id']) ?>">
                                                 <input type="hidden" name="estado" value="cancelado">
-                                                <button class="btn-apagar">Cancelar</button>
+                                                <button class="btn-apagar" type="submit">Cancelar</button>
                                             </form>
                                         </div>
                                     <?php else: ?>
@@ -243,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const numero = parseFloat(valor);
+
         return isNaN(numero) ? 0 : numero;
     }
 
@@ -255,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (dataFim < dataInicio) return 0;
 
         const diferenca = dataFim - dataInicio;
+
         return Math.floor(diferenca / (1000 * 60 * 60 * 24)) + 1;
     }
 

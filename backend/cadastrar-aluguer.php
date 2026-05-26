@@ -30,23 +30,62 @@ if (!in_array($estado, $estadosPermitidos, true)) {
 }
 
 try {
+    $conn->beginTransaction();
+
+    $stmtClienteValido = $conn->prepare("
+        SELECT id
+        FROM clientes
+        WHERE id = :cliente_id
+          AND TRIM(estado) = 'Cliente'
+        LIMIT 1
+    ");
+    $stmtClienteValido->execute([
+        ':cliente_id' => $cliente_id
+    ]);
+
+    if (!$stmtClienteValido->fetch()) {
+        $conn->rollBack();
+        die('Só é possível criar alugueres para clientes com estado Cliente.');
+    }
+
+    $stmtCavaloValido = $conn->prepare("
+        SELECT id
+        FROM cavalos
+        WHERE id = :cavalo_id
+          AND TRIM(estado) = 'Disponível'
+        LIMIT 1
+    ");
+    $stmtCavaloValido->execute([
+        ':cavalo_id' => $cavalo_id
+    ]);
+
+    if (!$stmtCavaloValido->fetch()) {
+        $conn->rollBack();
+        die('Só é possível alugar cavalos com estado Disponível.');
+    }
+
     $stmtVerificar = $conn->prepare("
         SELECT id 
         FROM alugueres 
         WHERE cavalo_id = :cavalo_id 
-        AND estado = 'ativo'
+          AND estado = 'ativo'
         LIMIT 1
     ");
-    $stmtVerificar->execute([':cavalo_id' => $cavalo_id]);
+    $stmtVerificar->execute([
+        ':cavalo_id' => $cavalo_id
+    ]);
 
     if ($stmtVerificar->fetch()) {
+        $conn->rollBack();
         die('Este cavalo já tem um aluguer ativo.');
     }
 
-    $sql = "INSERT INTO alugueres 
-            (cliente_id, cavalo_id, data_inicio, data_fim, preco_diario, estado)
-            VALUES 
-            (:cliente_id, :cavalo_id, :data_inicio, :data_fim, :preco_diario, :estado)";
+    $sql = "
+        INSERT INTO alugueres 
+        (cliente_id, cavalo_id, data_inicio, data_fim, preco_diario, estado)
+        VALUES 
+        (:cliente_id, :cavalo_id, :data_inicio, :data_fim, :preco_diario, :estado)
+    ";
 
     $stmt = $conn->prepare($sql);
     $stmt->bindValue(':cliente_id', $cliente_id, PDO::PARAM_INT);
@@ -57,9 +96,27 @@ try {
     $stmt->bindValue(':estado', $estado);
     $stmt->execute();
 
+    if ($estado === 'ativo') {
+        $stmtAtualizarCavalo = $conn->prepare("
+            UPDATE cavalos
+            SET estado = 'Alugado'
+            WHERE id = :cavalo_id
+        ");
+        $stmtAtualizarCavalo->execute([
+            ':cavalo_id' => $cavalo_id
+        ]);
+    }
+
+    $conn->commit();
+
     header('Location: ../admin/alugueres.php');
     exit;
+
 } catch (PDOException $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+
     die('Erro ao criar aluguer: ' . $e->getMessage());
 }
 ?>

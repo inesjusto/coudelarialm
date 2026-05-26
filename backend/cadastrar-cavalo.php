@@ -37,28 +37,26 @@ function normalizarAltura($valor) {
 }
 
 try {
+
     $nome = trim($_POST['nome'] ?? '');
     $raca = trim($_POST['raca'] ?? '');
     $sexo = trim($_POST['sexo'] ?? '');
-    $idade = isset($_POST['idade']) && $_POST['idade'] !== '' ? (int) $_POST['idade'] : null;
+    $data_nascimento = trim($_POST['data_nascimento'] ?? '');
     $altura = normalizarAltura($_POST['altura'] ?? null);
     $cor = trim($_POST['cor'] ?? '');
     $preco = normalizarPreco($_POST['preco'] ?? null);
     $estado = trim($_POST['estado'] ?? '');
     $descricao = trim($_POST['descricao'] ?? '');
 
-    if ($nome === '' || $raca === '' || $idade === null || $preco === null) {
+    if (
+        $nome === '' ||
+        $raca === '' ||
+        $data_nascimento === '' ||
+        $preco === null
+    ) {
         echo json_encode([
             'sucesso' => false,
             'mensagem' => 'Preencha todos os campos obrigatórios.'
-        ]);
-        exit;
-    }
-
-    if ($idade < 0) {
-        echo json_encode([
-            'sucesso' => false,
-            'mensagem' => 'A idade não pode ser negativa.'
         ]);
         exit;
     }
@@ -98,7 +96,6 @@ try {
             'image/webp' => 'webp'
         ];
 
-        // 🔥 ALTERAÇÃO AQUI (20MB)
         $tamanhoMaximo = 20 * 1024 * 1024;
 
         if ($_FILES['imagem']['size'] > $tamanhoMaximo) {
@@ -116,7 +113,7 @@ try {
         if (!array_key_exists($mimeType, $tiposPermitidos)) {
             echo json_encode([
                 'sucesso' => false,
-                'mensagem' => 'Formato de imagem inválido. Use JPG, JPEG, PNG ou WEBP.'
+                'mensagem' => 'Formato de imagem inválido.'
             ]);
             exit;
         }
@@ -142,15 +139,38 @@ try {
     }
 
     $sql = "INSERT INTO cavalos
-                (nome, raca, sexo, idade, altura, cor, preco, estado, descricao, imagem)
-            VALUES
-                (:nome, :raca, :sexo, :idade, :altura, :cor, :preco, :estado, :descricao, :imagem)";
+        (
+            nome,
+            raca,
+            sexo,
+            data_nascimento,
+            altura,
+            cor,
+            preco,
+            estado,
+            descricao,
+            imagem
+        )
+        VALUES
+        (
+            :nome,
+            :raca,
+            :sexo,
+            :data_nascimento,
+            :altura,
+            :cor,
+            :preco,
+            :estado,
+            :descricao,
+            :imagem
+        )";
 
     $stmt = $conn->prepare($sql);
+
     $stmt->bindValue(':nome', $nome);
     $stmt->bindValue(':raca', $raca);
     $stmt->bindValue(':sexo', $sexo !== '' ? $sexo : null);
-    $stmt->bindValue(':idade', $idade, PDO::PARAM_INT);
+    $stmt->bindValue(':data_nascimento', $data_nascimento);
     $stmt->bindValue(':altura', $altura);
     $stmt->bindValue(':cor', $cor !== '' ? $cor : null);
     $stmt->bindValue(':preco', $preco);
@@ -166,11 +186,14 @@ try {
     ]);
 
 } catch (PDOException $e) {
+
     echo json_encode([
         'sucesso' => false,
         'mensagem' => 'Erro na base de dados: ' . $e->getMessage()
     ]);
+
 } catch (Exception $e) {
+
     echo json_encode([
         'sucesso' => false,
         'mensagem' => 'Erro: ' . $e->getMessage()

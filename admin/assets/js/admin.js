@@ -2,7 +2,8 @@ const TIPOS_IMAGEM_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png', 'image/
 const TAMANHO_MAXIMO_IMAGEM = 20 * 1024 * 1024;
 
 let graficoCavalos = null;
-let graficoClientes = null;
+let graficoClientesTipo = null;
+let graficoClientesEstado = null;
 let graficoRacasDetalhe = null;
 
 function pedidoComSucesso(resultado) {
@@ -124,9 +125,9 @@ async function carregarTabelaCavalos() {
     <td>${cavalo.idade ?? '-'}</td>
     <td>${formatarTextoApresentacao(cavalo.raca)}</td>
     <td>${formatarPreco(cavalo.preco)}</td>
-    <td>${cavalo.estado_aluguer === 'alugado' ? 'Alugado' : 'Disponível'}</td>
+    <td>${formatarTextoApresentacao(cavalo.estado)}</td>
     <td>
-        <div class="acoes">
+    <div class="acoes">
             <button class="btn-editar" onclick="editarCavalo(${cavalo.id})">Editar</button>
             <button class="btn-apagar" onclick="apagarCavalo(${cavalo.id})">Apagar</button>
         </div>
@@ -269,7 +270,7 @@ function configurarFormularioAdicionar() {
         const formData = new FormData();
         formData.append('nome', document.getElementById('nome').value);
         formData.append('sexo', document.getElementById('sexo').value);
-        formData.append('idade', document.getElementById('idade').value);
+        formData.append('data_nascimento', document.getElementById('data_nascimento').value);
         formData.append('raca', document.getElementById('raca').value);
         formData.append('altura', altura);
         formData.append('cor', document.getElementById('cor').value);
@@ -359,7 +360,7 @@ async function carregarDadosCavaloParaEdicao() {
         document.getElementById('cavalo-id').value = cavalo.id ?? '';
         document.getElementById('nome').value = cavalo.nome ?? '';
         document.getElementById('sexo').value = cavalo.sexo ?? '';
-        document.getElementById('idade').value = cavalo.idade ?? '';
+        document.getElementById('data_nascimento').value = cavalo.data_nascimento ?? '';
         document.getElementById('raca').value = cavalo.raca ?? '';
 
         if (document.getElementById('altura')) {
@@ -423,7 +424,7 @@ function configurarFormularioEditar() {
         formData.append('id', document.getElementById('cavalo-id').value);
         formData.append('nome', document.getElementById('nome').value);
         formData.append('sexo', document.getElementById('sexo').value);
-        formData.append('idade', document.getElementById('idade').value);
+        formData.append('data_nascimento', document.getElementById('data_nascimento').value);
         formData.append('raca', document.getElementById('raca').value);
         formData.append('altura', altura);
         formData.append('cor', document.getElementById('cor')?.value || '');
@@ -686,7 +687,11 @@ async function carregarGraficoCavalos(agrupamento = 'sexo') {
             return;
         }
 
-        document.getElementById('total-cavalos').textContent = resultado.total ?? 0;
+        const totalCavalos = document.getElementById('total-cavalos');
+
+        if (totalCavalos) {
+            totalCavalos.textContent = resultado.total ?? 0;
+        }
 
         const dados = Array.isArray(resultado.dados) ? resultado.dados : [];
         const labels = dados.map(item => item.label || 'Sem dados');
@@ -696,16 +701,17 @@ async function carregarGraficoCavalos(agrupamento = 'sexo') {
         destruirGrafico(graficoCavalos);
 
         graficoCavalos = new Chart(canvas, {
-            type: agrupamento === 'raca' ? 'bar' : 'doughnut',
+            type: agrupamento === 'idade' ? 'bar' : 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: agrupamento === 'raca' ? 'Quantidade' : 'Cavalos',
+                    label: agrupamento === 'idade' ? 'Quantidade' : 'Cavalos',
                     data: valores,
                     backgroundColor: cores,
                     borderColor: '#24283B',
-                    borderWidth: agrupamento === 'raca' ? 0 : 4,
-                    borderRadius: agrupamento === 'raca' ? 8 : 0
+                    borderWidth: agrupamento === 'idade' ? 0 : 4,
+                    borderRadius: agrupamento === 'idade' ? 8 : 0,
+                    borderSkipped: false
                 }]
             },
             options: {
@@ -713,13 +719,13 @@ async function carregarGraficoCavalos(agrupamento = 'sexo') {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: agrupamento !== 'raca',
+                        display: agrupamento !== 'idade',
                         labels: {
                             color: '#FFFFFF'
                         }
                     }
                 },
-                scales: agrupamento === 'raca' ? {
+                scales: agrupamento === 'idade' ? {
                     x: {
                         ticks: {
                             color: '#FFFFFF'
@@ -746,12 +752,14 @@ async function carregarGraficoCavalos(agrupamento = 'sexo') {
     }
 }
 
-async function carregarGraficoClientes(agrupamento = 'tipo') {
-    const canvas = document.getElementById('grafico-clientes');
+async function carregarGraficoClientesTipo() {
+
+    const canvas = document.getElementById('grafico-clientes-tipo');
     if (!canvas) return;
 
     try {
-        const resposta = await fetch(`../backend/stats-clientes.php?agrupamento=${agrupamento}`);
+
+        const resposta = await fetch('../backend/stats-clientes.php?agrupamento=tipo');
         const resultado = await resposta.json();
 
         if (resultado.erro) {
@@ -759,43 +767,63 @@ async function carregarGraficoClientes(agrupamento = 'tipo') {
             return;
         }
 
-        document.getElementById('total-clientes').textContent = resultado.total ?? 0;
+        const clientesEstado = document.getElementById('clientes-estado');
+        const clientesPotenciais = document.getElementById('clientes-potenciais');
+        const clientesContactados = document.getElementById('clientes-contactados');
+
+        if (clientesEstado) {
+            clientesEstado.textContent = resultado.clientes ?? 0;
+        }
+
+        if (clientesPotenciais) {
+            clientesPotenciais.textContent = resultado.potenciais ?? 0;
+        }
+
+        if (clientesContactados) {
+            clientesContactados.textContent = resultado.contactados ?? 0;
+        }
 
         const dados = Array.isArray(resultado.dados) ? resultado.dados : [];
+
         const labels = dados.map(item => {
-    let texto = (item.label || 'Sem tipo').toString().trim().toLowerCase();
+            let texto = (item.label || 'Sem tipo').toString().trim().toLowerCase();
 
-    // Correções de acentos
-    const mapa = {
-        'informacao': 'Informação',
-        'compra': 'Compra',
-        'visita': 'Visita'
-    };
+            const mapa = {
+                'informacao': 'Informação',
+                'compra': 'Compra',
+                'visita': 'Visita'
+            };
 
-    return mapa[texto] || (texto.charAt(0).toUpperCase() + texto.slice(1));
-});
+            return mapa[texto] || (
+                texto.charAt(0).toUpperCase() + texto.slice(1)
+            );
+        });
+
         const valores = dados.map(item => Number(item.total) || 0);
-        const cores = obterPaleta(labels.length);
 
-        destruirGrafico(graficoClientes);
+        destruirGrafico(graficoClientesTipo);
 
-        graficoClientes = new Chart(canvas, {
+        graficoClientesTipo = new Chart(canvas, {
+
             type: 'doughnut',
+
             data: {
                 labels: labels,
+
                 datasets: [{
                     data: valores,
-                    backgroundColor: cores,
+                    backgroundColor: obterPaleta(labels.length),
                     borderColor: '#24283B',
                     borderWidth: 4
                 }]
             },
+
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+
                 plugins: {
                     legend: {
-                        display: true,
                         labels: {
                             color: '#FFFFFF'
                         }
@@ -803,8 +831,74 @@ async function carregarGraficoClientes(agrupamento = 'tipo') {
                 }
             }
         });
+
     } catch (erro) {
-        console.error('Erro ao carregar gráfico de clientes:', erro);
+
+        console.error(
+            'Erro ao carregar gráfico tipo clientes:',
+            erro
+        );
+    }
+}
+
+async function carregarGraficoClientesEstado() {
+
+    const canvas = document.getElementById('grafico-clientes-estado');
+    if (!canvas) return;
+
+    try {
+
+        const resposta = await fetch('../backend/stats-clientes.php?agrupamento=interesse_cavalo');
+        const resultado = await resposta.json();
+
+        if (resultado.erro) {
+            console.error(resultado.erro);
+            return;
+        }
+
+        const dados = Array.isArray(resultado.dados) ? resultado.dados : [];
+
+        const labels = dados.map(item => item.label || 'Sem estado');
+
+        const valores = dados.map(item => Number(item.total) || 0);
+
+        destruirGrafico(graficoClientesEstado);
+
+        graficoClientesEstado = new Chart(canvas, {
+
+            type: 'doughnut',
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    data: valores,
+                    backgroundColor: obterPaleta(labels.length),
+                    borderColor: '#24283B',
+                    borderWidth: 4
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#FFFFFF'
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (erro) {
+
+        console.error(
+    'Erro ao carregar gráfico de interesse em cavalos:',
+    erro
+);
     }
 }
 
@@ -879,24 +973,31 @@ async function carregarGraficoRacasDetalhe() {
 function configurarFiltrosGraficos() {
 
     function ativarBotoes(containerId, callback) {
+
         const container = document.getElementById(containerId);
+
         if (!container) return;
 
         const botoes = container.querySelectorAll('.filtro-btn');
 
         botoes.forEach(btn => {
+
             btn.addEventListener('click', () => {
 
                 botoes.forEach(b => b.classList.remove('ativo'));
+
                 btn.classList.add('ativo');
 
                 callback(btn.dataset.value);
+
             });
+
         });
+
     }
 
+    // Apenas filtros dos cavalos
     ativarBotoes('filtro-cavalos', carregarGraficoCavalos);
-    ativarBotoes('filtro-clientes', carregarGraficoClientes);
 }
 
 async function carregarTabelaFornecedores() {
@@ -917,7 +1018,7 @@ async function carregarTabelaFornecedores() {
         if (fornecedores.erro) {
             tabela.innerHTML = `
                 <tr>
-                    <td colspan="8" class="mensagem-vazia">${fornecedores.erro}</td>
+                    <td colspan="7" class="mensagem-vazia">${fornecedores.erro}</td>
                 </tr>
             `;
             return;
@@ -926,7 +1027,7 @@ async function carregarTabelaFornecedores() {
         if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
             tabela.innerHTML = `
                 <tr>
-                    <td colspan="8" class="mensagem-vazia">Nenhum fornecedor registado.</td>
+                    <td colspan="7" class="mensagem-vazia">Nenhum fornecedor registado.</td>
                 </tr>
             `;
             return;
@@ -939,10 +1040,9 @@ async function carregarTabelaFornecedores() {
                 <td>${fornecedor.id ?? '-'}</td>
                 <td><strong>${fornecedor.nome ?? '-'}</strong></td>
                 <td>${fornecedor.nif ?? '-'}</td>
-                <td>${fornecedor.telefone ?? '-'}</td>
+                <td class="telefone-fornecedor">${fornecedor.telefone ?? '-'}</td>
                 <td>${fornecedor.email ?? '-'}</td>
                 <td>${fornecedor.tipo_fornecedor ?? '-'}</td>
-                <td>${fornecedor.data_criacao ?? '-'}</td>
                 <td>
                     <div class="acoes">
                         <button class="btn-editar" onclick="editarFornecedor(${fornecedor.id})">Editar</button>
@@ -956,7 +1056,7 @@ async function carregarTabelaFornecedores() {
     } catch (erro) {
         tabela.innerHTML = `
             <tr>
-                <td colspan="8" class="mensagem-vazia">Erro ao carregar fornecedores.</td>
+                <td colspan="7" class="mensagem-vazia">Erro ao carregar fornecedores.</td>
             </tr>
         `;
         console.error('Erro ao carregar fornecedores:', erro);
@@ -1032,14 +1132,34 @@ async function carregarTabelaDespesas() {
 
             linha.innerHTML = `
                 <td>${despesa.id ?? '-'}</td>
+
+                <td>
+                    <span class="badge-tipo badge-${(despesa.tipo_despesa || '').toLowerCase()}">
+                        ${formatarTextoApresentacao(despesa.tipo_despesa)}
+                    </span>
+                </td>
+
                 <td>${despesa.fornecedor_nome ?? 'Sem fornecedor'}</td>
-                <td>${despesa.cavalo_nome ?? 'Despesa geral'}</td>
+
+                <td>
+                    ${despesa.cavalo_nome
+                        ? `<strong>${despesa.cavalo_nome}</strong>`
+                        : '<span class="texto-fraco">—</span>'
+                    }
+                </td>
+
                 <td>${despesa.categoria ?? '-'}</td>
+
                 <td>${despesa.descricao ?? '-'}</td>
-                <td><strong>${parseFloat(despesa.valor).toFixed(2)} €</strong></td>
-                <td>${despesa.data_despesa ?? '-'}</td>
-                <td>${despesa.metodo_pagamento ?? '-'}</td>
-                <td>${despesa.estado_pagamento ?? '-'}</td>
+
+                <td class="valor-despesa">
+                    <strong>${Number(despesa.valor || 0).toFixed(2)} €</strong>
+                </td>
+
+                <td>${formatarTextoApresentacao(despesa.metodo_pagamento)}</td>
+
+                <td>${formatarTextoApresentacao(despesa.estado_pagamento)}</td>
+
                 <td>
                     <div class="acoes">
                         <button class="btn-editar" onclick="editarDespesa(${despesa.id})">Editar</button>
@@ -1052,6 +1172,7 @@ async function carregarTabelaDespesas() {
         });
     } catch (erro) {
         console.error('Erro ao carregar despesas:', erro);
+
         tabela.innerHTML = `
             <tr>
                 <td colspan="10" class="mensagem-vazia">Erro ao carregar despesas.</td>
@@ -1120,79 +1241,319 @@ function formatarEuros(valor) {
 }
 
 async function carregarStatsFinanceiro() {
-    const totalMes = document.getElementById('financeiro-total-mes');
-    const totalAno = document.getElementById('financeiro-total-ano');
-    const totalPendente = document.getElementById('financeiro-total-pendente');
-
-    const canvasCategorias = document.getElementById('grafico-despesas-categorias');
-    const canvasCavalos = document.getElementById('grafico-custo-cavalos');
-
-    if (!totalMes && !totalAno && !totalPendente && !canvasCategorias && !canvasCavalos) return;
 
     try {
+
         const resposta = await fetch('../backend/stats-financeiro.php');
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
         const dados = await resposta.json();
 
         if (!dados.sucesso) {
-            console.error(dados.erro || 'Erro ao carregar estatísticas financeiras.');
+            console.error(dados.erro);
             return;
         }
 
-        if (totalMes) totalMes.textContent = formatarEuros(dados.total_mes);
-        if (totalAno) totalAno.textContent = formatarEuros(dados.total_ano);
-        if (totalPendente) totalPendente.textContent = formatarEuros(dados.total_pendente);
+        // RECEITAS
+        const receitaTotal = document.getElementById('financeiro-receita-total');
 
-        if (canvasCategorias) {
-            const labelsCategorias = dados.categorias.map(item => item.categoria || 'Sem categoria');
-            const valoresCategorias = dados.categorias.map(item => Number(item.total || 0));
+        if (receitaTotal) {
+            receitaTotal.textContent =
+                `${Number(dados.receita_total || 0).toFixed(2)} €`;
+        }
 
-            if (graficoDespesasCategorias) {
-                graficoDespesasCategorias.destroy();
+        // DESPESAS TOTAIS
+        const despesasTotal = document.getElementById('financeiro-despesas-total');
+
+        if (despesasTotal) {
+            despesasTotal.textContent =
+                `${Number(dados.despesas_total || 0).toFixed(2)} €`;
+        }
+
+        // LUCRO GERAL
+        const lucroGeral = document.getElementById('financeiro-lucro-geral');
+
+        if (lucroGeral) {
+
+            const valorLucro = Number(dados.lucro_geral || 0);
+
+            lucroGeral.textContent =
+                `${valorLucro.toFixed(2)} €`;
+
+            // Cor dinâmica
+            if (valorLucro >= 0) {
+                lucroGeral.style.color = '#16a34a';
+            } else {
+                lucroGeral.style.color = '#dc2626';
             }
+        }
 
-            graficoDespesasCategorias = new Chart(canvasCategorias, {
+        // DESPESAS MÊS
+        const totalMes = document.getElementById('financeiro-total-mes');
+
+        if (totalMes) {
+            totalMes.textContent =
+                `${Number(dados.total_mes || 0).toFixed(2)} €`;
+        }
+
+        // DESPESAS ANO
+        const totalAno = document.getElementById('financeiro-total-ano');
+
+        if (totalAno) {
+            totalAno.textContent =
+                `${Number(dados.total_ano || 0).toFixed(2)} €`;
+        }
+
+        // PENDENTES
+        const totalPendente = document.getElementById('financeiro-total-pendente');
+
+        if (totalPendente) {
+            totalPendente.textContent =
+                `${Number(dados.total_pendente || 0).toFixed(2)} €`;
+        }
+
+        // GRÁFICO CATEGORIAS
+        const canvasCategorias = document.getElementById('grafico-despesas-categorias');
+
+        if (canvasCategorias && dados.categorias?.length) {
+
+            const labels = dados.categorias.map(item => item.categoria);
+            const valores = dados.categorias.map(item => Number(item.total));
+
+            new Chart(canvasCategorias, {
                 type: 'doughnut',
+
                 data: {
-                    labels: labelsCategorias,
+                    labels: labels,
+
                     datasets: [{
-                        label: 'Despesas por Categoria',
-                        data: valoresCategorias
+                        data: valores
                     }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
         }
 
-        if (canvasCavalos) {
-            const labelsCavalos = dados.custos_cavalos.map(item => item.cavalo || 'Sem cavalo');
-            const valoresCavalos = dados.custos_cavalos.map(item => Number(item.total || 0));
+        // GRÁFICO CUSTOS CAVALOS
+        const canvasCavalos = document.getElementById('grafico-custo-cavalos');
 
-            if (graficoCustoCavalos) {
-                graficoCustoCavalos.destroy();
-            }
+        if (canvasCavalos && dados.custos_cavalos?.length) {
 
-            graficoCustoCavalos = new Chart(canvasCavalos, {
+            const labels = dados.custos_cavalos.map(item => item.cavalo);
+            const valores = dados.custos_cavalos.map(item => Number(item.total));
+
+            new Chart(canvasCavalos, {
                 type: 'bar',
+
                 data: {
-                    labels: labelsCavalos,
+                    labels: labels,
+
                     datasets: [{
-                        label: 'Custo mensal por cavalo (€)',
-                        data: valoresCavalos
+                        label: 'Custos (€)',
+                        data: valores
                     }]
                 },
+
                 options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
         }
 
     } catch (erro) {
-        console.error('Erro ao carregar dashboard financeiro:', erro);
+
+        console.error(
+            'Erro ao carregar estatísticas financeiras:',
+            erro
+        );
     }
 }
+
+async function carregarTabelaAulas() {
+    const tabela = document.getElementById('tabela-aulas');
+    if (!tabela) return;
+
+    try {
+        const resposta = await fetch('../backend/listar-aulas.php');
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
+        const aulas = await resposta.json();
+
+        tabela.innerHTML = '';
+
+        if (aulas.erro) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="9" class="mensagem-vazia">${aulas.erro}</td>
+                </tr>
+            `;
+            return;
+        }
+
+        if (!Array.isArray(aulas) || aulas.length === 0) {
+            tabela.innerHTML = `
+                <tr>
+                    <td colspan="9" class="mensagem-vazia">Nenhuma aula registada.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        aulas.forEach(aula => {
+            const linha = document.createElement('tr');
+
+            linha.innerHTML = `
+                <td>${aula.id ?? '-'}</td>
+                <td>${aula.cliente_nome ?? 'Sem cliente'}</td>
+                <td>${aula.cavalo_nome ?? 'Sem cavalo'}</td>
+                <td>${aula.data_aula ?? '-'}</td>
+                <td>${aula.hora_inicio ?? '-'} - ${aula.hora_fim ?? '-'}</td>
+                <td>${aula.tipo_aula ?? '-'}</td>
+                <td><strong>${Number(aula.preco || 0).toFixed(2)} €</strong></td>
+                <td>${formatarTextoApresentacao(aula.estado)}</td>
+                <td>
+                    <div class="acoes">
+                        <button class="btn-editar" onclick="editarAula(${aula.id})">Ver</button>
+                    </div>
+                </td>
+            `;
+
+            tabela.appendChild(linha);
+        });
+
+    } catch (erro) {
+        console.error('Erro ao carregar aulas:', erro);
+
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="9" class="mensagem-vazia">Erro ao carregar aulas.</td>
+            </tr>
+        `;
+    }
+}
+
+function editarAula(id) {
+    window.location.href = `editar-aula.php?id=${id}`;
+}
+
+async function apagarAula(id) {
+    alert('A função de apagar aula será criada depois.');
+}
+
+async function carregarSelectClientes() {
+    const select = document.getElementById('cliente_id');
+    if (!select) return;
+
+    try {
+        const resposta = await fetch('../backend/listar-clientes.php');
+        const clientes = await resposta.json();
+
+        if (!Array.isArray(clientes)) return;
+
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.nome;
+            select.appendChild(option);
+        });
+    } catch (erro) {
+        console.error('Erro ao carregar clientes:', erro);
+    }
+}
+
+function carregarCalendarioAulas() {
+    const calendarioEl = document.getElementById('calendario-aulas');
+    if (!calendarioEl) return;
+
+    const calendario = new FullCalendar.Calendar(calendarioEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt',
+        height: 'auto',
+
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia'
+        },
+
+        events: '../backend/eventos-aulas.php',
+
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+
+            const id = info.event.id;
+
+            if (id) {
+                window.location.href = `editar-aula.php?id=${id}`;
+            }
+        }
+    });
+
+    calendario.render();
+}
+
+function calcularIdadePorData(dataNascimento) {
+    if (!dataNascimento) return '—';
+
+    const nascimento = new Date(dataNascimento + 'T00:00:00');
+    const hoje = new Date();
+
+    if (nascimento > hoje) return 'Data inválida';
+
+    let anos = hoje.getFullYear() - nascimento.getFullYear();
+    let meses = hoje.getMonth() - nascimento.getMonth();
+
+    if (hoje.getDate() < nascimento.getDate()) {
+        meses--;
+    }
+
+    if (meses < 0) {
+        anos--;
+        meses += 12;
+    }
+
+    if (anos > 0) {
+        return anos === 1 ? '1 ano' : `${anos} anos`;
+    }
+
+    return meses === 1 ? '1 mês' : `${meses} meses`;
+}
+
+function configurarCalculoIdadeFormulario() {
+    const campoData = document.getElementById('data_nascimento');
+    const idadeCalculada = document.getElementById('idade-calculada');
+
+    if (!campoData || !idadeCalculada) return;
+
+    function atualizar() {
+        idadeCalculada.textContent = calcularIdadePorData(campoData.value);
+    }
+
+    campoData.addEventListener('input', atualizar);
+    campoData.addEventListener('change', atualizar);
+
+    atualizar();
+}
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarPreviewImagem();
@@ -1203,10 +1564,15 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarEditarCliente();
     configurarFiltrosGraficos();
     carregarGraficoCavalos();
-    carregarGraficoClientes();
+    carregarGraficoClientesTipo();
+    carregarGraficoClientesEstado();
     carregarGraficoRacasDetalhe();
     carregarTabelaFornecedores();
     carregarTabelaDespesas();
     carregarSelectFornecedores();
     carregarStatsFinanceiro();
+    carregarTabelaAulas();
+    carregarSelectClientes();
+    carregarCalendarioAulas();
+    configurarCalculoIdadeFormulario();
 });
