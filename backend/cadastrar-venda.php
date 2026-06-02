@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/proteger.php';
 require_once __DIR__ . '/conexao.php';
+require_once __DIR__ . '/funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/adicionar-venda.php?erro=metodo');
@@ -10,19 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $clienteId = isset($_POST['cliente_id']) ? (int) $_POST['cliente_id'] : 0;
 $cavaloId = isset($_POST['cavalo_id']) ? (int) $_POST['cavalo_id'] : 0;
 $dataVenda = trim($_POST['data_venda'] ?? '');
-$valorTexto = trim($_POST['valor'] ?? '');
+$valor = normalizarValorMonetario($_POST['valor'] ?? '');
 $metodoPagamento = trim($_POST['metodo_pagamento'] ?? '');
 $observacoes = trim($_POST['observacoes'] ?? '');
-
-$valorTexto = str_replace('€', '', $valorTexto);
-$valorTexto = str_replace(' ', '', $valorTexto);
-
-if (strpos($valorTexto, ',') !== false) {
-    $valorTexto = str_replace('.', '', $valorTexto);
-    $valorTexto = str_replace(',', '.', $valorTexto);
-}
-
-$valor = (float)$valorTexto;
 
 if ($clienteId <= 0 || $cavaloId <= 0 || $dataVenda === '' || $valor <= 0) {
     header('Location: ../admin/adicionar-venda.php?erro=campos');

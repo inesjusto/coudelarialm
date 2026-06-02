@@ -1,39 +1,135 @@
 <?php
-include 'conexao.php';
-require_once __DIR__ . '/funcoes-formatacao.php';
+require_once 'proteger.php';
+require_once 'conexao.php';
+require_once 'funcoes-formatacao.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-function normalizarPreco($valor) {
-
-    if ($valor === null) return null;
+function normalizarAltura($valor) {
+    if ($valor === null) {
+        return null;
+    }
 
     $valor = trim((string)$valor);
 
-    if ($valor === '') return null;
+    if ($valor === '') {
+        return null;
+    }
 
     $valor = str_replace(' ', '', $valor);
-    $valor = str_replace('.', '', $valor);
     $valor = str_replace(',', '.', $valor);
 
     return is_numeric($valor) ? (float)$valor : null;
 }
 
-function normalizarAltura($valor) {
+function criarImagemOrigem($caminhoTemporario, $tipoImagem) {
+    if ($tipoImagem === 'image/jpeg' || $tipoImagem === 'image/jpg') {
+        return imagecreatefromjpeg($caminhoTemporario);
+    }
 
-    if ($valor === null) return null;
+    if ($tipoImagem === 'image/png') {
+        return imagecreatefrompng($caminhoTemporario);
+    }
 
-    $valor = trim((string)$valor);
+    if ($tipoImagem === 'image/webp') {
+        return imagecreatefromwebp($caminhoTemporario);
+    }
 
-    if ($valor === '') return null;
+    return false;
+}
 
-    $valor = str_replace(' ', '', $valor);
-    $valor = str_replace(',', '.', $valor);
+function guardarImagemWebpOtimizada($ficheiro, $pastaDestino, $nomeBase) {
+    $tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    $tamanhoMaximo = 20 * 1024 * 1024;
 
-    return is_numeric($valor) ? (float)$valor : null;
+    if (!isset($ficheiro) || $ficheiro['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    if ($ficheiro['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Erro no upload da imagem.');
+    }
+
+    if ($ficheiro['size'] > $tamanhoMaximo) {
+        throw new Exception('A imagem excede o tamanho máximo permitido.');
+    }
+
+    if (!extension_loaded('gd')) {
+        throw new Exception('A extensão GD não está ativa no PHP.');
+    }
+
+    $tipoImagem = mime_content_type($ficheiro['tmp_name']);
+
+    if (!in_array($tipoImagem, $tiposPermitidos, true)) {
+        throw new Exception('Formato de imagem inválido. Use JPG, JPEG, PNG ou WEBP.');
+    }
+
+    if (!is_dir($pastaDestino)) {
+        mkdir($pastaDestino, 0777, true);
+    }
+
+    $imagemOrigem = criarImagemOrigem($ficheiro['tmp_name'], $tipoImagem);
+
+    if (!$imagemOrigem) {
+        throw new Exception('Não foi possível processar a imagem.');
+    }
+
+    $larguraOriginal = imagesx($imagemOrigem);
+    $alturaOriginal = imagesy($imagemOrigem);
+
+    $larguraMaxima = 1200;
+
+    if ($larguraOriginal > $larguraMaxima) {
+        $novaLargura = $larguraMaxima;
+        $novaAltura = (int)(($alturaOriginal / $larguraOriginal) * $novaLargura);
+    } else {
+        $novaLargura = $larguraOriginal;
+        $novaAltura = $alturaOriginal;
+    }
+
+    $imagemFinal = imagecreatetruecolor($novaLargura, $novaAltura);
+
+    imagealphablending($imagemFinal, false);
+    imagesavealpha($imagemFinal, true);
+
+    $transparente = imagecolorallocatealpha($imagemFinal, 0, 0, 0, 127);
+    imagefilledrectangle($imagemFinal, 0, 0, $novaLargura, $novaAltura, $transparente);
+
+    imagecopyresampled(
+        $imagemFinal,
+        $imagemOrigem,
+        0,
+        0,
+        0,
+        0,
+        $novaLargura,
+        $novaAltura,
+        $larguraOriginal,
+        $alturaOriginal
+    );
+
+    $nomeFicheiro = $nomeBase . '.webp';
+    $caminhoFinal = rtrim($pastaDestino, '/\\') . DIRECTORY_SEPARATOR . $nomeFicheiro;
+
+    $guardou = imagewebp($imagemFinal, $caminhoFinal, 80);
+
+    imagedestroy($imagemOrigem);
+    imagedestroy($imagemFinal);
+
+    if (!$guardou) {
+        throw new Exception('Erro ao guardar a imagem em WEBP.');
+    }
+
+    return $nomeFicheiro;
 }
 
 try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode([
+            'erro' => 'Método de requisição inválido.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     if (
         !isset($_POST['id']) ||
@@ -42,19 +138,21 @@ try {
         !isset($_POST['preco']) ||
         !isset($_POST['data_nascimento'])
     ) {
-        echo json_encode(["erro" => "Dados incompletos."]);
+        echo json_encode([
+            'erro' => 'Dados incompletos.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     $id = (int) $_POST['id'];
 
-    $nome = trim($_POST['nome']);
-    $raca = trim($_POST['raca']);
+    $nome = trim($_POST['nome'] ?? '');
+    $raca = trim($_POST['raca'] ?? '');
     $sexo = trim($_POST['sexo'] ?? '');
-    $data_nascimento = trim($_POST['data_nascimento']);
+    $dataNascimento = trim($_POST['data_nascimento'] ?? '');
     $altura = normalizarAltura($_POST['altura'] ?? null);
     $cor = trim($_POST['cor'] ?? '');
-    $preco = normalizarPreco($_POST['preco'] ?? null);
+    $preco = normalizarValorMonetario($_POST['preco'] ?? '');
     $estado = trim($_POST['estado'] ?? '');
     $descricao = trim($_POST['descricao'] ?? '');
 
@@ -62,99 +160,83 @@ try {
         $id <= 0 ||
         $nome === '' ||
         $raca === '' ||
-        $data_nascimento === '' ||
-        $preco === null
+        $dataNascimento === '' ||
+        trim($_POST['preco'] ?? '') === ''
     ) {
-        echo json_encode(["erro" => "Preencha todos os campos obrigatórios."]);
+        echo json_encode([
+            'erro' => 'Preencha todos os campos obrigatórios.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     if ($preco < 0) {
-        echo json_encode(["erro" => "O preço não pode ser negativo."]);
+        echo json_encode([
+            'erro' => 'O preço não pode ser negativo.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     if ($altura !== null && $altura < 0) {
-        echo json_encode(["erro" => "A altura não pode ser negativa."]);
+        echo json_encode([
+            'erro' => 'A altura não pode ser negativa.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $sqlAtual = "SELECT imagem FROM cavalos WHERE id = :id";
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataNascimento)) {
+        echo json_encode([
+            'erro' => 'Data de nascimento inválida.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
-    $stmtAtual = $conn->prepare($sqlAtual);
-    $stmtAtual->execute([':id' => $id]);
+    $stmtAtual = $conn->prepare("
+        SELECT imagem
+        FROM cavalos
+        WHERE id = :id
+        LIMIT 1
+    ");
+
+    $stmtAtual->execute([
+        ':id' => $id
+    ]);
 
     $cavaloAtual = $stmtAtual->fetch(PDO::FETCH_ASSOC);
 
     if (!$cavaloAtual) {
-        echo json_encode(["erro" => "Cavalo não encontrado."]);
+        echo json_encode([
+            'erro' => 'Cavalo não encontrado.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $nomeImagem = $cavaloAtual['imagem'];
+    $nomeImagem = $cavaloAtual['imagem'] ?? null;
 
     if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $diretorioDestino = __DIR__ . '/../public/assets/img/cavalos';
+        $nomeBase = 'cavalo_' . $id . '_' . time();
 
-        if ($_FILES['imagem']['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(["erro" => "Erro ao enviar a nova imagem."]);
-            exit;
-        }
+        $novaImagem = guardarImagemWebpOtimizada(
+            $_FILES['imagem'],
+            $diretorioDestino,
+            $nomeBase
+        );
 
-        $tiposPermitidos = [
-            'image/jpeg' => 'jpg',
-            'image/jpg'  => 'jpg',
-            'image/png'  => 'png',
-            'image/webp' => 'webp'
-        ];
+        if ($novaImagem !== null) {
+            if (!empty($nomeImagem)) {
+                $imagemAntiga = $diretorioDestino . DIRECTORY_SEPARATOR . $nomeImagem;
 
-        $tamanhoMaximo = 20 * 1024 * 1024;
-
-        if ($_FILES['imagem']['size'] > $tamanhoMaximo) {
-            echo json_encode(["erro" => "A imagem excede 20 MB."]);
-            exit;
-        }
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-
-        $mimeType = finfo_file($finfo, $_FILES['imagem']['tmp_name']);
-
-        finfo_close($finfo);
-
-        if (!array_key_exists($mimeType, $tiposPermitidos)) {
-            echo json_encode(["erro" => "Formato inválido."]);
-            exit;
-        }
-
-        $extensao = $tiposPermitidos[$mimeType];
-
-        $novoNomeImagem = uniqid('cavalo_', true) . '.' . $extensao;
-
-        $diretorioDestino = __DIR__ . '/../public/assets/img/cavalos/';
-
-        if (!is_dir($diretorioDestino)) {
-            mkdir($diretorioDestino, 0777, true);
-        }
-
-        $caminhoFisico = $diretorioDestino . $novoNomeImagem;
-
-        if (!move_uploaded_file($_FILES['imagem']['tmp_name'], $caminhoFisico)) {
-            echo json_encode(["erro" => "Erro ao guardar imagem."]);
-            exit;
-        }
-
-        if (!empty($nomeImagem)) {
-
-            $imagemAntiga = __DIR__ . '/../public/assets/img/cavalos/' . $nomeImagem;
-
-            if (file_exists($imagemAntiga)) {
-                unlink($imagemAntiga);
+                if (file_exists($imagemAntiga)) {
+                    unlink($imagemAntiga);
+                }
             }
-        }
 
-        $nomeImagem = $novoNomeImagem;
+            $nomeImagem = $novaImagem;
+        }
     }
 
-    $sql = "UPDATE cavalos
+    $stmt = $conn->prepare("
+        UPDATE cavalos
         SET
             nome = :nome,
             raca = :raca,
@@ -166,15 +248,14 @@ try {
             estado = :estado,
             descricao = :descricao,
             imagem = :imagem
-        WHERE id = :id";
-
-    $stmt = $conn->prepare($sql);
+        WHERE id = :id
+    ");
 
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->bindValue(':nome', $nome);
     $stmt->bindValue(':raca', $raca);
     $stmt->bindValue(':sexo', $sexo !== '' ? $sexo : null);
-    $stmt->bindValue(':data_nascimento', $data_nascimento);
+    $stmt->bindValue(':data_nascimento', $dataNascimento);
     $stmt->bindValue(':altura', $altura);
     $stmt->bindValue(':cor', $cor !== '' ? $cor : null);
     $stmt->bindValue(':preco', $preco);
@@ -185,14 +266,14 @@ try {
     $stmt->execute();
 
     echo json_encode([
-        "sucesso" => true,
-        "message" => "Cavalo editado com sucesso."
-    ]);
+        'sucesso' => true,
+        'message' => 'Cavalo editado com sucesso.',
+        'imagem' => $nomeImagem
+    ], JSON_UNESCAPED_UNICODE);
 
-} catch (PDOException $e) {
-
+} catch (Exception $e) {
     echo json_encode([
-        "erro" => "Erro ao editar cavalo: " . $e->getMessage()
-    ]);
+        'erro' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
 }
 ?>

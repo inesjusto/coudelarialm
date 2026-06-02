@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Tempo de geração: 26-Maio-2026 às 15:48
+-- Tempo de geração: 02-Jun-2026 às 18:08
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -63,8 +63,7 @@ CREATE TABLE `alugueres` (
 --
 
 INSERT INTO `alugueres` (`id`, `cliente_id`, `cavalo_id`, `data_inicio`, `data_fim`, `preco_diario`, `estado`, `criado_em`) VALUES
-(1, 10, 10, '2026-05-26', '2026-06-26', 20.00, 'ativo', '2026-05-26 10:38:14'),
-(2, 4, 17, '2026-05-01', '2026-07-01', 25.00, 'ativo', '2026-05-26 10:42:45');
+(1, 10, 10, '2026-05-01', '2026-05-31', 20.00, 'concluido', '2026-06-02 10:43:00');
 
 -- --------------------------------------------------------
 
@@ -128,14 +127,14 @@ INSERT INTO `cavalos` (`id`, `nome`, `raca`, `sexo`, `data_nascimento`, `altura`
 (7, 'Shadow Comet', 'Andaluz', 'Garanhão', '2018-02-28', 1.65, 'Castanha Escura', 16700.00, 'Disponível', 'Garanhão Andaluz de grande elegância e presença forte, com movimentos enérgicos e excelente impulsão. Demonstra um temperamento vivo, mas muito inteligente e obediente durante o treino. Ideal para dressage, apresentações e passeios de alto nível. A pelagem castanha escura brilhante combinada com a crina negra longa destaca o seu aspeto nobre e atlético.', 'cavalo_6a0d73e1e8ca99.34697968.jpg', '2026-05-20 08:42:09'),
 (8, 'Silver Meadow', 'Outro', 'Fêmea', '2016-06-09', 1.55, 'Tordilha', 10400.00, 'Reformado', 'Égua tranquila e muito resistente, conhecida pelo seu comportamento dócil e experiência em passeios rurais. Possui uma pelagem tordilha clara com ligeiras marcações acinzentadas, típica da raça Camargue. Apesar de já reformada de trabalhos intensivos, continua apta para atividades leves e contacto com iniciantes, destacando-se pela serenidade e elegância natural.', 'cavalo_6a0d74724a1a39.95329093.jpg', '2026-05-20 08:44:34'),
 (9, 'Misty Thunder', 'Outro', 'Macho', '2018-11-14', 1.47, 'Tordilha Negra', 6900.00, 'Disponível', 'Cavalo compacto e resistente, com excelente adaptação a terrenos difíceis e grande facilidade em trilhos longos. Demonstra um temperamento calmo e amigável, sendo ideal para lazer e equitação recreativa. A pelagem tordilha negra juntamente com a crina clara cria um aspeto muito distinto e elegante. Conhecido pela sua resistência física e facilidade de aprendizagem.', 'cavalo_6a0d74df8bfcc7.81850150.jpg', '2026-05-20 08:46:23'),
-(10, 'Autumn Flame', 'Paint Horse', 'Macho', '2022-04-05', 1.42, 'Pampa', 7300.00, 'Alugado', 'Cavalo jovem com excelente porte e uma pelagem pampa castanha muito marcante. Demonstra curiosidade, energia e facilidade de adaptação ao treino inicial. Possui movimentos leves e boa estrutura física, sendo promissor para lazer, trilhos e equitação recreativa. A larga lista branca na face e as marcas brancas nas patas dão-lhe um aspeto bastante distinto e elegante.', 'cavalo_6a0d754edabc65.27369517.jpg', '2026-05-20 08:48:14'),
+(10, 'Autumn Flame', 'Paint Horse', 'Macho', '2022-04-05', 1.42, 'Pampa', 7300.00, 'Disponível', 'Cavalo jovem com excelente porte e uma pelagem pampa castanha muito marcante. Demonstra curiosidade, energia e facilidade de adaptação ao treino inicial. Possui movimentos leves e boa estrutura física, sendo promissor para lazer, trilhos e equitação recreativa. A larga lista branca na face e as marcas brancas nas patas dão-lhe um aspeto bastante distinto e elegante.', 'cavalo_6a0d754edabc65.27369517.jpg', '2026-05-20 08:48:14'),
 (11, 'Desert Echo', 'Mustang', 'Garanhão', '2019-07-30', 1.57, 'Castanha', 12300.00, 'Disponível', 'Garanhão de grande energia e presença forte, com movimentos rápidos e excelente agilidade. Demonstra um temperamento vivo, mas equilibrado, adaptando-se bem a treino e atividades de resistência. A pelagem escura com reflexos acastanhados destaca a musculatura e o porte atlético. Ideal para trilhos, equitação western e trabalho em campo aberto.', 'cavalo_6a0d75b06a14e6.32768765.jpg', '2026-05-20 08:49:52'),
 (12, 'Golden Horizon', 'Akhal-Teke', 'Fêmea', '2020-05-18', 1.60, 'Outra', 21500.00, 'Reservado', 'Égua elegante e muito refinada, conhecida pela sua resistência e aparência distinta. Possui uma pelagem isabela dourada com brilho natural característico da raça Akhal-Teke. Demonstra um comportamento atento e inteligente, com movimentos suaves e excelente desempenho em equitação desportiva e trilhos longos. Destaca-se pela postura nobre e pela grande agilidade.', 'cavalo_6a0d762e5998e5.74851235.jpg', '2026-05-20 08:51:58'),
 (13, 'Iron Dust', 'Mustang', 'Macho', '2019-10-12', 1.61, 'Castanha', 13800.00, 'Disponível', 'Cavalo robusto e atlético, com excelente resistência e postura firme. Demonstra um temperamento atento e energético, mantendo boa obediência durante o treino e passeios. Indicado para trilhos, trabalho western e atividades de resistência.', 'cavalo_6a0d769bc75d84.38784432.jpg', '2026-05-20 08:53:47'),
 (14, 'Silver Rain', 'Andaluz', 'Fêmea', '2018-03-26', 1.64, 'Tordilha', 15900.00, 'Disponível', 'Égua Andaluz de aparência elegante e porte harmonioso, destacando-se pela sua pelagem tordilha salpicada e movimentos suaves. Possui um temperamento dócil e atento, sendo indicada para dressage, lazer e apresentações equestres. Demonstra excelente equilíbrio corporal e facilidade de aprendizagem, tornando-se uma ótima escolha para cavaleiros intermédios e experientes.', 'cavalo_6a0d770539caa0.86277734.jpg', '2026-05-20 08:55:33'),
 (15, 'Forest King', 'Hanoveriano', 'Macho', '2017-09-07', 1.68, 'Castanha', 14600.00, 'Disponível', 'Cavalo Hanoveriano de porte forte e musculatura bem desenvolvida, ideal para saltos e ensino desportivo. Possui um temperamento equilibrado e tranquilo, demonstrando boa obediência e facilidade no maneio diário. A pelagem castanha brilhante com crina e cauda negras destaca a sua aparência elegante e atlética. Excelente escolha para cavaleiros que procuram resistência, potência e conforto nos movimentos.', 'cavalo_6a0d777b62beb9.60714314.jpg', '2026-05-20 08:57:31'),
 (16, 'Northern Spirit', 'Outro', 'Garanhão', '2018-04-21', 1.50, 'Baia', 13200.00, 'Disponível', 'Garanhão de porte compacto e musculatura forte, típico da raça Fiorde Norueguês. Possui uma pelagem baia dourada com crina bicolor escura, característica muito valorizada na raça. Demonstra um temperamento dócil, resistente e cooperativo, sendo excelente para lazer, trilhos e trabalho rural. Destaca-se pela elegância natural e pela grande resistência física.', 'cavalo_6a0d77c263a6f8.71386815.jpg', '2026-05-20 08:58:42'),
-(17, 'Copper Wind', 'Árabe', 'Fêmea', '2021-06-15', 1.54, 'Alazã', 17400.00, 'Alugado', 'Égua jovem de raça Árabe com excelente elegância e estrutura refinada. Possui uma pelagem alazã uniforme e brilhante, destacando-se pela postura nobre e movimentos leves. Demonstra um temperamento atento, inteligente e muito ágil, sendo ideal para resistência, lazer e apresentações equestres. A sua conformação atlética e expressão alerta tornam-na bastante valorizada.', 'cavalo_6a0d780a81ed43.76445741.jpg', '2026-05-20 08:59:54');
+(17, 'Copper Wind', 'Árabe', 'Fêmea', '2021-06-15', 1.54, 'Alazã', 17400.00, 'Disponível', 'Égua jovem de raça Árabe com excelente elegância e estrutura refinada. Possui uma pelagem alazã uniforme e brilhante, destacando-se pela postura nobre e movimentos leves. Demonstra um temperamento atento, inteligente e muito ágil, sendo ideal para resistência, lazer e apresentações equestres. A sua conformação atlética e expressão alerta tornam-na bastante valorizada.', 'cavalo_6a0d780a81ed43.76445741.jpg', '2026-05-20 08:59:54');
 
 -- --------------------------------------------------------
 
@@ -251,14 +250,6 @@ CREATE TABLE `despesas` (
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Extraindo dados da tabela `despesas`
---
-
-INSERT INTO `despesas` (`id`, `fornecedor_id`, `cavalo_id`, `categoria`, `descricao`, `valor`, `data_despesa`, `metodo_pagamento`, `estado_pagamento`, `data_criacao`) VALUES
-(1, 8, NULL, 'Manutenção', NULL, 150.00, '2026-05-25', 'Automático', 'pago', '2026-05-26 11:20:23'),
-(2, 7, 16, 'Medicamentos', NULL, 70.00, '2026-05-30', 'Transferência', 'pendente', '2026-05-26 11:27:16');
-
 -- --------------------------------------------------------
 
 --
@@ -291,6 +282,30 @@ INSERT INTO `fornecedores` (`id`, `nome`, `nif`, `telefone`, `email`, `morada`, 
 (7, 'EquiMed Farma', '519004572', '+351 919 660 287', 'suporte@equimedfarma.pt', 'Parque Empresarial do Ribatejo, Lote 7, 2080-101 Almeirim', 'Medicamentos', NULL, '2026-05-26 11:06:46'),
 (8, 'Lusoequestre Equipamentos', '515772144', '+351 926 511 432', 'comercial@lusoequestre.pt', 'Rua da Feira nº 31, 4750-803 Barcelos', 'Equipamento', 'Especializado em selas, cabeçadas e acessórios.', '2026-05-26 11:07:19'),
 (9, 'RuralFix Serviços', '518337905', '+351 912 345 880', 'ruralfix.manutencao@gmail.com', 'Caminho das Oliveiras, 8600-421 Lagos', 'Manutenção', 'Reparação de cercas, boxes e estruturas equestres.', '2026-05-26 11:07:54');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `vendas_cavalos`
+--
+
+CREATE TABLE `vendas_cavalos` (
+  `id` int(11) NOT NULL,
+  `cliente_id` int(11) NOT NULL,
+  `cavalo_id` int(11) NOT NULL,
+  `data_venda` date NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `metodo_pagamento` varchar(50) DEFAULT NULL,
+  `observacoes` text DEFAULT NULL,
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Extraindo dados da tabela `vendas_cavalos`
+--
+
+INSERT INTO `vendas_cavalos` (`id`, `cliente_id`, `cavalo_id`, `data_venda`, `valor`, `metodo_pagamento`, `observacoes`, `data_criacao`) VALUES
+(1, 10, 10, '2026-06-02', 7300.00, 'Transferência Bancária', NULL, '2026-06-02 14:26:49');
 
 --
 -- Índices para tabelas despejadas
@@ -361,6 +376,14 @@ ALTER TABLE `fornecedores`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Índices para tabela `vendas_cavalos`
+--
+ALTER TABLE `vendas_cavalos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_cavalo_vendido` (`cavalo_id`),
+  ADD KEY `cliente_id` (`cliente_id`);
+
+--
 -- AUTO_INCREMENT de tabelas despejadas
 --
 
@@ -374,7 +397,7 @@ ALTER TABLE `administradores`
 -- AUTO_INCREMENT de tabela `alugueres`
 --
 ALTER TABLE `alugueres`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
@@ -386,7 +409,7 @@ ALTER TABLE `aulas`
 -- AUTO_INCREMENT de tabela `cavalos`
 --
 ALTER TABLE `cavalos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de tabela `clientes`
@@ -410,13 +433,19 @@ ALTER TABLE `consumos_cavalos`
 -- AUTO_INCREMENT de tabela `despesas`
 --
 ALTER TABLE `despesas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `fornecedores`
 --
 ALTER TABLE `fornecedores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de tabela `vendas_cavalos`
+--
+ALTER TABLE `vendas_cavalos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restrições para despejos de tabelas
@@ -455,6 +484,13 @@ ALTER TABLE `consumos_cavalos`
 ALTER TABLE `despesas`
   ADD CONSTRAINT `despesas_ibfk_1` FOREIGN KEY (`fornecedor_id`) REFERENCES `fornecedores` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_despesas_cavalo` FOREIGN KEY (`cavalo_id`) REFERENCES `cavalos` (`id`) ON DELETE SET NULL;
+
+--
+-- Limitadores para a tabela `vendas_cavalos`
+--
+ALTER TABLE `vendas_cavalos`
+  ADD CONSTRAINT `vendas_cavalos_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
+  ADD CONSTRAINT `vendas_cavalos_ibfk_2` FOREIGN KEY (`cavalo_id`) REFERENCES `cavalos` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

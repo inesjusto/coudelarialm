@@ -137,6 +137,15 @@ include __DIR__ . '/../backend/proteger.php';
             }
 
             try {
+
+            function formatarValorInput(valor) {
+                if (valor === null || valor === undefined || valor === '') return '';
+
+                return Number(valor).toFixed(2)
+                    .replace('.', ',')
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
                 await carregarSelectFornecedores();
 
                 const resposta = await fetch(`../backend/buscar-despesa.php?id=${id}`);
@@ -152,7 +161,7 @@ include __DIR__ . '/../backend/proteger.php';
                 document.getElementById('fornecedor_id').value = despesa.fornecedor_id ?? '';
                 document.getElementById('categoria').value = despesa.categoria ?? '';
                 document.getElementById('descricao').value = despesa.descricao ?? '';
-                document.getElementById('valor').value = despesa.valor ?? '';
+                document.getElementById('valor').value = formatarValorInput(despesa.valor);
                 document.getElementById('data_despesa').value = despesa.data_despesa ?? '';
                 document.getElementById('metodo_pagamento').value = despesa.metodo_pagamento ?? '';
                 document.getElementById('estado_pagamento').value = despesa.estado_pagamento ?? 'pendente';

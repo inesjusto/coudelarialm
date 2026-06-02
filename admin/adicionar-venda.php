@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
+require_once __DIR__ . '/../backend/funcoes-formatacao.php';
 
 /*
     Clientes:
@@ -89,7 +90,7 @@ function mostrarErroVenda($erro) {
                 <a href="clientes.php" class="nav-link">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="aulas.php" class="nav-link">Aulas</a>
-                <a href="vendas.php" class="nav-link">Vendas</a>
+                <a href="vendas.php" class="nav-link ativo">Vendas</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
                 <a href="despesas.php" class="nav-link">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -138,7 +139,7 @@ function mostrarErroVenda($erro) {
                                     <?php foreach ($cavalos as $cavalo): ?>
                                         <option 
                                             value="<?= htmlspecialchars($cavalo['id']) ?>"
-                                            data-preco="<?= htmlspecialchars($cavalo['preco'] ?? '') ?>"
+                                            data-preco="<?= htmlspecialchars(formatarValorInput($cavalo['preco'] ?? 0)) ?>"
                                         >
                                             <?= htmlspecialchars($cavalo['nome']) ?>
                                         </option>

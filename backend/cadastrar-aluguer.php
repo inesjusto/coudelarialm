@@ -1,79 +1,18 @@
 <?php
 require_once 'proteger.php';
 require_once 'conexao.php';
+require_once 'funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die('Método inválido.');
-}
-
-function normalizarValorMonetario($valor) {
-    $valor = trim((string)$valor);
-
-    if ($valor === '') {
-        return 0;
-    }
-
-    $valor = str_replace('€', '', $valor);
-    $valor = str_replace(' ', '', $valor);
-
-    /*
-        Aceita formatos:
-        25
-        25,00
-        25.00
-        1.000,00
-        1000.00
-    */
-
-    $temVirgula = strpos($valor, ',') !== false;
-    $temPonto = strpos($valor, '.') !== false;
-
-    if ($temVirgula && $temPonto) {
-        /*
-            Formato português:
-            1.000,00
-            2.500,50
-        */
-        $valor = str_replace('.', '', $valor);
-        $valor = str_replace(',', '.', $valor);
-    } elseif ($temVirgula && !$temPonto) {
-        /*
-            Formato português simples:
-            25,00
-        */
-        $valor = str_replace(',', '.', $valor);
-    } elseif ($temPonto && !$temVirgula) {
-        /*
-            Pode ser:
-            25.00 = decimal
-            1000.00 = decimal
-            1.000 = milhar português
-
-            Se houver exatamente 3 dígitos depois do ponto,
-            tratamos como separador de milhar.
-        */
-        $partes = explode('.', $valor);
-
-        if (count($partes) === 2 && strlen($partes[1]) === 3) {
-            $valor = str_replace('.', '', $valor);
-        }
-    }
-
-    if (!is_numeric($valor)) {
-        return 0;
-    }
-
-    return (float)$valor;
 }
 
 $cliente_id = isset($_POST['cliente_id']) ? (int) $_POST['cliente_id'] : 0;
 $cavalo_id = isset($_POST['cavalo_id']) ? (int) $_POST['cavalo_id'] : 0;
 $data_inicio = trim($_POST['data_inicio'] ?? '');
 $data_fim = trim($_POST['data_fim'] ?? '');
-$preco_diario_texto = trim($_POST['preco_diario'] ?? $_POST['preco'] ?? '0');
+$preco_diario = normalizarValorMonetario($_POST['preco_diario'] ?? $_POST['preco'] ?? '0');
 $estado = trim($_POST['estado'] ?? 'ativo');
-
-$preco_diario = normalizarValorMonetario($preco_diario_texto);
 
 if ($cliente_id <= 0 || $cavalo_id <= 0 || $data_inicio === '') {
     die('Preencha os campos obrigatórios.');
@@ -104,13 +43,7 @@ if (!in_array($estado, $estadosPermitidos, true)) {
 try {
     $conn->beginTransaction();
 
-    $stmtClienteValido = $conn->prepare("
-        SELECT id
-        FROM clientes
-        WHERE id = :cliente_id
-          AND TRIM(LOWER(estado)) = 'cliente'
-        LIMIT 1
-    ");
+    $stmtClienteValido = $conn->prepare("\n        SELECT id\n        FROM clientes\n        WHERE id = :cliente_id\n          AND TRIM(LOWER(estado)) = 'cliente'\n        LIMIT 1\n    ");
     $stmtClienteValido->execute([
         ':cliente_id' => $cliente_id
     ]);
@@ -120,14 +53,7 @@ try {
         die('Só é possível criar alugueres para clientes com estado Cliente.');
     }
 
-    $stmtCavaloValido = $conn->prepare("
-        SELECT id
-        FROM cavalos
-        WHERE id = :cavalo_id
-          AND TRIM(LOWER(estado)) IN ('disponível', 'disponivel')
-        LIMIT 1
-        FOR UPDATE
-    ");
+    $stmtCavaloValido = $conn->prepare("\n        SELECT id\n        FROM cavalos\n        WHERE id = :cavalo_id\n          AND TRIM(LOWER(estado)) IN ('disponível', 'disponivel')\n        LIMIT 1\n        FOR UPDATE\n    ");
     $stmtCavaloValido->execute([
         ':cavalo_id' => $cavalo_id
     ]);
@@ -137,13 +63,7 @@ try {
         die('Só é possível alugar cavalos com estado Disponível.');
     }
 
-    $stmtVerificar = $conn->prepare("
-        SELECT id 
-        FROM alugueres 
-        WHERE cavalo_id = :cavalo_id 
-          AND estado = 'ativo'
-        LIMIT 1
-    ");
+    $stmtVerificar = $conn->prepare("\n        SELECT id \n        FROM alugueres \n        WHERE cavalo_id = :cavalo_id \n          AND estado = 'ativo'\n        LIMIT 1\n    ");
     $stmtVerificar->execute([
         ':cavalo_id' => $cavalo_id
     ]);
@@ -153,15 +73,9 @@ try {
         die('Este cavalo já tem um aluguer ativo.');
     }
 
-    $sql = "
-        INSERT INTO alugueres 
-        (cliente_id, cavalo_id, data_inicio, data_fim, preco_diario, estado)
-        VALUES 
-        (:cliente_id, :cavalo_id, :data_inicio, :data_fim, :preco_diario, :estado)
-    ";
+    $sql = "\n        INSERT INTO alugueres \n        (cliente_id, cavalo_id, data_inicio, data_fim, preco_diario, estado)\n        VALUES \n        (:cliente_id, :cavalo_id, :data_inicio, :data_fim, :preco_diario, :estado)\n    ";
 
     $stmt = $conn->prepare($sql);
-
     $stmt->execute([
         ':cliente_id' => $cliente_id,
         ':cavalo_id' => $cavalo_id,
@@ -172,11 +86,7 @@ try {
     ]);
 
     if ($estado === 'ativo') {
-        $stmtAtualizarCavalo = $conn->prepare("
-            UPDATE cavalos
-            SET estado = 'Alugado'
-            WHERE id = :cavalo_id
-        ");
+        $stmtAtualizarCavalo = $conn->prepare("\n            UPDATE cavalos\n            SET estado = 'Alugado'\n            WHERE id = :cavalo_id\n        ");
         $stmtAtualizarCavalo->execute([
             ':cavalo_id' => $cavalo_id
         ]);

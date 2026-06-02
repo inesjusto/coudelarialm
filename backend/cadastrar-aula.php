@@ -1,6 +1,7 @@
 <?php
 require_once 'proteger.php';
 require_once 'conexao.php';
+require_once 'funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/aulas.php');
@@ -13,22 +14,12 @@ $data_aula = trim($_POST['data_aula'] ?? '');
 $hora_inicio = trim($_POST['hora_inicio'] ?? '');
 $hora_fim = trim($_POST['hora_fim'] ?? '');
 $tipo_aula = trim($_POST['tipo_aula'] ?? '');
-$precoTexto = trim($_POST['preco'] ?? '');
+$preco = normalizarValorMonetario($_POST['preco'] ?? '');
 $estado = $_POST['estado'] ?? 'marcada';
 $observacoes = trim($_POST['observacoes'] ?? '');
 
 $cliente_id = empty($cliente_id) ? null : (int)$cliente_id;
 $cavalo_id = empty($cavalo_id) ? null : (int)$cavalo_id;
-
-$precoTexto = str_replace('€', '', $precoTexto);
-$precoTexto = str_replace(' ', '', $precoTexto);
-
-if (strpos($precoTexto, ',') !== false) {
-    $precoTexto = str_replace('.', '', $precoTexto);
-    $precoTexto = str_replace(',', '.', $precoTexto);
-}
-
-$preco = (float)$precoTexto;
 
 $estadosPermitidos = ['marcada', 'realizada', 'cancelada'];
 
@@ -52,14 +43,7 @@ if ($hora_fim <= $hora_inicio) {
 
 try {
     if ($cliente_id !== null) {
-        $stmtCliente = $conn->prepare("
-            SELECT id
-            FROM clientes
-            WHERE id = :cliente_id
-              AND TRIM(LOWER(estado)) = 'cliente'
-            LIMIT 1
-        ");
-
+        $stmtCliente = $conn->prepare("\n            SELECT id\n            FROM clientes\n            WHERE id = :cliente_id\n              AND TRIM(LOWER(estado)) = 'cliente'\n            LIMIT 1\n        ");
         $stmtCliente->execute([
             ':cliente_id' => $cliente_id
         ]);
@@ -70,20 +54,7 @@ try {
     }
 
     if ($cavalo_id !== null) {
-        $stmtCavalo = $conn->prepare("
-            SELECT id
-            FROM cavalos c
-            WHERE c.id = :cavalo_id
-              AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
-              AND NOT EXISTS (
-                  SELECT 1
-                  FROM alugueres a
-                  WHERE a.cavalo_id = c.id
-                    AND a.estado = 'ativo'
-                    AND :data_aula BETWEEN a.data_inicio AND a.data_fim
-              )
-            LIMIT 1
-        ");
+        $stmtCavalo = $conn->prepare("\n            SELECT id\n            FROM cavalos c\n            WHERE c.id = :cavalo_id\n              AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')\n              AND NOT EXISTS (\n                  SELECT 1\n                  FROM alugueres a\n                  WHERE a.cavalo_id = c.id\n                    AND a.estado = 'ativo'\n                    AND :data_aula BETWEEN a.data_inicio AND a.data_fim\n              )\n            LIMIT 1\n        ");
 
         $stmtCavalo->execute([
             ':cavalo_id' => $cavalo_id,
@@ -95,12 +66,7 @@ try {
         }
     }
 
-    $sql = "
-        INSERT INTO aulas
-        (cliente_id, cavalo_id, data_aula, hora_inicio, hora_fim, tipo_aula, preco, estado, observacoes)
-        VALUES
-        (:cliente_id, :cavalo_id, :data_aula, :hora_inicio, :hora_fim, :tipo_aula, :preco, :estado, :observacoes)
-    ";
+    $sql = "\n        INSERT INTO aulas\n        (cliente_id, cavalo_id, data_aula, hora_inicio, hora_fim, tipo_aula, preco, estado, observacoes)\n        VALUES\n        (:cliente_id, :cavalo_id, :data_aula, :hora_inicio, :hora_fim, :tipo_aula, :preco, :estado, :observacoes)\n    ";
 
     $stmt = $conn->prepare($sql);
 

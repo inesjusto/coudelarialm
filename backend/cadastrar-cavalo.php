@@ -1,6 +1,7 @@
 <?php
+require_once 'proteger.php';
 require_once 'conexao.php';
-require_once __DIR__ . '/funcoes-formatacao.php';
+require_once 'funcoes-formatacao.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,7 +19,8 @@ $data_nascimento = trim($_POST['data_nascimento'] ?? '');
 $raca = trim($_POST['raca'] ?? '');
 $altura = trim($_POST['altura'] ?? '');
 $cor = trim($_POST['cor'] ?? '');
-$preco = trim($_POST['preco'] ?? '');
+$precoTexto = trim($_POST['preco'] ?? '');
+$preco = normalizarValorMonetario($precoTexto);
 $estado = trim($_POST['estado'] ?? '');
 $descricao = trim($_POST['descricao'] ?? '');
 
@@ -29,13 +31,21 @@ if (
     $raca === '' ||
     $altura === '' ||
     $cor === '' ||
-    $preco === '' ||
+    $precoTexto === '' ||
     $estado === '' ||
     $descricao === ''
 ) {
     echo json_encode([
         'sucesso' => false,
         'message' => 'Preencha todos os campos obrigatórios.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($preco < 0) {
+    echo json_encode([
+        'sucesso' => false,
+        'message' => 'O preço não pode ser negativo.'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

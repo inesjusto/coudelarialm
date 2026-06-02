@@ -10,31 +10,18 @@ function normalizarValorMonetario($valor) {
     $valor = str_replace('€', '', $valor);
     $valor = str_replace(' ', '', $valor);
 
-    /*
-        Aceita:
-        25
-        25,00
-        25.00
-        1.000,00
-        1000.00
-    */
-
     $temVirgula = strpos($valor, ',') !== false;
     $temPonto = strpos($valor, '.') !== false;
 
     if ($temVirgula && $temPonto) {
-        // Exemplo português: 1.000,00
+        // Formato português: 1.000,00
         $valor = str_replace('.', '', $valor);
         $valor = str_replace(',', '.', $valor);
     } elseif ($temVirgula && !$temPonto) {
-        // Exemplo: 25,00
+        // Formato português simples: 25,00
         $valor = str_replace(',', '.', $valor);
     } elseif ($temPonto && !$temVirgula) {
-        /*
-            Pode ser:
-            25.00 = decimal
-            1.000 = milhar
-        */
+        // Pode ser decimal inglês: 25.00 ou milhar português: 1.000
         $partes = explode('.', $valor);
 
         if (count($partes) === 2 && strlen($partes[1]) === 3) {
@@ -42,11 +29,35 @@ function normalizarValorMonetario($valor) {
         }
     }
 
-    if (!is_numeric($valor)) {
+    return is_numeric($valor) ? (float)$valor : 0;
+}
+
+function normalizarNumeroDecimal($valor) {
+    $valor = trim((string)$valor);
+
+    if ($valor === '') {
         return 0;
     }
 
-    return (float)$valor;
+    $valor = str_replace(' ', '', $valor);
+
+    $temVirgula = strpos($valor, ',') !== false;
+    $temPonto = strpos($valor, '.') !== false;
+
+    if ($temVirgula && $temPonto) {
+        $valor = str_replace('.', '', $valor);
+        $valor = str_replace(',', '.', $valor);
+    } elseif ($temVirgula && !$temPonto) {
+        $valor = str_replace(',', '.', $valor);
+    } elseif ($temPonto && !$temVirgula) {
+        $partes = explode('.', $valor);
+
+        if (count($partes) === 2 && strlen($partes[1]) === 3) {
+            $valor = str_replace('.', '', $valor);
+        }
+    }
+
+    return is_numeric($valor) ? (float)$valor : 0;
 }
 
 function formatarValorEuros($valor) {
@@ -60,3 +71,12 @@ function formatarValorInput($valor) {
 
     return number_format((float)$valor, 2, ',', '.');
 }
+
+function formatarNumeroInput($valor, $casasDecimais = 2) {
+    if ($valor === null || $valor === '') {
+        return '';
+    }
+
+    return number_format((float)$valor, $casasDecimais, ',', '.');
+}
+?>

@@ -291,12 +291,43 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 }
             }
 
+
+            function normalizarValor(valor) {
+                if (!valor) return 0;
+
+                valor = valor.toString().trim().replace('€', '').replace(/\s/g, '');
+
+                const temVirgula = valor.includes(',');
+                const temPonto = valor.includes('.');
+
+                if (temVirgula && temPonto) {
+                    valor = valor.replace(/\./g, '').replace(',', '.');
+                } else if (temVirgula && !temPonto) {
+                    valor = valor.replace(',', '.');
+                } else if (temPonto && !temVirgula) {
+                    const partes = valor.split('.');
+
+                    if (partes.length === 2 && partes[1].length === 3) {
+                        valor = valor.replace(/\./g, '');
+                    }
+                }
+
+                const numero = parseFloat(valor);
+                return isNaN(numero) ? 0 : numero;
+            }
+
+            function formatarValor(valor) {
+                return `${Number(valor || 0)
+                    .toFixed(2)
+                    .replace('.', ',')
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
+            }
             function calcularResumoConsumo() {
-                const consumo = parseFloat((consumoDiario.value || '').replace(',', '.'));
+                const consumo = normalizarValor(consumoDiario.value);
                 const inicio = dataInicio.value;
                 const fim = dataFim.value;
-                const qtdEmbalagem = parseFloat((quantidadePorEmbalagem.value || '').replace(',', '.'));
-                const preco = parseFloat((precoEmbalagem.value || '').replace(',', '.'));
+                const qtdEmbalagem = normalizarValor(quantidadePorEmbalagem.value);
+                const preco = normalizarValor(precoEmbalagem.value);
 
                 if (!consumo || !inicio || !fim || !qtdEmbalagem || isNaN(preco)) {
                     resumoConsumo.textContent = 'Preencha os campos para calcular automaticamente o custo.';
@@ -321,7 +352,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                     Dias: <strong>${dias}</strong><br>
                     Quantidade total: <strong>${quantidadeTotal.toFixed(2)} ${unidade.value}</strong><br>
                     Embalagens necessárias: <strong>${embalagens}</strong><br>
-                    Custo total estimado: <strong>${custoTotal.toFixed(2)} €</strong>
+                    Custo total estimado: <strong>${formatarValor(custoTotal)}</strong>
                 `;
             }
 

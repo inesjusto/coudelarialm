@@ -1,6 +1,7 @@
 <?php
 require_once 'proteger.php';
 require_once 'conexao.php';
+require_once 'funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/despesas.php');
@@ -34,12 +35,12 @@ if ($tipo_registo === 'cavalo' && empty($cavalo_id)) {
 $temCalculoAutomatico = $tipo_registo === 'cavalo' && in_array($categoria, $categoriasComCalculo, true);
 
 if ($temCalculoAutomatico) {
-    $consumo_diario = str_replace(',', '.', trim($_POST['consumo_diario'] ?? ''));
+    $consumo_diario = normalizarNumeroDecimal($_POST['consumo_diario'] ?? '');
     $unidade = trim($_POST['unidade'] ?? 'kg');
     $data_inicio = $_POST['data_inicio'] ?? '';
     $data_fim = $_POST['data_fim'] ?? '';
-    $quantidade_por_embalagem = str_replace(',', '.', trim($_POST['quantidade_por_embalagem'] ?? ''));
-    $preco_embalagem = str_replace(',', '.', trim($_POST['preco_embalagem'] ?? ''));
+    $quantidade_por_embalagem = normalizarNumeroDecimal($_POST['quantidade_por_embalagem'] ?? '');
+    $preco_embalagem = normalizarValorMonetario($_POST['preco_embalagem'] ?? '');
 
     if (
         empty($data_inicio) ||
@@ -78,13 +79,11 @@ if ($temCalculoAutomatico) {
         $metodo_pagamento = 'Automático';
     }
 } else {
-    $valor = str_replace(',', '.', $valor);
+    $valor_final = normalizarValorMonetario($valor);
 
-    if (!is_numeric($valor) || $valor <= 0) {
+    if ($valor_final <= 0) {
         die('O valor da despesa deve ser válido.');
     }
-
-    $valor_final = (float)$valor;
 }
 
 try {

@@ -250,12 +250,21 @@ document.addEventListener('DOMContentLoaded', function () {
     function normalizarPreco(valor) {
         if (!valor) return 0;
 
-        valor = valor.toString().trim().replace(/\s/g, '');
+        valor = valor.toString().trim().replace('€', '').replace(/\s/g, '');
 
-        if (valor.includes(',') && valor.includes('.')) {
+        const temVirgula = valor.includes(',');
+        const temPonto = valor.includes('.');
+
+        if (temVirgula && temPonto) {
             valor = valor.replace(/\./g, '').replace(',', '.');
-        } else {
+        } else if (temVirgula && !temPonto) {
             valor = valor.replace(',', '.');
+        } else if (temPonto && !temVirgula) {
+            const partes = valor.split('.');
+
+            if (partes.length === 2 && partes[1].length === 3) {
+                valor = valor.replace(/\./g, '');
+            }
         }
 
         const numero = parseFloat(valor);
@@ -281,10 +290,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const precoDiario = normalizarPreco(inputPrecoDiario.value);
         const total = dias * precoDiario;
 
-        inputTotalPrevisto.value = total.toLocaleString('pt-PT', {
-            style: 'currency',
-            currency: 'EUR'
-        });
+        inputTotalPrevisto.value = `${Number(total || 0)
+            .toFixed(2)
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
     }
 
     const fim = flatpickr("#data_fim", {

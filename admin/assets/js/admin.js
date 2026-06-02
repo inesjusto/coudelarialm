@@ -17,12 +17,31 @@ function mensagemErroResultado(resultado, fallback = 'Ocorreu um erro.') {
 function normalizarPreco(valor) {
     if (!valor) return '';
 
-    return valor
+    valor = valor
         .toString()
         .trim()
-        .replace(/\s/g, '')
-        .replace(/\./g, '')
-        .replace(',', '.');
+        .replace('€', '')
+        .replace(/\s/g, '');
+
+    const temVirgula = valor.includes(',');
+    const temPonto = valor.includes('.');
+
+    if (temVirgula && temPonto) {
+        // Formato português: 1.000,00
+        valor = valor.replace(/\./g, '').replace(',', '.');
+    } else if (temVirgula && !temPonto) {
+        // Formato português simples: 25,00
+        valor = valor.replace(',', '.');
+    } else if (temPonto && !temVirgula) {
+        const partes = valor.split('.');
+
+        // 1.000 como separador de milhar. 25.00 fica decimal.
+        if (partes.length === 2 && partes[1].length === 3) {
+            valor = valor.replace(/\./g, '');
+        }
+    }
+
+    return valor;
 }
 
 function normalizarAltura(valor) {
@@ -36,19 +55,19 @@ function normalizarAltura(valor) {
 }
 
 function formatarPreco(valor) {
-    return Number(valor ?? 0).toLocaleString('pt-PT', {
-        style: 'currency',
-        currency: 'EUR'
-    });
+    return `${Number(valor ?? 0)
+        .toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
 }
 
 function formatarPrecoParaInput(valor) {
     if (valor === null || valor === undefined || valor === '') return '';
 
-    return Number(valor).toLocaleString('pt-PT', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
+    return Number(valor)
+        .toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 function formatarAlturaParaInput(valor) {

@@ -1,6 +1,7 @@
 <?php
 require_once 'proteger.php';
 require_once 'conexao.php';
+require_once 'funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/despesas.php');
@@ -17,15 +18,12 @@ $metodo_pagamento = trim($_POST['metodo_pagamento'] ?? '');
 $estado_pagamento = $_POST['estado_pagamento'] ?? 'pendente';
 
 $fornecedor_id = empty($fornecedor_id) ? null : (int)$fornecedor_id;
-$valor = str_replace(',', '.', $valor);
+$valor = normalizarValorMonetario($valor);
 
-if ($id <= 0 || empty($categoria) || empty($valor) || empty($data_despesa)) {
+if ($id <= 0 || empty($categoria) || $valor <= 0 || empty($data_despesa)) {
     die('Dados inválidos.');
 }
 
-if (!is_numeric($valor) || $valor <= 0) {
-    die('O valor da despesa deve ser válido.');
-}
 
 try {
     $sql = "UPDATE despesas SET
