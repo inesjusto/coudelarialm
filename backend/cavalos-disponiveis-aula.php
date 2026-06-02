@@ -1,38 +1,58 @@
 <?php
-require_once 'proteger.php';
-require_once 'conexao.php';
+require_once __DIR__ . '/proteger.php';
+require_once __DIR__ . '/conexao.php';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-$data = $_GET['data'] ?? '';
+$data = trim($_GET['data'] ?? '');
 
 if ($data === '') {
-    echo json_encode([]);
+    echo json_encode([], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+    echo json_encode([
+        'erro' => 'Data inválida.'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 try {
-    $sql = "
+    /*
+        Regras:
+        - Só permite cavalos com estado Disponível ou Alugado.
+        - Vendido, Reservado, Indisponível, Em Tratamento, Reformado não aparecem.
+        - Se existir aluguer ativo ou concluído que apanhe a data da aula, o cavalo não aparece.
+        - Aluguer cancelado não bloqueia.
+        - Se data_fim for NULL num aluguer ativo, considera alugado por tempo indefinido.
+    */
+
+    $stmt = $conn->prepare("
         SELECT 
             c.id,
             c.nome
         FROM cavalos c
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM alugueres a
-            WHERE a.cavalo_id = c.id
-              AND a.estado = 'ativo'
-              AND :data_aula BETWEEN a.data_inicio AND a.data_fim
-        )
+        WHERE TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel', 'alugado')
+          AND NOT EXISTS (
+              SELECT 1
+              FROM alugueres a
+              WHERE a.cavalo_id = c.id
+                AND TRIM(LOWER(a.estado)) IN ('ativo', 'concluido')
+                AND DATE(:data_aula) >= DATE(a.data_inicio)
+                AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
+          )
         ORDER BY c.nome ASC
-    ";
+    ");
 
-    $stmt = $conn->prepare($sql);
     $stmt->execute([
         ':data_aula' => $data
     ]);
 
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+    $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($cavalos, JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {
     echo json_encode([

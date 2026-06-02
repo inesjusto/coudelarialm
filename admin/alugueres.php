@@ -18,22 +18,57 @@ function calcularDias($dataInicio, $dataFim = null) {
     return $inicio->diff($fim)->days + 1;
 }
 
+function formatarData($data) {
+    if (empty($data)) {
+        return '—';
+    }
+
+    return date('d/m/Y', strtotime($data));
+}
+
+function formatarValor($valor) {
+    return number_format((float)$valor, 2, ',', '.') . ' €';
+}
+
+function formatarEstado($estado) {
+    $estado = trim((string)$estado);
+
+    if ($estado === '') {
+        return '-';
+    }
+
+    return ucfirst(strtolower($estado));
+}
+
+/*
+    Clientes:
+    - Só clientes com estado cliente.
+    - Usa LOWER para funcionar mesmo se estiver Cliente, cliente ou CLIENTE.
+*/
 $stmtClientes = $conn->query("
     SELECT id, nome
     FROM clientes
-    WHERE TRIM(estado) = 'Cliente'
+    WHERE TRIM(LOWER(estado)) = 'cliente'
     ORDER BY nome ASC
 ");
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
+/*
+    Cavalos:
+    - Só cavalos realmente disponíveis para iniciar um aluguer.
+    - Não mostra vendidos, alugados, reservados, indisponíveis, etc.
+*/
 $stmtCavalos = $conn->query("
     SELECT id, nome
     FROM cavalos
-    WHERE TRIM(estado) = 'Disponível'
+    WHERE TRIM(LOWER(estado)) IN ('disponível', 'disponivel')
     ORDER BY nome ASC
 ");
 $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
+/*
+    Lista de alugueres.
+*/
 $stmtAlugueres = $conn->query("
     SELECT 
         a.id,
@@ -56,6 +91,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alugueres</title>
+
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
@@ -110,9 +146,9 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                             <?php if (empty($clientes)): ?>
                                 <option value="" disabled>Não existem clientes disponíveis</option>
                             <?php else: ?>
-                                <?php foreach ($clientes as $c): ?>
-                                    <option value="<?= htmlspecialchars($c['id']) ?>">
-                                        <?= htmlspecialchars($c['nome']) ?>
+                                <?php foreach ($clientes as $cliente): ?>
+                                    <option value="<?= htmlspecialchars($cliente['id']) ?>">
+                                        <?= htmlspecialchars($cliente['nome']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -127,9 +163,9 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                             <?php if (empty($cavalos)): ?>
                                 <option value="" disabled>Não existem cavalos disponíveis</option>
                             <?php else: ?>
-                                <?php foreach ($cavalos as $c): ?>
-                                    <option value="<?= htmlspecialchars($c['id']) ?>">
-                                        <?= htmlspecialchars($c['nome']) ?>
+                                <?php foreach ($cavalos as $cavalo): ?>
+                                    <option value="<?= htmlspecialchars($cavalo['id']) ?>">
+                                        <?= htmlspecialchars($cavalo['nome']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -159,7 +195,9 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                     <input type="hidden" name="estado" value="ativo">
 
                     <div class="acoes-formulario">
-                        <button class="btn-editar btn-form-principal" type="submit">Criar</button>
+                        <button class="btn-editar btn-form-principal" type="submit">
+                            Criar Aluguer
+                        </button>
                     </div>
 
                 </form>
@@ -190,34 +228,35 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                             <td colspan="10" class="mensagem-vazia">Sem alugueres</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($alugueres as $a): ?>
+                        <?php foreach ($alugueres as $aluguer): ?>
                             <?php
-                                $diasTotais = calcularDias($a['data_inicio'], $a['data_fim']);
-                                $totalPrevisto = $diasTotais * (float)$a['preco_diario'];
+                                $diasTotais = calcularDias($aluguer['data_inicio'], $aluguer['data_fim']);
+                                $totalPrevisto = $diasTotais * (float)$aluguer['preco_diario'];
+                                $estadoNormalizado = strtolower(trim($aluguer['estado']));
                             ?>
 
                             <tr>
-                                <td><?= htmlspecialchars($a['id']) ?></td>
-                                <td><?= htmlspecialchars($a['nome_cliente']) ?></td>
-                                <td><?= htmlspecialchars($a['nome_cavalo']) ?></td>
-                                <td><?= htmlspecialchars($a['data_inicio']) ?></td>
-                                <td><?= htmlspecialchars($a['data_fim'] ?? '—') ?></td>
-                                <td><?= number_format((float)$a['preco_diario'], 2, ',', '.') ?> €</td>
+                                <td><?= htmlspecialchars($aluguer['id']) ?></td>
+                                <td><?= htmlspecialchars($aluguer['nome_cliente']) ?></td>
+                                <td><?= htmlspecialchars($aluguer['nome_cavalo']) ?></td>
+                                <td><?= htmlspecialchars(formatarData($aluguer['data_inicio'])) ?></td>
+                                <td><?= htmlspecialchars(formatarData($aluguer['data_fim'])) ?></td>
+                                <td><?= htmlspecialchars(formatarValor($aluguer['preco_diario'])) ?></td>
                                 <td><?= htmlspecialchars($diasTotais) ?></td>
-                                <td><?= number_format($totalPrevisto, 2, ',', '.') ?> €</td>
-                                <td><?= ucfirst(htmlspecialchars($a['estado'])) ?></td>
+                                <td><?= htmlspecialchars(formatarValor($totalPrevisto)) ?></td>
+                                <td><?= htmlspecialchars(formatarEstado($aluguer['estado'])) ?></td>
 
                                 <td>
-                                    <?php if ($a['estado'] === 'ativo'): ?>
+                                    <?php if ($estadoNormalizado === 'ativo'): ?>
                                         <div class="acoes">
                                             <form method="POST" action="../backend/alterar-estado-aluguer.php">
-                                                <input type="hidden" name="id" value="<?= htmlspecialchars($a['id']) ?>">
+                                                <input type="hidden" name="id" value="<?= htmlspecialchars($aluguer['id']) ?>">
                                                 <input type="hidden" name="estado" value="concluido">
                                                 <button class="btn-editar" type="submit">Concluir</button>
                                             </form>
 
                                             <form method="POST" action="../backend/alterar-estado-aluguer.php">
-                                                <input type="hidden" name="id" value="<?= htmlspecialchars($a['id']) ?>">
+                                                <input type="hidden" name="id" value="<?= htmlspecialchars($aluguer['id']) ?>">
                                                 <input type="hidden" name="estado" value="cancelado">
                                                 <button class="btn-apagar" type="submit">Cancelar</button>
                                             </form>
@@ -272,6 +311,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return isNaN(numero) ? 0 : numero;
     }
 
+    function formatarEuros(valor) {
+        return `${Number(valor || 0)
+            .toFixed(2)
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
+    }
+
     function calcularDias(inicio, fim) {
         if (!inicio || !fim) return 0;
 
@@ -290,10 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const precoDiario = normalizarPreco(inputPrecoDiario.value);
         const total = dias * precoDiario;
 
-        inputTotalPrevisto.value = `${Number(total || 0)
-            .toFixed(2)
-            .replace('.', ',')
-            .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
+        inputTotalPrevisto.value = formatarEuros(total);
     }
 
     const fim = flatpickr("#data_fim", {

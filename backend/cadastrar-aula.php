@@ -1,25 +1,23 @@
 <?php
-require_once 'proteger.php';
-require_once 'conexao.php';
-require_once 'funcoes-formatacao.php';
+require_once __DIR__ . '/proteger.php';
+require_once __DIR__ . '/conexao.php';
+require_once __DIR__ . '/funcoes-formatacao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/aulas.php');
     exit;
 }
 
-$cliente_id = $_POST['cliente_id'] ?? null;
-$cavalo_id = $_POST['cavalo_id'] ?? null;
-$data_aula = trim($_POST['data_aula'] ?? '');
-$hora_inicio = trim($_POST['hora_inicio'] ?? '');
-$hora_fim = trim($_POST['hora_fim'] ?? '');
-$tipo_aula = trim($_POST['tipo_aula'] ?? '');
-$preco = normalizarValorMonetario($_POST['preco'] ?? '');
-$estado = $_POST['estado'] ?? 'marcada';
-$observacoes = trim($_POST['observacoes'] ?? '');
+$clienteId = isset($_POST['cliente_id']) && $_POST['cliente_id'] !== '' ? (int) $_POST['cliente_id'] : null;
+$cavaloId = isset($_POST['cavalo_id']) && $_POST['cavalo_id'] !== '' ? (int) $_POST['cavalo_id'] : null;
 
-$cliente_id = empty($cliente_id) ? null : (int)$cliente_id;
-$cavalo_id = empty($cavalo_id) ? null : (int)$cavalo_id;
+$dataAula = trim($_POST['data_aula'] ?? '');
+$horaInicio = trim($_POST['hora_inicio'] ?? '');
+$horaFim = trim($_POST['hora_fim'] ?? '');
+$tipoAula = trim($_POST['tipo_aula'] ?? '');
+$preco = normalizarValorMonetario($_POST['preco'] ?? '');
+$estado = trim($_POST['estado'] ?? 'marcada');
+$observacoes = trim($_POST['observacoes'] ?? '');
 
 $estadosPermitidos = ['marcada', 'realizada', 'cancelada'];
 
@@ -27,25 +25,34 @@ if (!in_array($estado, $estadosPermitidos, true)) {
     $estado = 'marcada';
 }
 
-if (
-    empty($data_aula) ||
-    empty($hora_inicio) ||
-    empty($hora_fim) ||
-    $preco < 0 ||
-    !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_aula)
-) {
-    die('Dados inválidos.');
+if ($dataAula === '' || $horaInicio === '' || $horaFim === '') {
+    die('Preencha todos os campos obrigatórios.');
 }
 
-if ($hora_fim <= $hora_inicio) {
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataAula)) {
+    die('Data da aula inválida.');
+}
+
+if ($horaFim <= $horaInicio) {
     die('A hora de fim tem de ser posterior à hora de início.');
 }
 
+if ($preco < 0) {
+    die('O preço não pode ser negativo.');
+}
+
 try {
-    if ($cliente_id !== null) {
-        $stmtCliente = $conn->prepare("\n            SELECT id\n            FROM clientes\n            WHERE id = :cliente_id\n              AND TRIM(LOWER(estado)) = 'cliente'\n            LIMIT 1\n        ");
+    if ($clienteId !== null) {
+        $stmtCliente = $conn->prepare("
+            SELECT id
+            FROM clientes
+            WHERE id = :id
+              AND TRIM(LOWER(estado)) = 'cliente'
+            LIMIT 1
+        ");
+
         $stmtCliente->execute([
-            ':cliente_id' => $cliente_id
+            ':id' => $clienteId
         ]);
 
         if (!$stmtCliente->fetch(PDO::FETCH_ASSOC)) {
@@ -53,33 +60,65 @@ try {
         }
     }
 
-    if ($cavalo_id !== null) {
-        $stmtCavalo = $conn->prepare("\n            SELECT id\n            FROM cavalos c\n            WHERE c.id = :cavalo_id\n              AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')\n              AND NOT EXISTS (\n                  SELECT 1\n                  FROM alugueres a\n                  WHERE a.cavalo_id = c.id\n                    AND a.estado = 'ativo'\n                    AND :data_aula BETWEEN a.data_inicio AND a.data_fim\n              )\n            LIMIT 1\n        ");
+    $stmtCavalo = $conn->prepare("
+    SELECT c.id
+    FROM cavalos c
+    WHERE c.id = :cavalo_id
+      AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel', 'alugado')
+      AND NOT EXISTS (
+          SELECT 1
+          FROM alugueres a
+          WHERE a.cavalo_id = c.id
+            AND TRIM(LOWER(a.estado)) IN ('ativo', 'concluido')
+            AND DATE(:data_aula) >= DATE(a.data_inicio)
+            AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
+      )
+    LIMIT 1
+");
 
         $stmtCavalo->execute([
-            ':cavalo_id' => $cavalo_id,
-            ':data_aula' => $data_aula
+            ':cavalo_id' => $cavaloId,
+            ':data_aula' => $dataAula
         ]);
 
         if (!$stmtCavalo->fetch(PDO::FETCH_ASSOC)) {
             die('Este cavalo não está disponível na data selecionada.');
         }
-    }
 
-    $sql = "\n        INSERT INTO aulas\n        (cliente_id, cavalo_id, data_aula, hora_inicio, hora_fim, tipo_aula, preco, estado, observacoes)\n        VALUES\n        (:cliente_id, :cavalo_id, :data_aula, :hora_inicio, :hora_fim, :tipo_aula, :preco, :estado, :observacoes)\n    ";
-
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare("
+        INSERT INTO aulas (
+            cliente_id,
+            cavalo_id,
+            data_aula,
+            hora_inicio,
+            hora_fim,
+            tipo_aula,
+            preco,
+            estado,
+            observacoes
+        ) VALUES (
+            :cliente_id,
+            :cavalo_id,
+            :data_aula,
+            :hora_inicio,
+            :hora_fim,
+            :tipo_aula,
+            :preco,
+            :estado,
+            :observacoes
+        )
+    ");
 
     $stmt->execute([
-        ':cliente_id' => $cliente_id,
-        ':cavalo_id' => $cavalo_id,
-        ':data_aula' => $data_aula,
-        ':hora_inicio' => $hora_inicio,
-        ':hora_fim' => $hora_fim,
-        ':tipo_aula' => $tipo_aula ?: null,
+        ':cliente_id' => $clienteId,
+        ':cavalo_id' => $cavaloId,
+        ':data_aula' => $dataAula,
+        ':hora_inicio' => $horaInicio,
+        ':hora_fim' => $horaFim,
+        ':tipo_aula' => $tipoAula !== '' ? $tipoAula : null,
         ':preco' => $preco,
         ':estado' => $estado,
-        ':observacoes' => $observacoes ?: null
+        ':observacoes' => $observacoes !== '' ? $observacoes : null
     ]);
 
     header('Location: ../admin/aulas.php?sucesso=aula_adicionada');

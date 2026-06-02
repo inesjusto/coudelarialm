@@ -1,6 +1,6 @@
 <?php
-require_once 'proteger.php';
-require_once 'conexao.php';
+require_once __DIR__ . '/proteger.php';
+require_once __DIR__ . '/conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../admin/fornecedores.php');
@@ -41,7 +41,9 @@ try {
         ':id' => $id
     ]);
 
-    if (!$stmtFornecedor->fetch(PDO::FETCH_ASSOC)) {
+    $fornecedor = $stmtFornecedor->fetch(PDO::FETCH_ASSOC);
+
+    if (!$fornecedor) {
         die('Fornecedor não encontrado.');
     }
 
