@@ -3,12 +3,7 @@ include __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
 require_once __DIR__ . '/../backend/funcoes-formatacao.php';
 
-/*
-    Clientes:
-    - Só aparecem clientes com estado Cliente
-    - Não repete nomes
-    - Mostra apenas o nome
-*/
+
 $stmtClientes = $conn->prepare("
     SELECT 
         MIN(id) AS id,
@@ -23,12 +18,6 @@ $stmtClientes = $conn->prepare("
 $stmtClientes->execute();
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
-/*
-    Cavalos:
-    - Só aparecem cavalos disponíveis
-    - Não aparecem cavalos já vendidos
-    - Mostra apenas o nome
-*/
 $stmtCavalos = $conn->prepare("
     SELECT id, nome, preco
     FROM cavalos
@@ -70,6 +59,7 @@ function mostrarErroVenda($erro) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Venda</title>
     <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
 </head>
 <body>
     <div class="admin-layout">

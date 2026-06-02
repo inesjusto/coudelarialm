@@ -104,6 +104,7 @@ $anoAtual = (int) date('Y');
     <title>Painel Administrativo</title>
     <link rel="stylesheet" href="assets/css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
 </head>
 <body>
     <div class="admin-layout">

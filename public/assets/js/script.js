@@ -157,11 +157,13 @@ function criarCardCavalo(cavalo, mostrarDescricao = true) {
   card.innerHTML = `
     <div class="horse-image">
       <img 
-        src="${imagem}" 
-        alt="${escapeHtml(cavalo.nome || "Cavalo")}"
-        loading="lazy"
-        decoding="async"
-        onerror="this.onerror=null;this.src='assets/img/cavalos/default.jpg';"
+  src="${imagem}" 
+  alt="${escapeHtml(cavalo.nome || "Cavalo")}"
+  loading="lazy"
+  decoding="async"
+  width="600"
+  height="400"
+  onerror="this.onerror=null;this.src='assets/img/cavalos/default.jpg';"
       >
     </div>
 
@@ -170,7 +172,7 @@ function criarCardCavalo(cavalo, mostrarDescricao = true) {
       <p><strong>Raça:</strong> ${escapeHtml(cavalo.raca || "Não definida")}</p>
       <p><strong>Sexo:</strong> ${escapeHtml(cavalo.sexo || "Não definido")}</p>
       <p><strong>Idade:</strong> ${escapeHtml(formatarIdade(cavalo.idade))}</p>
-      <p><strong>Preço:</strong> ${escapeHtml(formatarPreco(cavalo.preco))}</p>
+      <p><strong>Preço:</strong> ${escapeHtml(formatarPreco(cavalo.preco, cavalo.preco_formatado))}</p>
       ${
         mostrarDescricao
           ? `<p><strong>Descrição:</strong> ${escapeHtml(cavalo.descricao || "Sem descrição disponível.")}</p>`
@@ -193,7 +195,11 @@ function normalizarRespostaCavalos(data) {
   return [];
 }
 
-function formatarPreco(preco) {
+function formatarPreco(preco, precoFormatado = "") {
+  if (precoFormatado && String(precoFormatado).trim() !== "") {
+    return String(precoFormatado);
+  }
+
   if (preco === null || preco === undefined || preco === "") {
     return "Sob consulta";
   }
@@ -204,10 +210,10 @@ function formatarPreco(preco) {
     return String(preco);
   }
 
-  return valor.toLocaleString("pt-PT", {
-    style: "currency",
-    currency: "EUR"
-  });
+  return `${valor
+    .toFixed(2)
+    .replace(".", ",")
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} €`;
 }
 
 function formatarIdade(idade) {

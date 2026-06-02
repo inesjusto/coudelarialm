@@ -7,9 +7,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
 $nome = trim($_POST['nome'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
+$nif = trim($_POST['nif'] ?? '');
 $tipo_interesse = trim($_POST['tipo_interesse'] ?? 'compra');
 $estado = trim($_POST['estado'] ?? 'potencial');
 $interesse = trim($_POST['interesse'] ?? 'nao');
@@ -34,33 +36,78 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     die('Email inválido.');
 }
 
+if ($nif !== '' && !preg_match('/^[0-9]{9}$/', $nif)) {
+    die('O NIF deve ter 9 dígitos.');
+}
+
+$tiposPermitidos = ['compra', 'informacao', 'visita'];
+$estadosPermitidos = ['potencial', 'contactado', 'cliente'];
+
+if (!in_array($tipo_interesse, $tiposPermitidos, true)) {
+    $tipo_interesse = 'compra';
+}
+
+if (!in_array($estado, $estadosPermitidos, true)) {
+    $estado = 'potencial';
+}
+
 try {
     $conn->beginTransaction();
 
-    $sql = "UPDATE clientes
-            SET nome = :nome,
-                email = :email,
-                telefone = :telefone,
-                tipo_interesse = :tipo_interesse,
-                estado = :estado
-            WHERE id = :id";
+    $stmtExiste = $conn->prepare("
+        SELECT id 
+        FROM clientes 
+        WHERE id = :id 
+        LIMIT 1
+    ");
+    $stmtExiste->execute([
+        ':id' => $id
+    ]);
+
+    if (!$stmtExiste->fetch(PDO::FETCH_ASSOC)) {
+        $conn->rollBack();
+        die('Cliente não encontrado.');
+    }
+
+    $sql = "
+        UPDATE clientes
+        SET 
+            nome = :nome,
+            email = :email,
+            telefone = :telefone,
+            nif = :nif,
+            tipo_interesse = :tipo_interesse,
+            estado = :estado
+        WHERE id = :id
+    ";
 
     $stmt = $conn->prepare($sql);
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->bindValue(':nome', $nome);
     $stmt->bindValue(':email', $email);
     $stmt->bindValue(':telefone', $telefone !== '' ? $telefone : null);
+    $stmt->bindValue(':nif', $nif !== '' ? $nif : null);
     $stmt->bindValue(':tipo_interesse', $tipo_interesse);
     $stmt->bindValue(':estado', $estado);
     $stmt->execute();
 
-    $stmtApagar = $conn->prepare("DELETE FROM clientes_cavalos WHERE cliente_id = :cliente_id");
+    $stmtApagar = $conn->prepare("
+        DELETE FROM clientes_cavalos 
+        WHERE cliente_id = :cliente_id
+    ");
     $stmtApagar->bindValue(':cliente_id', $id, PDO::PARAM_INT);
     $stmtApagar->execute();
 
     if (!empty($cavalos)) {
-        $sqlCavalo = "INSERT INTO clientes_cavalos (cliente_id, cavalo_id)
-                      VALUES (:cliente_id, :cavalo_id)";
+        $sqlCavalo = "
+            INSERT INTO clientes_cavalos (
+                cliente_id, 
+                cavalo_id
+            ) VALUES (
+                :cliente_id, 
+                :cavalo_id
+            )
+        ";
 
         $stmtCavalo = $conn->prepare($sqlCavalo);
 
@@ -75,6 +122,7 @@ try {
 
     header('Location: ../admin/clientes.php');
     exit;
+
 } catch (PDOException $e) {
     if ($conn->inTransaction()) {
         $conn->rollBack();

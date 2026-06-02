@@ -40,6 +40,7 @@ $estadoAtual = $cliente['estado'] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Cliente</title>
     <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
 </head>
 <body>
     <div class="admin-layout">
@@ -84,17 +85,46 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                         <div class="campo">
                             <label for="nome">Nome</label>
-                            <input type="text" id="nome" name="nome" value="<?= htmlspecialchars($cliente['nome']) ?>" required>
+                            <input 
+                                type="text" 
+                                id="nome" 
+                                name="nome" 
+                                value="<?= htmlspecialchars($cliente['nome']) ?>" 
+                                required
+                            >
                         </div>
 
                         <div class="campo">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" value="<?= htmlspecialchars($cliente['email']) ?>" required>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                value="<?= htmlspecialchars($cliente['email']) ?>" 
+                                required
+                            >
                         </div>
 
                         <div class="campo">
                             <label for="telefone">Telefone</label>
-                            <input type="text" id="telefone" name="telefone" value="<?= htmlspecialchars($cliente['telefone'] ?? '') ?>">
+                            <input 
+                                type="text" 
+                                id="telefone" 
+                                name="telefone" 
+                                value="<?= htmlspecialchars($cliente['telefone'] ?? '') ?>"
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="nif">NIF</label>
+                            <input 
+                                type="text" 
+                                id="nif" 
+                                name="nif" 
+                                maxlength="20"
+                                placeholder="Ex.: 123456789"
+                                value="<?= htmlspecialchars($cliente['nif'] ?? '') ?>"
+                            >
                         </div>
 
                         <div class="campo">

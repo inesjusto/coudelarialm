@@ -635,14 +635,19 @@ small {
 }
 
 .horse-image {
+  width: 100%;
   height: 260px;
   overflow: hidden;
+  background: var(--sidebar);
+  position: relative;
 }
 
 .horse-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .horse-content {
@@ -684,6 +689,24 @@ small {
   background: var(--accent);
   border-color: var(--accent);
   color: #FFFFFF;
+}
+
+/* =========================
+   MENSAGEM CONTACTO
+========================= */
+.mensagem-contacto {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 22px;
+}
+
+.mensagem-contacto.sucesso {
+  color: #22c55e;
+}
+
+.mensagem-contacto.erro {
+  color: #ef4444;
 }
 
 /* =========================
@@ -1046,4 +1069,9 @@ small {
   .service-feature-image {
     height: 320px;
   }
+
+    .horse-image {
+    height: 240px;
+  }
+  
 }

@@ -12,6 +12,7 @@ $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Cliente</title>
     <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
 </head>
 <body>
     <div class="admin-layout">
@@ -66,6 +67,17 @@ $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="campo">
                             <label for="telefone">Telefone</label>
                             <input type="text" id="telefone" name="telefone">
+                        </div>
+
+                        <div class="campo">
+                            <label for="nif">NIF</label>
+                            <input 
+                                type="text" 
+                                id="nif" 
+                                name="nif" 
+                                maxlength="20" 
+                                placeholder="Ex.: 123456789"
+                            >
                         </div>
 
                         <div class="campo">

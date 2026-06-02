@@ -25,6 +25,7 @@ $stmt = $conn->prepare("
         cl.nome AS cliente_nome,
         cl.email AS cliente_email,
         cl.telefone AS cliente_telefone,
+        cl.nif AS cliente_nif,
 
         c.nome AS cavalo_nome,
         c.raca AS cavalo_raca,
@@ -85,6 +86,14 @@ function calcularIdade($dataNascimento) {
 $numeroFatura = 'VC-' . str_pad((string)$venda['id'], 5, '0', STR_PAD_LEFT);
 $dataAtual = date('d/m/Y');
 $idadeCavalo = calcularIdade($venda['cavalo_data_nascimento']);
+
+$nifCoudelaria = '512345678';
+$nifCliente = trim((string)($venda['cliente_nif'] ?? ''));
+
+$taxaIva = 0.23;
+$totalComIva = (float)$venda['valor'];
+$valorSemIva = $totalComIva / (1 + $taxaIva);
+$valorIva = $totalComIva - $valorSemIva;
 
 $options = new Options();
 $options->set('defaultFont', 'DejaVu Sans');
@@ -301,27 +310,28 @@ ob_start();
 
         <div class="subtitulo">
             Fatura de Venda de Cavalo<br>
-            Documento gerado pelo sistema administrativo em <?= htmlspecialchars($dataAtual) ?>
+            NIF da Coudelaria: <?= e($nifCoudelaria) ?><br>
+            Documento gerado pelo sistema administrativo no dia <?= e($dataAtual) ?>
         </div>
 
         <div class="titulo-fatura">
-            Fatura <?= htmlspecialchars($numeroFatura) ?>
+            Fatura <?= e($numeroFatura) ?>
         </div>
     </div>
 
     <table class="info-fatura">
         <tr>
             <td class="label">N.º Fatura</td>
-            <td><?= htmlspecialchars($numeroFatura) ?></td>
+            <td><?= e($numeroFatura) ?></td>
             <td class="label">Data de emissão</td>
-            <td><?= htmlspecialchars($dataAtual) ?></td>
+            <td><?= e($dataAtual) ?></td>
         </tr>
 
         <tr>
             <td class="label">Data da venda</td>
-            <td><?= htmlspecialchars(formatarData($venda['data_venda'])) ?></td>
+            <td><?= e(formatarData($venda['data_venda'])) ?></td>
             <td class="label">Método de pagamento</td>
-            <td><?= htmlspecialchars($venda['metodo_pagamento'] ?: '-') ?></td>
+            <td><?= e($venda['metodo_pagamento'] ?: '-') ?></td>
         </tr>
     </table>
 
@@ -334,17 +344,22 @@ ob_start();
                     <table class="tabela-dados">
                         <tr>
                             <td class="label">Nome</td>
-                            <td><?= htmlspecialchars($venda['cliente_nome']) ?></td>
+                            <td><?= e($venda['cliente_nome']) ?></td>
+                        </tr>
+
+                        <tr>
+                            <td class="label">NIF</td>
+                            <td><?= e($nifCliente !== '' ? $nifCliente : 'Consumidor final') ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Email</td>
-                            <td><?= htmlspecialchars($venda['cliente_email'] ?: '-') ?></td>
+                            <td><?= e($venda['cliente_email'] ?: '-') ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Telefone</td>
-                            <td><?= htmlspecialchars($venda['cliente_telefone'] ?: '-') ?></td>
+                            <td><?= e($venda['cliente_telefone'] ?: '-') ?></td>
                         </tr>
                     </table>
                 </div>
@@ -357,32 +372,32 @@ ob_start();
                     <table class="tabela-dados">
                         <tr>
                             <td class="label">Nome</td>
-                            <td><?= htmlspecialchars($venda['cavalo_nome']) ?></td>
+                            <td><?= e($venda['cavalo_nome']) ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Raça</td>
-                            <td><?= htmlspecialchars($venda['cavalo_raca'] ?: '-') ?></td>
+                            <td><?= e($venda['cavalo_raca'] ?: '-') ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Sexo</td>
-                            <td><?= htmlspecialchars($venda['cavalo_sexo'] ?: '-') ?></td>
+                            <td><?= e($venda['cavalo_sexo'] ?: '-') ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Idade</td>
-                            <td><?= htmlspecialchars($idadeCavalo) ?></td>
+                            <td><?= e($idadeCavalo) ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Pelagem</td>
-                            <td><?= htmlspecialchars($venda['cavalo_cor'] ?: '-') ?></td>
+                            <td><?= e($venda['cavalo_cor'] ?: '-') ?></td>
                         </tr>
 
                         <tr>
                             <td class="label">Altura</td>
-                            <td><?= htmlspecialchars($venda['cavalo_altura'] ?: '-') ?></td>
+                            <td><?= e($venda['cavalo_altura'] ?: '-') ?></td>
                         </tr>
                     </table>
                 </div>
@@ -400,18 +415,18 @@ ob_start();
 
         <tbody>
             <tr>
-                <td>Venda do cavalo <?= htmlspecialchars($venda['cavalo_nome']) ?></td>
-                <td><?= htmlspecialchars(formatarValor($venda['valor'])) ?></td>
+                <td>Venda do cavalo <?= e($venda['cavalo_nome']) ?> — valor sem IVA</td>
+                <td><?= e(formatarValor($valorSemIva)) ?></td>
             </tr>
 
             <tr>
-                <td>IVA</td>
-                <td>Incluído / Não aplicável</td>
+                <td>IVA 23%</td>
+                <td><?= e(formatarValor($valorIva)) ?></td>
             </tr>
 
             <tr class="linha-total">
-                <th>Total a pagar</th>
-                <th><?= htmlspecialchars(formatarValor($venda['valor'])) ?></th>
+                <th>Total com IVA</th>
+                <th><?= e(formatarValor($totalComIva)) ?></th>
             </tr>
         </tbody>
     </table>
@@ -420,11 +435,18 @@ ob_start();
         <h2>Declaração de Venda</h2>
 
         <p>
-            A Coudelaria Lima Monteiro declara que vendeu ao cliente 
-            <strong><?= htmlspecialchars($venda['cliente_nome']) ?></strong> 
-            o cavalo <strong><?= htmlspecialchars($venda['cavalo_nome']) ?></strong>, 
-            pelo valor total de <strong><?= htmlspecialchars(formatarValor($venda['valor'])) ?></strong>, 
-            na data de <strong><?= htmlspecialchars(formatarData($venda['data_venda'])) ?></strong>.
+            A Coudelaria Lima Monteiro, com o NIF 
+            <strong><?= e($nifCoudelaria) ?></strong>, declara que vendeu ao cliente 
+            <strong><?= e($venda['cliente_nome']) ?></strong>
+            <?php if ($nifCliente !== ''): ?>
+                , com o NIF <strong><?= e($nifCliente) ?></strong>,
+            <?php else: ?>
+                , identificado como <strong>Consumidor final</strong>,
+            <?php endif; ?>
+            o cavalo <strong><?= e($venda['cavalo_nome']) ?></strong>, 
+            pelo valor total de <strong><?= e(formatarValor($totalComIva)) ?></strong>, 
+            incluindo IVA à taxa de 23%, na data de 
+            <strong><?= e(formatarData($venda['data_venda'])) ?></strong>.
         </p>
 
         <p>
@@ -448,12 +470,27 @@ ob_start();
 
             <tr>
                 <td class="label">Forma de pagamento</td>
-                <td><?= htmlspecialchars($venda['metodo_pagamento'] ?: '-') ?></td>
+                <td><?= e($venda['metodo_pagamento'] ?: '-') ?></td>
+            </tr>
+
+            <tr>
+                <td class="label">Valor sem IVA</td>
+                <td><?= e(formatarValor($valorSemIva)) ?></td>
+            </tr>
+
+            <tr>
+                <td class="label">IVA aplicado</td>
+                <td>23% — <?= e(formatarValor($valorIva)) ?></td>
+            </tr>
+
+            <tr>
+                <td class="label">Total com IVA</td>
+                <td><?= e(formatarValor($totalComIva)) ?></td>
             </tr>
 
             <tr>
                 <td class="label">Data de registo no sistema</td>
-                <td><?= htmlspecialchars(formatarData($venda['data_criacao'])) ?></td>
+                <td><?= e(formatarData($venda['data_criacao'])) ?></td>
             </tr>
         </table>
     </div>
@@ -461,7 +498,7 @@ ob_start();
     <?php if (!empty($venda['observacoes'])): ?>
         <div class="bloco">
             <h2>Observações</h2>
-            <div class="observacoes"><?= nl2br(htmlspecialchars($venda['observacoes'])) ?></div>
+            <div class="observacoes"><?= nl2br(e($venda['observacoes'])) ?></div>
         </div>
     <?php endif; ?>
 

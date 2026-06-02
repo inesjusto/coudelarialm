@@ -9,7 +9,7 @@ include __DIR__ . '/../backend/proteger.php';
     <title>Aulas</title>
 
     <link rel="stylesheet" href="assets/css/admin.css">
-
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 </head>
