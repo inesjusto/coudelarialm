@@ -3,15 +3,16 @@ require_once 'proteger.php';
 require_once 'conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Método inválido.');
+    header('Location: ../admin/adicionar-cliente.php');
+    exit;
 }
 
 $nome = trim($_POST['nome'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
 $nif = trim($_POST['nif'] ?? '');
-$tipo_interesse = trim($_POST['tipo_interesse'] ?? 'compra');
-$estado = trim($_POST['estado'] ?? 'potencial');
+$tipo_interesse = trim($_POST['tipo_interesse'] ?? '');
+$estado = trim($_POST['estado'] ?? '');
 $interesse = trim($_POST['interesse'] ?? 'nao');
 
 $cavalos = [];
@@ -22,27 +23,32 @@ if ($interesse === 'sim' && !empty($_POST['cavalos']) && is_array($_POST['cavalo
     $cavalos = array_unique($cavalos);
 }
 
-if ($nome === '' || $email === '') {
-    die('Preencha os campos obrigatórios.');
+if ($nome === '' || $email === '' || $tipo_interesse === '' || $estado === '') {
+    header('Location: ../admin/adicionar-cliente.php?erro=campos');
+    exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    die('Email inválido.');
+    header('Location: ../admin/adicionar-cliente.php?erro=email');
+    exit;
 }
 
 if ($nif !== '' && !preg_match('/^[0-9]{9}$/', $nif)) {
-    die('O NIF deve ter 9 dígitos.');
+    header('Location: ../admin/adicionar-cliente.php?erro=nif');
+    exit;
 }
 
 $tiposPermitidos = ['compra', 'informacao', 'visita'];
 $estadosPermitidos = ['potencial', 'contactado', 'cliente'];
 
 if (!in_array($tipo_interesse, $tiposPermitidos, true)) {
-    $tipo_interesse = 'compra';
+    header('Location: ../admin/adicionar-cliente.php?erro=tipo');
+    exit;
 }
 
 if (!in_array($estado, $estadosPermitidos, true)) {
-    $estado = 'potencial';
+    header('Location: ../admin/adicionar-cliente.php?erro=estado');
+    exit;
 }
 
 try {
@@ -99,7 +105,7 @@ try {
 
     $conn->commit();
 
-    header('Location: ../admin/clientes.php');
+    header('Location: ../admin/clientes.php?sucesso=cliente_adicionado');
     exit;
 
 } catch (PDOException $e) {
@@ -107,6 +113,7 @@ try {
         $conn->rollBack();
     }
 
-    die('Erro ao guardar cliente: ' . $e->getMessage());
+    header('Location: ../admin/adicionar-cliente.php?erro=guardar');
+    exit;
 }
 ?>

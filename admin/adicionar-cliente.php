@@ -4,6 +4,27 @@ require_once __DIR__ . '/../backend/conexao.php';
 
 $stmt = $conn->query("SELECT id, nome FROM cavalos ORDER BY nome ASC");
 $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$erro = $_GET['erro'] ?? '';
+
+function mensagemErroCliente($erro) {
+    switch ($erro) {
+        case 'campos':
+            return 'Preencha todos os campos obrigatórios.';
+        case 'email':
+            return 'Indique um email válido.';
+        case 'nif':
+            return 'O NIF deve conter exatamente 9 dígitos numéricos.';
+        case 'tipo':
+            return 'O tipo de interesse selecionado não é válido.';
+        case 'estado':
+            return 'O estado selecionado não é válido.';
+        case 'guardar':
+            return 'Ocorreu um erro ao guardar o cliente. Tente novamente.';
+        default:
+            return '';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -75,9 +96,11 @@ $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 type="text" 
                                 id="nif" 
                                 name="nif" 
-                                maxlength="20" 
+                                maxlength="9" 
+                                pattern="[0-9]{9}"
+                                inputmode="numeric"
                                 placeholder="Ex.: 123456789"
-                            >
+                                >
                         </div>
 
                         <div class="campo">
@@ -127,6 +150,14 @@ $cavalos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <button type="submit" class="btn-editar btn-form-principal">Guardar Cliente</button>
                             <a href="clientes.php" class="btn-cancelar">Cancelar</a>
                         </div>
+
+                        <?php if (mensagemErroCliente($erro) !== ''): ?>
+                            <p id="mensagem-formulario" class="mensagem-formulario mensagem-erro">
+                                <?= htmlspecialchars(mensagemErroCliente($erro)) ?>
+                            </p>
+                        <?php else: ?>
+                            <p id="mensagem-formulario" class="mensagem-formulario"></p>
+                        <?php endif; ?>
 
                     </form>
                 </div>

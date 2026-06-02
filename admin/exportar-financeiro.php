@@ -54,7 +54,7 @@ try {
     $stmtReceitaAulas = $conn->prepare("
         SELECT COALESCE(SUM(preco), 0) AS total
         FROM aulas
-        WHERE estado = 'realizada'
+        WHERE TRIM(LOWER(estado)) = 'realizada'
           AND data_aula BETWEEN :data_inicio AND :data_fim
     ");
 
@@ -67,31 +67,38 @@ try {
 
     $stmtReceitaAlugueres = $conn->prepare("
         SELECT COALESCE(SUM(
-            (
-                DATEDIFF(
-                    LEAST(
-                        CASE
-                            WHEN estado = 'ativo' THEN CURDATE()
-                            ELSE data_fim
-                        END,
-                        :data_fim_1
-                    ),
-                    GREATEST(data_inicio, :data_inicio_1)
-                ) + 1
-            ) * preco_diario
+            CASE
+                WHEN fim_calculo < inicio_calculo THEN 0
+                ELSE (
+                    (
+                        DATEDIFF(fim_calculo, inicio_calculo) + 1
+                        + CASE 
+                            WHEN fim_calculo > inicio_calculo THEN 1
+                            ELSE 0
+                          END
+                    ) * preco_diario
+                )
+            END
         ), 0) AS total
-        FROM alugueres
-        WHERE estado IN ('ativo', 'concluido')
-          AND data_inicio IS NOT NULL
-          AND (
-              estado = 'ativo'
-              OR data_fim IS NOT NULL
-          )
-          AND data_inicio <= :data_fim_2
-          AND CASE
-                WHEN estado = 'ativo' THEN CURDATE()
-                ELSE data_fim
-              END >= :data_inicio_2
+        FROM (
+            SELECT
+                preco_diario,
+                GREATEST(data_inicio, :data_inicio_1) AS inicio_calculo,
+                LEAST(
+                    CASE
+                        WHEN TRIM(LOWER(estado)) = 'ativo' THEN CURDATE()
+                        ELSE data_fim
+                    END,
+                    :data_fim_1
+                ) AS fim_calculo
+            FROM alugueres
+            WHERE TRIM(LOWER(estado)) IN ('ativo', 'concluido')
+              AND data_inicio IS NOT NULL
+              AND data_fim IS NOT NULL
+              AND data_inicio <= CURDATE()
+              AND data_inicio <= :data_fim_2
+              AND data_fim >= :data_inicio_2
+        ) AS calculo_alugueres
     ");
 
     $stmtReceitaAlugueres->execute([
@@ -119,7 +126,7 @@ try {
     $stmtDespesasTotal = $conn->prepare("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
           AND data_despesa BETWEEN :data_inicio AND :data_fim
     ");
 
@@ -135,7 +142,7 @@ try {
             categoria,
             COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
           AND data_despesa BETWEEN :data_inicio AND :data_fim
         GROUP BY categoria
         ORDER BY total DESC
@@ -154,7 +161,7 @@ try {
             COALESCE(SUM(d.valor), 0) AS total
         FROM despesas d
         INNER JOIN cavalos c ON d.cavalo_id = c.id
-        WHERE d.estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(d.estado_pagamento)) != 'cancelado'
           AND d.data_despesa BETWEEN :data_inicio AND :data_fim
         GROUP BY c.id, c.nome
         ORDER BY total DESC
@@ -211,7 +218,7 @@ try {
         }
 
         .cards {
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         .card {
@@ -249,15 +256,32 @@ try {
         h2 {
             border-left: 5px solid #22c55e;
             padding-left: 10px;
-            margin-top: 30px;
+            margin-top: 24px;
+            margin-bottom: 10px;
             font-size: 20px;
             color: #111827;
+            page-break-after: avoid;
+        }
+
+        .secao-pdf {
+            page-break-inside: avoid;
+            margin-top: 18px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 12px;
+            page-break-inside: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
 
         th {
@@ -281,10 +305,12 @@ try {
         }
 
         .rodape {
-            margin-top: 40px;
+            margin-top: 36px;
             text-align: center;
             color: #6b7280;
             font-size: 11px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 12px;
         }
     </style>
 </head>
@@ -319,108 +345,114 @@ try {
         </div>
     </div>
 
-    <h2>Resumo das Receitas</h2>
+    <div class="secao-pdf">
+        <h2>Resumo das Receitas</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Origem</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr>
-                <td>Aulas realizadas</td>
-                <td><?= number_format((float) $receitaAulas, 2, ',', '.') ?> €</td>
-            </tr>
-
-            <tr>
-                <td>Alugueres do período</td>
-                <td><?= number_format((float) $receitaAlugueres, 2, ',', '.') ?> €</td>
-            </tr>
-
-            <tr>
-                <td>Vendas de cavalos</td>
-                <td><?= number_format((float) $receitaVendas, 2, ',', '.') ?> €</td>
-            </tr>
-
-            <tr class="linha-total">
-                <th>Total das Receitas</th>
-                <th><?= number_format($receitaTotal, 2, ',', '.') ?> €</th>
-            </tr>
-        </tbody>
-    </table>
-
-    <h2>Despesas por Categoria</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Categoria</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <?php if (empty($categorias)): ?>
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="2">Sem despesas registadas neste período.</td>
+                    <th>Origem</th>
+                    <th>Total</th>
                 </tr>
-                <tr class="linha-total">
-                    <th>Total das Despesas</th>
-                    <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
-                </tr>
-            <?php else: ?>
-                <?php foreach ($categorias as $categoria): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($categoria['categoria']) ?></td>
-                        <td><?= number_format((float) $categoria['total'], 2, ',', '.') ?> €</td>
-                    </tr>
-                <?php endforeach; ?>
+            </thead>
 
-                <tr class="linha-total">
-                    <th>Total das Despesas</th>
-                    <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-
-    <h2>Custos por Cavalo</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Cavalo</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <?php if (empty($custosCavalos)): ?>
+            <tbody>
                 <tr>
-                    <td colspan="2">Sem custos associados a cavalos neste período.</td>
+                    <td>Aulas realizadas</td>
+                    <td><?= number_format((float) $receitaAulas, 2, ',', '.') ?> €</td>
                 </tr>
-                <tr class="linha-total">
-                    <th>Total dos Custos por Cavalo</th>
-                    <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
+
+                <tr>
+                    <td>Alugueres de cavalos</td>
+                    <td><?= number_format((float) $receitaAlugueres, 2, ',', '.') ?> €</td>
                 </tr>
-            <?php else: ?>
-                <?php foreach ($custosCavalos as $cavalo): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($cavalo['nome']) ?></td>
-                        <td><?= number_format((float) $cavalo['total'], 2, ',', '.') ?> €</td>
-                    </tr>
-                <?php endforeach; ?>
+
+                <tr>
+                    <td>Vendas de cavalos</td>
+                    <td><?= number_format((float) $receitaVendas, 2, ',', '.') ?> €</td>
+                </tr>
 
                 <tr class="linha-total">
-                    <th>Total dos Custos por Cavalo</th>
-                    <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
+                    <th>Total das Receitas</th>
+                    <th><?= number_format($receitaTotal, 2, ',', '.') ?> €</th>
                 </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="secao-pdf">
+        <h2>Despesas por Categoria</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php if (empty($categorias)): ?>
+                    <tr>
+                        <td colspan="2">Sem despesas registadas neste período.</td>
+                    </tr>
+                    <tr class="linha-total">
+                        <th>Total das Despesas</th>
+                        <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($categorias as $categoria): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($categoria['categoria']) ?></td>
+                            <td><?= number_format((float) $categoria['total'], 2, ',', '.') ?> €</td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <tr class="linha-total">
+                        <th>Total das Despesas</th>
+                        <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="secao-pdf">
+        <h2>Custos por Cavalo</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Cavalo</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php if (empty($custosCavalos)): ?>
+                    <tr>
+                        <td colspan="2">Sem custos associados a cavalos neste período.</td>
+                    </tr>
+                    <tr class="linha-total">
+                        <th>Total dos Custos por Cavalo</th>
+                        <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($custosCavalos as $cavalo): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($cavalo['nome']) ?></td>
+                            <td><?= number_format((float) $cavalo['total'], 2, ',', '.') ?> €</td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <tr class="linha-total">
+                        <th>Total dos Custos por Cavalo</th>
+                        <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 
     <div class="rodape">
         Documento gerado automaticamente pelo sistema da Coudelaria Lima Monteiro.

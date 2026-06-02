@@ -10,32 +10,52 @@ try {
     $sqlReceitaAulas = "
         SELECT COALESCE(SUM(preco), 0) AS total
         FROM aulas
-        WHERE estado = 'realizada'
+        WHERE TRIM(LOWER(estado)) = 'realizada'
     ";
 
     $receitaAulas = $conn->query($sqlReceitaAulas)->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // RECEITA DE ALUGUERES ATÉ HOJE
+    /*
+        RECEITA DE ALUGUERES ATÉ HOJE
+
+        Regras:
+        - reservado/futuro não conta.
+        - cancelado não conta.
+        - ativo conta só até hoje.
+        - concluido conta até data_fim.
+        - nunca calcula valores negativos.
+        - usa a regra dos alugueres:
+          10/06 até 20/06 = 12 dias.
+    */
     $sqlReceitaAlugueres = "
         SELECT COALESCE(SUM(
-            (
-                DATEDIFF(
-                    CASE
-                        WHEN estado = 'ativo' THEN CURDATE()
-                        ELSE data_fim
-                    END,
-                    data_inicio
-                ) + 1
-            ) * preco_diario
+            CASE
+                WHEN fim_calculo < inicio_calculo THEN 0
+                ELSE (
+                    (
+                        DATEDIFF(fim_calculo, inicio_calculo) + 1
+                        + CASE 
+                            WHEN fim_calculo > inicio_calculo THEN 1
+                            ELSE 0
+                          END
+                    ) * preco_diario
+                )
+            END
         ), 0) AS total
-        FROM alugueres
-        WHERE estado IN ('ativo', 'concluido')
-          AND data_inicio IS NOT NULL
-          AND (
-              estado = 'ativo'
-              OR data_fim IS NOT NULL
-          )
-          AND data_inicio <= CURDATE()
+        FROM (
+            SELECT
+                preco_diario,
+                data_inicio AS inicio_calculo,
+                CASE
+                    WHEN TRIM(LOWER(estado)) = 'ativo' THEN CURDATE()
+                    ELSE data_fim
+                END AS fim_calculo
+            FROM alugueres
+            WHERE TRIM(LOWER(estado)) IN ('ativo', 'concluido')
+              AND data_inicio IS NOT NULL
+              AND data_fim IS NOT NULL
+              AND data_inicio <= CURDATE()
+        ) AS calculo_alugueres
     ";
 
     $receitaAlugueres = $conn->query($sqlReceitaAlugueres)->fetch(PDO::FETCH_ASSOC)['total'];
@@ -60,7 +80,7 @@ try {
     $sqlDespesasTotal = "
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
     ";
 
     $despesasTotal = $conn->query($sqlDespesasTotal)->fetch(PDO::FETCH_ASSOC)['total'];
@@ -69,7 +89,7 @@ try {
     $sqlDespesasMes = "
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
           AND MONTH(data_despesa) = MONTH(CURDATE())
           AND YEAR(data_despesa) = YEAR(CURDATE())
     ";
@@ -80,7 +100,7 @@ try {
     $sqlDespesasAno = "
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
           AND YEAR(data_despesa) = YEAR(CURDATE())
     ";
 
@@ -90,7 +110,7 @@ try {
     $sqlPendentes = "
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento = 'pendente'
+        WHERE TRIM(LOWER(estado_pagamento)) = 'pendente'
     ";
 
     $despesasPendentes = $conn->query($sqlPendentes)->fetch(PDO::FETCH_ASSOC)['total'];
@@ -101,7 +121,7 @@ try {
             categoria,
             COALESCE(SUM(valor), 0) AS total
         FROM despesas
-        WHERE estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(estado_pagamento)) != 'cancelado'
         GROUP BY categoria
         ORDER BY total DESC
     ";
@@ -115,7 +135,7 @@ try {
             COALESCE(SUM(d.valor), 0) AS total
         FROM despesas d
         INNER JOIN cavalos c ON d.cavalo_id = c.id
-        WHERE d.estado_pagamento != 'cancelado'
+        WHERE TRIM(LOWER(d.estado_pagamento)) != 'cancelado'
         GROUP BY d.cavalo_id, c.nome
         ORDER BY total DESC
     ";

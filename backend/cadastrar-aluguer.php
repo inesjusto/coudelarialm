@@ -2,91 +2,165 @@
 require_once 'proteger.php';
 require_once 'conexao.php';
 require_once 'funcoes-formatacao.php';
+require_once 'atualizar-alugueres.php';
+
+function redirecionarErro($erro) {
+    header('Location: ../admin/alugueres.php?erro=' . urlencode($erro));
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Método inválido.');
+    redirecionarErro('metodo');
 }
 
 $cliente_id = isset($_POST['cliente_id']) ? (int) $_POST['cliente_id'] : 0;
 $cavalo_id = isset($_POST['cavalo_id']) ? (int) $_POST['cavalo_id'] : 0;
+
 $data_inicio = trim($_POST['data_inicio'] ?? '');
 $data_fim = trim($_POST['data_fim'] ?? '');
-$preco_diario = normalizarValorMonetario($_POST['preco_diario'] ?? $_POST['preco'] ?? '0');
-$estado = trim($_POST['estado'] ?? 'ativo');
 
-if ($cliente_id <= 0 || $cavalo_id <= 0 || $data_inicio === '') {
-    die('Preencha os campos obrigatórios.');
+$preco_diario = normalizarValorMonetario($_POST['preco_diario'] ?? $_POST['preco'] ?? '0');
+
+if ($cliente_id <= 0 || $cavalo_id <= 0 || $data_inicio === '' || $data_fim === '') {
+    redirecionarErro('campos');
 }
 
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_inicio)) {
-    die('Data de início inválida.');
+    redirecionarErro('data_inicio');
 }
 
-if ($data_fim !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_fim)) {
-    die('Data de fim inválida.');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_fim)) {
+    redirecionarErro('data_fim');
 }
 
-if ($data_fim !== '' && strtotime($data_fim) < strtotime($data_inicio)) {
-    die('A data de fim não pode ser anterior à data de início.');
+if (strtotime($data_fim) < strtotime($data_inicio)) {
+    redirecionarErro('datas');
 }
 
 if ($preco_diario <= 0) {
-    die('O preço diário deve ser superior a 0.');
+    redirecionarErro('preco');
 }
 
-$estadosPermitidos = ['ativo', 'concluido', 'cancelado'];
+/*
+    Estado automático:
+    - Se hoje está dentro do período: ativo
+    - Se começa no futuro: reservado
+    - Se já terminou: concluido
+*/
+$hoje = date('Y-m-d');
 
-if (!in_array($estado, $estadosPermitidos, true)) {
+if ($data_inicio <= $hoje && $data_fim >= $hoje) {
     $estado = 'ativo';
+} elseif ($data_inicio > $hoje) {
+    $estado = 'reservado';
+} else {
+    $estado = 'concluido';
 }
 
 try {
     $conn->beginTransaction();
 
-    $stmtClienteValido = $conn->prepare("\n        SELECT id\n        FROM clientes\n        WHERE id = :cliente_id\n          AND TRIM(LOWER(estado)) = 'cliente'\n        LIMIT 1\n    ");
+    $stmtClienteValido = $conn->prepare("
+        SELECT id
+        FROM clientes
+        WHERE id = :cliente_id
+          AND TRIM(LOWER(estado)) = 'cliente'
+        LIMIT 1
+    ");
+
     $stmtClienteValido->execute([
         ':cliente_id' => $cliente_id
     ]);
 
     if (!$stmtClienteValido->fetch(PDO::FETCH_ASSOC)) {
         $conn->rollBack();
-        die('Só é possível criar alugueres para clientes com estado Cliente.');
+        redirecionarErro('cliente');
     }
 
-    $stmtCavaloValido = $conn->prepare("\n        SELECT id\n        FROM cavalos\n        WHERE id = :cavalo_id\n          AND TRIM(LOWER(estado)) IN ('disponível', 'disponivel')\n        LIMIT 1\n        FOR UPDATE\n    ");
+    $stmtCavaloValido = $conn->prepare("
+        SELECT id
+        FROM cavalos
+        WHERE id = :cavalo_id
+          AND TRIM(LOWER(estado)) IN ('disponível', 'disponivel')
+        LIMIT 1
+        FOR UPDATE
+    ");
+
     $stmtCavaloValido->execute([
         ':cavalo_id' => $cavalo_id
     ]);
 
     if (!$stmtCavaloValido->fetch(PDO::FETCH_ASSOC)) {
         $conn->rollBack();
-        die('Só é possível alugar cavalos com estado Disponível.');
+        redirecionarErro('cavalo');
     }
 
-    $stmtVerificar = $conn->prepare("\n        SELECT id \n        FROM alugueres \n        WHERE cavalo_id = :cavalo_id \n          AND estado = 'ativo'\n        LIMIT 1\n    ");
-    $stmtVerificar->execute([
-        ':cavalo_id' => $cavalo_id
+    /*
+        Bloqueia alugueres sobrepostos:
+        Se já existir um aluguer ativo ou reservado do mesmo cavalo
+        dentro do mesmo intervalo de datas, não deixa criar.
+    */
+    $stmtVerificarSobreposicao = $conn->prepare("
+        SELECT id
+        FROM alugueres
+        WHERE cavalo_id = :cavalo_id
+          AND TRIM(LOWER(estado)) IN ('ativo', 'reservado')
+          AND data_inicio <= :data_fim
+          AND COALESCE(data_fim, '9999-12-31') >= :data_inicio
+        LIMIT 1
+    ");
+
+    $stmtVerificarSobreposicao->execute([
+        ':cavalo_id' => $cavalo_id,
+        ':data_inicio' => $data_inicio,
+        ':data_fim' => $data_fim
     ]);
 
-    if ($stmtVerificar->fetch(PDO::FETCH_ASSOC)) {
+    if ($stmtVerificarSobreposicao->fetch(PDO::FETCH_ASSOC)) {
         $conn->rollBack();
-        die('Este cavalo já tem um aluguer ativo.');
+        redirecionarErro('sobreposicao');
     }
 
-    $sql = "\n        INSERT INTO alugueres \n        (cliente_id, cavalo_id, data_inicio, data_fim, preco_diario, estado)\n        VALUES \n        (:cliente_id, :cavalo_id, :data_inicio, :data_fim, :preco_diario, :estado)\n    ";
+    $sql = "
+        INSERT INTO alugueres (
+            cliente_id,
+            cavalo_id,
+            data_inicio,
+            data_fim,
+            preco_diario,
+            estado
+        ) VALUES (
+            :cliente_id,
+            :cavalo_id,
+            :data_inicio,
+            :data_fim,
+            :preco_diario,
+            :estado
+        )
+    ";
 
     $stmt = $conn->prepare($sql);
+
     $stmt->execute([
         ':cliente_id' => $cliente_id,
         ':cavalo_id' => $cavalo_id,
         ':data_inicio' => $data_inicio,
-        ':data_fim' => $data_fim !== '' ? $data_fim : null,
+        ':data_fim' => $data_fim,
         ':preco_diario' => $preco_diario,
         ':estado' => $estado
     ]);
 
+    /*
+        Só muda o cavalo para Alugado se o aluguer estiver ativo hoje.
+        Aluguer futuro fica reservado, mas o cavalo continua Disponível.
+    */
     if ($estado === 'ativo') {
-        $stmtAtualizarCavalo = $conn->prepare("\n            UPDATE cavalos\n            SET estado = 'Alugado'\n            WHERE id = :cavalo_id\n        ");
+        $stmtAtualizarCavalo = $conn->prepare("
+            UPDATE cavalos
+            SET estado = 'Alugado'
+            WHERE id = :cavalo_id
+        ");
+
         $stmtAtualizarCavalo->execute([
             ':cavalo_id' => $cavalo_id
         ]);
@@ -94,7 +168,7 @@ try {
 
     $conn->commit();
 
-    header('Location: ../admin/alugueres.php');
+    header('Location: ../admin/alugueres.php?sucesso=criado');
     exit;
 
 } catch (PDOException $e) {
@@ -102,6 +176,6 @@ try {
         $conn->rollBack();
     }
 
-    die('Erro ao criar aluguer: ' . $e->getMessage());
+    redirecionarErro('guardar');
 }
 ?>

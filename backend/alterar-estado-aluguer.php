@@ -1,6 +1,7 @@
 <?php
 require_once 'proteger.php';
 require_once 'conexao.php';
+require_once 'atualizar-alugueres.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die('Método inválido.');
@@ -9,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 $estado = trim($_POST['estado'] ?? '');
 
-$estadosPermitidos = ['ativo', 'concluido', 'cancelado'];
+$estadosPermitidos = ['ativo', 'reservado', 'concluido', 'cancelado'];
 
 if ($id <= 0) {
     die('ID de aluguer inválido.');
@@ -20,11 +21,19 @@ if (!in_array($estado, $estadosPermitidos, true)) {
 }
 
 try {
+    $conn->beginTransaction();
+
     $stmtBuscar = $conn->prepare("
-        SELECT cavalo_id
+        SELECT 
+            id,
+            cavalo_id,
+            data_inicio,
+            data_fim,
+            estado
         FROM alugueres
         WHERE id = :id
         LIMIT 1
+        FOR UPDATE
     ");
 
     $stmtBuscar->execute([
@@ -34,11 +43,17 @@ try {
     $aluguer = $stmtBuscar->fetch(PDO::FETCH_ASSOC);
 
     if (!$aluguer) {
+        $conn->rollBack();
         die('Aluguer não encontrado.');
     }
 
     $cavalo_id = (int) $aluguer['cavalo_id'];
 
+    /*
+        Se o aluguer for concluído manualmente:
+        - estado passa para concluido
+        - data_fim passa para hoje
+    */
     if ($estado === 'concluido') {
         $stmtAtualizarAluguer = $conn->prepare("
             UPDATE alugueres
@@ -64,11 +79,23 @@ try {
         ]);
     }
 
+    /*
+        Se for ativado manualmente, o cavalo passa para Alugado.
+        Normalmente isto será feito automaticamente pelo atualizar-alugueres.php.
+    */
     if ($estado === 'ativo') {
         $stmtAtualizarCavalo = $conn->prepare("
             UPDATE cavalos
             SET estado = 'Alugado'
             WHERE id = :cavalo_id
+              AND TRIM(LOWER(estado)) NOT IN (
+                  'vendido',
+                  'reservado',
+                  'indisponível',
+                  'indisponivel',
+                  'em tratamento',
+                  'reformado'
+              )
         ");
 
         $stmtAtualizarCavalo->execute([
@@ -76,26 +103,34 @@ try {
         ]);
     }
 
+    /*
+        Se for concluído ou cancelado:
+        - só volta o cavalo para Disponível se não existir outro aluguer ativo hoje.
+        - alugueres reservados futuros não devem deixar o cavalo como Alugado.
+    */
     if ($estado === 'concluido' || $estado === 'cancelado') {
-        $stmtVerificar = $conn->prepare("
+        $stmtVerificarAtivoHoje = $conn->prepare("
             SELECT id
             FROM alugueres
             WHERE cavalo_id = :cavalo_id
-              AND estado = 'ativo'
               AND id != :id
+              AND TRIM(LOWER(estado)) = 'ativo'
+              AND data_inicio <= CURDATE()
+              AND data_fim >= CURDATE()
             LIMIT 1
         ");
 
-        $stmtVerificar->execute([
+        $stmtVerificarAtivoHoje->execute([
             ':cavalo_id' => $cavalo_id,
             ':id' => $id
         ]);
 
-        if (!$stmtVerificar->fetch()) {
+        if (!$stmtVerificarAtivoHoje->fetch(PDO::FETCH_ASSOC)) {
             $stmtAtualizarCavalo = $conn->prepare("
                 UPDATE cavalos
                 SET estado = 'Disponível'
                 WHERE id = :cavalo_id
+                  AND TRIM(LOWER(estado)) = 'alugado'
             ");
 
             $stmtAtualizarCavalo->execute([
@@ -104,10 +139,52 @@ try {
         }
     }
 
+    /*
+        Se ficar reservado:
+        - o cavalo não deve ficar Alugado.
+        - se não houver aluguer ativo hoje, volta a Disponível.
+    */
+    if ($estado === 'reservado') {
+        $stmtVerificarAtivoHoje = $conn->prepare("
+            SELECT id
+            FROM alugueres
+            WHERE cavalo_id = :cavalo_id
+              AND id != :id
+              AND TRIM(LOWER(estado)) = 'ativo'
+              AND data_inicio <= CURDATE()
+              AND data_fim >= CURDATE()
+            LIMIT 1
+        ");
+
+        $stmtVerificarAtivoHoje->execute([
+            ':cavalo_id' => $cavalo_id,
+            ':id' => $id
+        ]);
+
+        if (!$stmtVerificarAtivoHoje->fetch(PDO::FETCH_ASSOC)) {
+            $stmtAtualizarCavalo = $conn->prepare("
+                UPDATE cavalos
+                SET estado = 'Disponível'
+                WHERE id = :cavalo_id
+                  AND TRIM(LOWER(estado)) = 'alugado'
+            ");
+
+            $stmtAtualizarCavalo->execute([
+                ':cavalo_id' => $cavalo_id
+            ]);
+        }
+    }
+
+    $conn->commit();
+
     header('Location: ../admin/alugueres.php');
     exit;
 
 } catch (PDOException $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+
     die('Erro ao alterar estado do aluguer: ' . $e->getMessage());
 }
 ?>

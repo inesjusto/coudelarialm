@@ -3,7 +3,7 @@ require_once __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
 require_once __DIR__ . '/../backend/atualizar-alugueres.php';
 
-function calcularDias($dataInicio, $dataFim = null) {
+function calcularDiasAluguer($dataInicio, $dataFim = null) {
     if (empty($dataInicio)) {
         return 0;
     }
@@ -15,7 +15,13 @@ function calcularDias($dataInicio, $dataFim = null) {
         return 0;
     }
 
-    return $inicio->diff($fim)->days + 1;
+    $dias = $inicio->diff($fim)->days + 1;
+
+    if ($fim > $inicio) {
+        $dias++;
+    }
+
+    return $dias;
 }
 
 function formatarData($data) {
@@ -37,14 +43,27 @@ function formatarEstado($estado) {
         return '-';
     }
 
-    return ucfirst(strtolower($estado));
+    $estado = strtolower($estado);
+
+    if ($estado === 'ativo') {
+        return 'Ativo';
+    }
+
+    if ($estado === 'reservado') {
+        return 'Reservado';
+    }
+
+    if ($estado === 'concluido') {
+        return 'Concluído';
+    }
+
+    if ($estado === 'cancelado') {
+        return 'Cancelado';
+    }
+
+    return ucfirst($estado);
 }
 
-/*
-    Clientes:
-    - Só clientes com estado cliente.
-    - Usa LOWER para funcionar mesmo se estiver Cliente, cliente ou CLIENTE.
-*/
 $stmtClientes = $conn->query("
     SELECT id, nome
     FROM clientes
@@ -53,11 +72,6 @@ $stmtClientes = $conn->query("
 ");
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
-/*
-    Cavalos:
-    - Só cavalos realmente disponíveis para iniciar um aluguer.
-    - Não mostra vendidos, alugados, reservados, indisponíveis, etc.
-*/
 $stmtCavalos = $conn->query("
     SELECT id, nome
     FROM cavalos
@@ -66,9 +80,6 @@ $stmtCavalos = $conn->query("
 ");
 $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
-/*
-    Lista de alugueres.
-*/
 $stmtAlugueres = $conn->query("
     SELECT 
         a.id,
@@ -84,6 +95,45 @@ $stmtAlugueres = $conn->query("
     ORDER BY a.id DESC
 ");
 $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
+$erro = $_GET['erro'] ?? '';
+$sucesso = $_GET['sucesso'] ?? '';
+
+function mensagemErroAluguer($erro) {
+    switch ($erro) {
+        case 'metodo':
+            return 'Método inválido.';
+        case 'campos':
+            return 'Preencha todos os campos obrigatórios.';
+        case 'data_inicio':
+            return 'A data de início é inválida.';
+        case 'data_fim':
+            return 'A data de fim é inválida.';
+        case 'datas':
+            return 'A data de fim não pode ser anterior à data de início.';
+        case 'preco':
+            return 'O preço diário deve ser superior a 0.';
+        case 'cliente':
+            return 'Só é possível criar alugueres para clientes com estado Cliente.';
+        case 'cavalo':
+            return 'Só é possível alugar cavalos com estado Disponível.';
+        case 'sobreposicao':
+            return 'Este cavalo já tem um aluguer ativo ou reservado nesse período.';
+        case 'guardar':
+            return 'Ocorreu um erro ao criar o aluguer. Tente novamente.';
+        default:
+            return '';
+    }
+}
+
+function mensagemSucessoAluguer($sucesso) {
+    switch ($sucesso) {
+        case 'criado':
+            return 'Aluguer criado com sucesso.';
+        default:
+            return '';
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -192,13 +242,23 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                         <input type="text" id="total_previsto" value="0,00 €" readonly>
                     </div>
 
-                    <input type="hidden" name="estado" value="ativo">
+                    <input type="hidden" name="estado" id="estado_aluguer" value="reservado">
 
                     <div class="acoes-formulario">
                         <button class="btn-editar btn-form-principal" type="submit">
                             Criar Aluguer
                         </button>
                     </div>
+
+<?php if (mensagemErroAluguer($erro) !== ''): ?>
+    <p class="mensagem-formulario mensagem-erro">
+        <?= htmlspecialchars(mensagemErroAluguer($erro)) ?>
+    </p>
+<?php elseif (mensagemSucessoAluguer($sucesso) !== ''): ?>
+    <p class="mensagem-formulario mensagem-sucesso">
+        <?= htmlspecialchars(mensagemSucessoAluguer($sucesso)) ?>
+    </p>
+<?php endif; ?>
 
                 </form>
             </div>
@@ -230,7 +290,7 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                     <?php else: ?>
                         <?php foreach ($alugueres as $aluguer): ?>
                             <?php
-                                $diasTotais = calcularDias($aluguer['data_inicio'], $aluguer['data_fim']);
+                                $diasTotais = calcularDiasAluguer($aluguer['data_inicio'], $aluguer['data_fim']);
                                 $totalPrevisto = $diasTotais * (float)$aluguer['preco_diario'];
                                 $estadoNormalizado = strtolower(trim($aluguer['estado']));
                             ?>
@@ -261,6 +321,16 @@ $alugueres = $stmtAlugueres->fetchAll(PDO::FETCH_ASSOC);
                                                 <button class="btn-apagar" type="submit">Cancelar</button>
                                             </form>
                                         </div>
+
+                                    <?php elseif ($estadoNormalizado === 'reservado'): ?>
+                                        <div class="acoes">
+                                            <form method="POST" action="../backend/alterar-estado-aluguer.php">
+                                                <input type="hidden" name="id" value="<?= htmlspecialchars($aluguer['id']) ?>">
+                                                <input type="hidden" name="estado" value="cancelado">
+                                                <button class="btn-apagar" type="submit">Cancelar</button>
+                                            </form>
+                                        </div>
+
                                     <?php else: ?>
                                         —
                                     <?php endif; ?>
@@ -285,6 +355,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputFim = document.getElementById('data_fim');
     const inputPrecoDiario = document.getElementById('preco_diario');
     const inputTotalPrevisto = document.getElementById('total_previsto');
+    const inputEstadoAluguer = document.getElementById('estado_aluguer');
 
     function normalizarPreco(valor) {
         if (!valor) return 0;
@@ -318,7 +389,16 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
     }
 
-    function calcularDias(inicio, fim) {
+    function hojeISO() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function calcularDiasAluguer(inicio, fim) {
         if (!inicio || !fim) return 0;
 
         const dataInicio = new Date(inicio + 'T00:00:00');
@@ -327,27 +407,52 @@ document.addEventListener('DOMContentLoaded', function () {
         if (dataFim < dataInicio) return 0;
 
         const diferenca = dataFim - dataInicio;
+        let dias = Math.floor(diferenca / (1000 * 60 * 60 * 24)) + 1;
 
-        return Math.floor(diferenca / (1000 * 60 * 60 * 24)) + 1;
+        if (dataFim > dataInicio) {
+            dias++;
+        }
+
+        return dias;
+    }
+
+    function atualizarEstadoAluguer() {
+        const inicio = inputInicio.value;
+        const fim = inputFim.value;
+        const hoje = hojeISO();
+
+        if (!inicio || !fim) {
+            inputEstadoAluguer.value = 'reservado';
+            return;
+        }
+
+        if (inicio <= hoje && fim >= hoje) {
+            inputEstadoAluguer.value = 'ativo';
+        } else {
+            inputEstadoAluguer.value = 'reservado';
+        }
     }
 
     function atualizarTotalPrevisto() {
-        const dias = calcularDias(inputInicio.value, inputFim.value);
+        const dias = calcularDiasAluguer(inputInicio.value, inputFim.value);
         const precoDiario = normalizarPreco(inputPrecoDiario.value);
         const total = dias * precoDiario;
 
         inputTotalPrevisto.value = formatarEuros(total);
+        atualizarEstadoAluguer();
     }
 
     const fim = flatpickr("#data_fim", {
         dateFormat: "Y-m-d",
         locale: "pt",
+        disableMobile: true,
         onChange: atualizarTotalPrevisto
     });
 
     flatpickr("#data_inicio", {
         dateFormat: "Y-m-d",
         locale: "pt",
+        disableMobile: true,
         onChange: function(selectedDates, dateStr) {
             fim.set("minDate", dateStr);
 
