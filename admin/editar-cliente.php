@@ -59,6 +59,8 @@ $estadoAtual = $cliente['estado'] ?? '';
                 <a href="cavalos.php" class="nav-link">Cavalos</a>
                 <a href="clientes.php" class="nav-link ativo">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
+                <a href="aulas.php" class="nav-link">Aulas</a>
+                <a href="vendas.php" class="nav-link">Vendas</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
                 <a href="despesas.php" class="nav-link">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>

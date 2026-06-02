@@ -68,6 +68,32 @@ $stmtCavalosIndisponiveis = $conn->query("
 ");
 $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
 
+$stmtVendasResumo = $conn->query("
+    SELECT 
+        COUNT(*) AS total_vendas,
+        COALESCE(SUM(valor), 0) AS receita_vendas
+    FROM vendas_cavalos
+");
+
+$vendasResumo = $stmtVendasResumo->fetch(PDO::FETCH_ASSOC);
+$totalVendas = (int) ($vendasResumo['total_vendas'] ?? 0);
+$receitaVendas = (float) ($vendasResumo['receita_vendas'] ?? 0);
+
+$stmtUltimaVenda = $conn->query("
+    SELECT 
+        vendas_cavalos.data_venda,
+        vendas_cavalos.valor,
+        clientes.nome AS cliente_nome,
+        cavalos.nome AS cavalo_nome
+    FROM vendas_cavalos
+    INNER JOIN clientes ON clientes.id = vendas_cavalos.cliente_id
+    INNER JOIN cavalos ON cavalos.id = vendas_cavalos.cavalo_id
+    ORDER BY vendas_cavalos.data_venda DESC, vendas_cavalos.id DESC
+    LIMIT 1
+");
+
+$ultimaVenda = $stmtUltimaVenda->fetch(PDO::FETCH_ASSOC);
+
 $anoAtual = (int) date('Y');
 ?>
 <!DOCTYPE html>
@@ -98,6 +124,7 @@ $anoAtual = (int) date('Y');
                 <a href="clientes.php" class="nav-link">Clientes</a>
                 <a href="alugueres.php" class="nav-link">Alugueres</a>
                 <a href="aulas.php" class="nav-link">Aulas</a>
+                <a href="vendas.php" class="nav-link">Vendas</a>
                 <a href="fornecedores.php" class="nav-link">Fornecedores</a>
                 <a href="despesas.php" class="nav-link">Despesas</a>
                 <a href="logout.php" class="nav-link nav-link-sair">Terminar Sessão</a>
@@ -119,6 +146,7 @@ $anoAtual = (int) date('Y');
                         <a href="aulas.php" class="botao-principal">Gerir Aulas</a>
                         <a href="fornecedores.php" class="botao-principal">Gerir Fornecedores</a>
                         <a href="despesas.php" class="botao-principal">Gerir Despesas</a>
+                        <a href="vendas.php" class="botao-principal">Gerir Vendas</a>
 
                         <div class="pdf-financeiro-box">
                             <span class="pdf-financeiro-label">Relatório financeiro</span>
@@ -280,8 +308,40 @@ $anoAtual = (int) date('Y');
 
             <section class="dashboard-secao">
                 <div class="dashboard-secao-header">
+                    <h2>Vendas</h2>
+                    <p>Resumo das vendas de cavalos registadas no sistema.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card destaque-verde">
+                        <span class="stat-label">Vendas Realizadas</span>
+                        <strong class="stat-value"><?= htmlspecialchars($totalVendas) ?></strong>
+                    </div>
+
+                    <div class="stat-card destaque-verde receita">
+                        <span class="stat-label">Receita de Vendas</span>
+                        <strong class="stat-value"><?= number_format($receitaVendas, 2, ',', '.') ?> €</strong>
+                    </div>
+
+                    <div class="stat-card destaque-azul">
+                        <span class="stat-label">Última Venda</span>
+                        <strong class="stat-value" style="font-size: 1rem;">
+                            <?php if ($ultimaVenda): ?>
+                                <?= htmlspecialchars($ultimaVenda['cavalo_nome']) ?>
+                                <br>
+                                <small><?= htmlspecialchars(date('d/m/Y', strtotime($ultimaVenda['data_venda']))) ?></small>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-secao">
+                <div class="dashboard-secao-header">
                     <h2>Financeiro</h2>
-                    <p>Despesas gerais, despesas por categoria e custo mensal por cavalo.</p>
+                    <p>Receitas, despesas, lucro geral e custos associados aos cavalos.</p>
                 </div>
 
                 <div class="stats-grid">

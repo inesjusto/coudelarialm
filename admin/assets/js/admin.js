@@ -1265,6 +1265,13 @@ async function carregarStatsFinanceiro() {
                 `${Number(dados.receita_total || 0).toFixed(2)} €`;
         }
 
+        const receitaVendas = document.getElementById('financeiro-receita-vendas');
+
+if (receitaVendas) {
+    receitaVendas.textContent =
+        `${Number(dados.receita_vendas || 0).toFixed(2)} €`;
+}
+
         // DESPESAS TOTAIS
         const despesasTotal = document.getElementById('financeiro-despesas-total');
 

@@ -11,13 +11,21 @@ if ($data === '') {
     exit;
 }
 
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+    echo json_encode([
+        'erro' => 'Data inválida.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 try {
     $sql = "
         SELECT 
             c.id,
             c.nome
         FROM cavalos c
-        WHERE NOT EXISTS (
+        WHERE TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
+          AND NOT EXISTS (
             SELECT 1
             FROM alugueres a
             WHERE a.cavalo_id = c.id

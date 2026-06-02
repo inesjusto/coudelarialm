@@ -46,6 +46,7 @@ if ($mes === null) {
 
 $options = new Options();
 $options->set('isRemoteEnabled', true);
+$options->set('defaultFont', 'DejaVu Sans');
 
 $dompdf = new Dompdf($options);
 
@@ -102,6 +103,19 @@ try {
 
     $receitaAlugueres = $stmtReceitaAlugueres->fetch(PDO::FETCH_ASSOC)['total'];
 
+    $stmtReceitaVendas = $conn->prepare("
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM vendas_cavalos
+        WHERE data_venda BETWEEN :data_inicio AND :data_fim
+    ");
+
+    $stmtReceitaVendas->execute([
+        ':data_inicio' => $dataInicio,
+        ':data_fim' => $dataFim
+    ]);
+
+    $receitaVendas = $stmtReceitaVendas->fetch(PDO::FETCH_ASSOC)['total'];
+
     $stmtDespesasTotal = $conn->prepare("
         SELECT COALESCE(SUM(valor), 0) AS total
         FROM despesas
@@ -153,7 +167,7 @@ try {
 
     $custosCavalos = $stmtCustosCavalos->fetchAll(PDO::FETCH_ASSOC);
 
-    $receitaTotal = (float) $receitaAulas + (float) $receitaAlugueres;
+    $receitaTotal = (float) $receitaAulas + (float) $receitaAlugueres + (float) $receitaVendas;
     $despesasTotal = (float) $despesasTotal;
     $lucroGeral = $receitaTotal - $despesasTotal;
 
@@ -326,6 +340,11 @@ try {
                 <td><?= number_format((float) $receitaAlugueres, 2, ',', '.') ?> €</td>
             </tr>
 
+            <tr>
+                <td>Vendas de cavalos</td>
+                <td><?= number_format((float) $receitaVendas, 2, ',', '.') ?> €</td>
+            </tr>
+
             <tr class="linha-total">
                 <th>Total das Receitas</th>
                 <th><?= number_format($receitaTotal, 2, ',', '.') ?> €</th>
@@ -412,7 +431,7 @@ try {
 <?php
     $html = ob_get_clean();
 
-    $dompdf->loadHtml($html);
+    $dompdf->loadHtml($html, 'UTF-8');
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
 

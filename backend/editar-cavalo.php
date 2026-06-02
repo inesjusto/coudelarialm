@@ -1,5 +1,6 @@
 <?php
 include 'conexao.php';
+require_once __DIR__ . '/funcoes-formatacao.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

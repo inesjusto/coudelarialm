@@ -16,9 +16,6 @@ try {
     $receitaAulas = $conn->query($sqlReceitaAulas)->fetch(PDO::FETCH_ASSOC)['total'];
 
     // RECEITA DE ALUGUERES ATÉ HOJE
-    // Conta alugueres ativos e concluídos.
-    // Ativos contam só até à data de hoje.
-    // Concluídos contam até à data real de fim.
     $sqlReceitaAlugueres = "
         SELECT COALESCE(SUM(
             (
@@ -38,9 +35,26 @@ try {
               estado = 'ativo'
               OR data_fim IS NOT NULL
           )
+          AND data_inicio <= CURDATE()
     ";
 
     $receitaAlugueres = $conn->query($sqlReceitaAlugueres)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // RECEITA DE VENDAS DE CAVALOS
+    $sqlReceitaVendas = "
+        SELECT COALESCE(SUM(valor), 0) AS total
+        FROM vendas_cavalos
+    ";
+
+    $receitaVendas = $conn->query($sqlReceitaVendas)->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // NÚMERO DE VENDAS
+    $sqlNumeroVendas = "
+        SELECT COUNT(*) AS total
+        FROM vendas_cavalos
+    ";
+
+    $numeroVendas = $conn->query($sqlNumeroVendas)->fetch(PDO::FETCH_ASSOC)['total'];
 
     // TOTAL DE DESPESAS
     $sqlDespesasTotal = "
@@ -109,7 +123,7 @@ try {
     $custosCavalos = $conn->query($sqlCustosCavalos)->fetchAll(PDO::FETCH_ASSOC);
 
     // RECEITA TOTAL
-    $receitaTotal = (float)$receitaAulas + (float)$receitaAlugueres;
+    $receitaTotal = (float)$receitaAulas + (float)$receitaAlugueres + (float)$receitaVendas;
 
     // LUCRO GERAL
     $lucroGeral = $receitaTotal - (float)$despesasTotal;
@@ -119,6 +133,8 @@ try {
 
         'receita_aulas' => (float)$receitaAulas,
         'receita_alugueres' => (float)$receitaAlugueres,
+        'receita_vendas' => (float)$receitaVendas,
+        'numero_vendas' => (int)$numeroVendas,
         'receita_total' => (float)$receitaTotal,
 
         'total_mes' => (float)$despesasMes,
