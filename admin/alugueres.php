@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
+require_once __DIR__ . '/../backend/atualizar-alugueres.php';
 
 function calcularDias($dataInicio, $dataFim = null) {
     if (empty($dataInicio)) {

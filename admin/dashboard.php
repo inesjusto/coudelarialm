@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
+require_once __DIR__ . '/../backend/atualizar-alugueres.php';
 
 function calcularDias($dataInicio, $dataFim = null) {
     if (empty($dataInicio)) return 0;
@@ -66,6 +67,8 @@ $stmtCavalosIndisponiveis = $conn->query("
        OR TRIM(estado) <> 'Disponível'
 ");
 $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
+
+$anoAtual = (int) date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -116,9 +119,40 @@ $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
                         <a href="aulas.php" class="botao-principal">Gerir Aulas</a>
                         <a href="fornecedores.php" class="botao-principal">Gerir Fornecedores</a>
                         <a href="despesas.php" class="botao-principal">Gerir Despesas</a>
-                        <a href="exportar-financeiro.php?periodo=geral" target="_blank" class="botao-principal">PDF Geral</a>
-                        <a href="exportar-financeiro.php?periodo=mes" target="_blank" class="botao-principal">PDF do Mês</a>
-                        <a href="exportar-financeiro.php?periodo=ano" target="_blank" class="botao-principal">PDF do Ano</a>
+
+                        <div class="pdf-financeiro-box">
+                            <span class="pdf-financeiro-label">Relatório financeiro</span>
+
+                            <form action="exportar-financeiro.php" method="GET" target="_blank" class="form-pdf-financeiro">
+                                <select name="ano" required>
+                                    <?php for ($ano = $anoAtual; $ano >= 2024; $ano--): ?>
+                                        <option value="<?= htmlspecialchars($ano) ?>">
+                                            <?= htmlspecialchars($ano) ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+
+                                <select name="mes">
+                                    <option value="">Ano completo</option>
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+
+                                <button type="submit" class="botao-principal">
+                                    Gerar PDF
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -136,14 +170,14 @@ $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
                     </div>
 
                     <div class="stat-card destaque-verde">
-    <span class="stat-label">Cavalos Disponíveis</span>
-    <strong class="stat-value"><?= htmlspecialchars($totalCavalosDisponiveis) ?></strong>
-</div>
+                        <span class="stat-label">Cavalos Disponíveis</span>
+                        <strong class="stat-value"><?= htmlspecialchars($totalCavalosDisponiveis) ?></strong>
+                    </div>
 
-<div class="stat-card destaque-azul">
-    <span class="stat-label">Cavalos Indisponíveis</span>
-    <strong class="stat-value"><?= htmlspecialchars($totalCavalosIndisponiveis) ?></strong>
-</div>
+                    <div class="stat-card destaque-azul">
+                        <span class="stat-label">Cavalos Indisponíveis</span>
+                        <strong class="stat-value"><?= htmlspecialchars($totalCavalosIndisponiveis) ?></strong>
+                    </div>
                 </div>
 
                 <div class="graficos-grid">
@@ -175,54 +209,50 @@ $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
             </section>
 
             <section class="dashboard-secao">
-    <div class="dashboard-secao-header">
-        <h2>Clientes</h2>
-        <p>Resumo e distribuição dos clientes registados.</p>
-    </div>
+                <div class="dashboard-secao-header">
+                    <h2>Clientes</h2>
+                    <p>Resumo e distribuição dos clientes registados.</p>
+                </div>
 
-<div class="stats-grid">
+                <div class="stats-grid">
+                    <div class="stat-card destaque-verde">
+                        <span class="stat-label">Clientes</span>
+                        <strong class="stat-value" id="clientes-estado">0</strong>
+                    </div>
 
-    <div class="stat-card destaque-verde">
-        <span class="stat-label">Clientes</span>
-        <strong class="stat-value" id="clientes-estado">0</strong>
-    </div>
+                    <div class="stat-card destaque-amarelo">
+                        <span class="stat-label">Potenciais Clientes</span>
+                        <strong class="stat-value" id="clientes-potenciais">0</strong>
+                    </div>
 
-    <div class="stat-card destaque-amarelo">
-        <span class="stat-label">Potenciais Clientes</span>
-        <strong class="stat-value" id="clientes-potenciais">0</strong>
-    </div>
+                    <div class="stat-card destaque-roxo">
+                        <span class="stat-label">Potenciais Clientes (Contactados)</span>
+                        <strong class="stat-value" id="clientes-contactados">0</strong>
+                    </div>
+                </div>
 
-    <div class="stat-card destaque-roxo">
-        <span class="stat-label">Potenciais Clientes (Contactados)</span>
-        <strong class="stat-value" id="clientes-contactados">0</strong>
-    </div>
+                <div class="graficos-grid">
+                    <div class="grafico-box">
+                        <div class="grafico-header">
+                            <h3>Clientes por Tipo</h3>
+                        </div>
 
-</div>
+                        <div class="chart-container">
+                            <canvas id="grafico-clientes-tipo"></canvas>
+                        </div>
+                    </div>
 
-    <div class="graficos-grid">
+                    <div class="grafico-box">
+                        <div class="grafico-header">
+                            <h3>Clientes Interessados em Cavalos</h3>
+                        </div>
 
-    <div class="grafico-box">
-        <div class="grafico-header">
-            <h3>Clientes por Tipo</h3>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="grafico-clientes-tipo"></canvas>
-        </div>
-    </div>
-
-    <div class="grafico-box">
-        <div class="grafico-header">
-            <h3>Clientes Interessados em Cavalos</h3>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="grafico-clientes-estado"></canvas>
-        </div>
-    </div>
-
-</div>
-</section>
+                        <div class="chart-container">
+                            <canvas id="grafico-clientes-estado"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <section class="dashboard-secao">
                 <div class="dashboard-secao-header">
@@ -271,20 +301,19 @@ $totalCavalosIndisponiveis = (int) $stmtCavalosIndisponiveis->fetchColumn();
                     </div>
 
                     <div class="stat-card destaque-verde receita">
-    <span class="stat-label">Receita Total</span>
-    <strong class="stat-value" id="financeiro-receita-total">0,00 €</strong>
-</div>
+                        <span class="stat-label">Receita Total</span>
+                        <strong class="stat-value" id="financeiro-receita-total">0,00 €</strong>
+                    </div>
 
-<div class="stat-card destaque-azul receita">
-    <span class="stat-label">Despesas Totais</span>
-    <strong class="stat-value" id="financeiro-despesas-total">0,00 €</strong>
-</div>
+                    <div class="stat-card destaque-azul receita">
+                        <span class="stat-label">Despesas Totais</span>
+                        <strong class="stat-value" id="financeiro-despesas-total">0,00 €</strong>
+                    </div>
 
-<div class="stat-card destaque-verde receita">
-    <span class="stat-label">Lucro Geral</span>
-    <strong class="stat-value" id="financeiro-lucro-geral">0,00 €</strong>
-</div> 
-
+                    <div class="stat-card destaque-verde receita">
+                        <span class="stat-label">Lucro Geral</span>
+                        <strong class="stat-value" id="financeiro-lucro-geral">0,00 €</strong>
+                    </div>
                 </div>
 
                 <div class="graficos-grid">

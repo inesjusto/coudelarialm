@@ -6,28 +6,42 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-$periodo = $_GET['periodo'] ?? 'geral';
+$ano = isset($_GET['ano']) ? (int) $_GET['ano'] : (int) date('Y');
+$mes = isset($_GET['mes']) && $_GET['mes'] !== '' ? (int) $_GET['mes'] : null;
 
-$periodosPermitidos = ['geral', 'mes', 'ano'];
-
-if (!in_array($periodo, $periodosPermitidos, true)) {
-    $periodo = 'geral';
+if ($ano < 2020 || $ano > (int) date('Y') + 1) {
+    $ano = (int) date('Y');
 }
 
-$tituloPeriodo = 'Geral';
-$dataInicio = '1000-01-01';
-$dataFim = date('Y-m-d');
-
-if ($periodo === 'mes') {
-    $tituloPeriodo = 'Mês Atual';
-    $dataInicio = date('Y-m-01');
-    $dataFim = date('Y-m-d');
+if ($mes !== null && ($mes < 1 || $mes > 12)) {
+    $mes = null;
 }
 
-if ($periodo === 'ano') {
-    $tituloPeriodo = 'Ano Atual';
-    $dataInicio = date('Y-01-01');
-    $dataFim = date('Y-m-d');
+$meses = [
+    1 => 'Janeiro',
+    2 => 'Fevereiro',
+    3 => 'Março',
+    4 => 'Abril',
+    5 => 'Maio',
+    6 => 'Junho',
+    7 => 'Julho',
+    8 => 'Agosto',
+    9 => 'Setembro',
+    10 => 'Outubro',
+    11 => 'Novembro',
+    12 => 'Dezembro'
+];
+
+if ($mes === null) {
+    $dataInicio = $ano . '-01-01';
+    $dataFim = $ano . '-12-31';
+    $tituloPeriodo = 'Ano ' . $ano;
+    $nomeFicheiro = 'relatorio-financeiro-' . $ano . '.pdf';
+} else {
+    $dataInicio = date('Y-m-01', strtotime($ano . '-' . $mes . '-01'));
+    $dataFim = date('Y-m-t', strtotime($ano . '-' . $mes . '-01'));
+    $tituloPeriodo = $meses[$mes] . ' ' . $ano;
+    $nomeFicheiro = 'relatorio-financeiro-' . strtolower($meses[$mes]) . '-' . $ano . '.pdf';
 }
 
 $options = new Options();
@@ -42,10 +56,12 @@ try {
         WHERE estado = 'realizada'
           AND data_aula BETWEEN :data_inicio AND :data_fim
     ");
+
     $stmtReceitaAulas->execute([
         ':data_inicio' => $dataInicio,
         ':data_fim' => $dataFim
     ]);
+
     $receitaAulas = $stmtReceitaAulas->fetch(PDO::FETCH_ASSOC)['total'];
 
     $stmtReceitaAlugueres = $conn->prepare("
@@ -76,12 +92,14 @@ try {
                 ELSE data_fim
               END >= :data_inicio_2
     ");
+
     $stmtReceitaAlugueres->execute([
         ':data_inicio_1' => $dataInicio,
         ':data_inicio_2' => $dataInicio,
         ':data_fim_1' => $dataFim,
         ':data_fim_2' => $dataFim
     ]);
+
     $receitaAlugueres = $stmtReceitaAlugueres->fetch(PDO::FETCH_ASSOC)['total'];
 
     $stmtDespesasTotal = $conn->prepare("
@@ -90,28 +108,36 @@ try {
         WHERE estado_pagamento != 'cancelado'
           AND data_despesa BETWEEN :data_inicio AND :data_fim
     ");
+
     $stmtDespesasTotal->execute([
         ':data_inicio' => $dataInicio,
         ':data_fim' => $dataFim
     ]);
+
     $despesasTotal = $stmtDespesasTotal->fetch(PDO::FETCH_ASSOC)['total'];
 
     $stmtCategorias = $conn->prepare("
-        SELECT categoria, COALESCE(SUM(valor), 0) AS total
+        SELECT 
+            categoria,
+            COALESCE(SUM(valor), 0) AS total
         FROM despesas
         WHERE estado_pagamento != 'cancelado'
           AND data_despesa BETWEEN :data_inicio AND :data_fim
         GROUP BY categoria
         ORDER BY total DESC
     ");
+
     $stmtCategorias->execute([
         ':data_inicio' => $dataInicio,
         ':data_fim' => $dataFim
     ]);
+
     $categorias = $stmtCategorias->fetchAll(PDO::FETCH_ASSOC);
 
     $stmtCustosCavalos = $conn->prepare("
-        SELECT c.nome, COALESCE(SUM(d.valor), 0) AS total
+        SELECT 
+            c.nome,
+            COALESCE(SUM(d.valor), 0) AS total
         FROM despesas d
         INNER JOIN cavalos c ON d.cavalo_id = c.id
         WHERE d.estado_pagamento != 'cancelado'
@@ -119,14 +145,23 @@ try {
         GROUP BY c.id, c.nome
         ORDER BY total DESC
     ");
+
     $stmtCustosCavalos->execute([
         ':data_inicio' => $dataInicio,
         ':data_fim' => $dataFim
     ]);
+
     $custosCavalos = $stmtCustosCavalos->fetchAll(PDO::FETCH_ASSOC);
 
-    $receitaTotal = (float)$receitaAulas + (float)$receitaAlugueres;
-    $lucroGeral = $receitaTotal - (float)$despesasTotal;
+    $receitaTotal = (float) $receitaAulas + (float) $receitaAlugueres;
+    $despesasTotal = (float) $despesasTotal;
+    $lucroGeral = $receitaTotal - $despesasTotal;
+
+    $totalCustosCavalos = 0;
+
+    foreach ($custosCavalos as $cavalo) {
+        $totalCustosCavalos += (float) $cavalo['total'];
+    }
 
     ob_start();
 ?>
@@ -134,6 +169,7 @@ try {
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -157,6 +193,7 @@ try {
             color: #6b7280;
             font-size: 13px;
             margin-top: 6px;
+            line-height: 1.6;
         }
 
         .cards {
@@ -223,6 +260,12 @@ try {
             font-size: 13px;
         }
 
+        .linha-total th {
+            background: #111827;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
         .rodape {
             margin-top: 40px;
             text-align: center;
@@ -235,10 +278,11 @@ try {
 
     <div class="topo">
         <h1>Coudelaria Lima Monteiro</h1>
+
         <div class="subtitulo">
             Relatório Financeiro - <?= htmlspecialchars($tituloPeriodo) ?><br>
             Período: <?= date('d/m/Y', strtotime($dataInicio)) ?> até <?= date('d/m/Y', strtotime($dataFim)) ?><br>
-            Gerado no dia <?= date('d/m/Y H:i') ?>
+            Gerado em <?= date('d/m/Y H:i') ?>
         </div>
     </div>
 
@@ -262,6 +306,7 @@ try {
     </div>
 
     <h2>Resumo das Receitas</h2>
+
     <table>
         <thead>
             <tr>
@@ -269,19 +314,27 @@ try {
                 <th>Total</th>
             </tr>
         </thead>
+
         <tbody>
             <tr>
                 <td>Aulas realizadas</td>
-                <td><?= number_format($receitaAulas, 2, ',', '.') ?> €</td>
+                <td><?= number_format((float) $receitaAulas, 2, ',', '.') ?> €</td>
             </tr>
+
             <tr>
-                <td>Alugueres até hoje</td>
-                <td><?= number_format($receitaAlugueres, 2, ',', '.') ?> €</td>
+                <td>Alugueres do período</td>
+                <td><?= number_format((float) $receitaAlugueres, 2, ',', '.') ?> €</td>
+            </tr>
+
+            <tr class="linha-total">
+                <th>Total das Receitas</th>
+                <th><?= number_format($receitaTotal, 2, ',', '.') ?> €</th>
             </tr>
         </tbody>
     </table>
 
     <h2>Despesas por Categoria</h2>
+
     <table>
         <thead>
             <tr>
@@ -289,23 +342,34 @@ try {
                 <th>Total</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (empty($categorias)): ?>
                 <tr>
-                    <td colspan="2">Sem despesas registadas.</td>
+                    <td colspan="2">Sem despesas registadas neste período.</td>
+                </tr>
+                <tr class="linha-total">
+                    <th>Total das Despesas</th>
+                    <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
                 </tr>
             <?php else: ?>
                 <?php foreach ($categorias as $categoria): ?>
                     <tr>
                         <td><?= htmlspecialchars($categoria['categoria']) ?></td>
-                        <td><?= number_format($categoria['total'], 2, ',', '.') ?> €</td>
+                        <td><?= number_format((float) $categoria['total'], 2, ',', '.') ?> €</td>
                     </tr>
                 <?php endforeach; ?>
+
+                <tr class="linha-total">
+                    <th>Total das Despesas</th>
+                    <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>
 
     <h2>Custos por Cavalo</h2>
+
     <table>
         <thead>
             <tr>
@@ -313,18 +377,28 @@ try {
                 <th>Total</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (empty($custosCavalos)): ?>
                 <tr>
-                    <td colspan="2">Sem custos associados a cavalos.</td>
+                    <td colspan="2">Sem custos associados a cavalos neste período.</td>
+                </tr>
+                <tr class="linha-total">
+                    <th>Total dos Custos por Cavalo</th>
+                    <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
                 </tr>
             <?php else: ?>
                 <?php foreach ($custosCavalos as $cavalo): ?>
                     <tr>
                         <td><?= htmlspecialchars($cavalo['nome']) ?></td>
-                        <td><?= number_format($cavalo['total'], 2, ',', '.') ?> €</td>
+                        <td><?= number_format((float) $cavalo['total'], 2, ',', '.') ?> €</td>
                     </tr>
                 <?php endforeach; ?>
+
+                <tr class="linha-total">
+                    <th>Total dos Custos por Cavalo</th>
+                    <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>
@@ -341,8 +415,6 @@ try {
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
-
-    $nomeFicheiro = 'RelatorioFinanceiroCLM' . $periodo . '.pdf';
 
     $dompdf->stream($nomeFicheiro, [
         'Attachment' => false

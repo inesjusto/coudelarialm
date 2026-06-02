@@ -40,7 +40,7 @@ async function carregarCavalos() {
       return;
     }
 
-    await renderizarCavalos(todosOsCavalos);
+    renderizarCavalos(todosOsCavalos);
     configurarFiltrosCavalos();
 
   } catch (error) {
@@ -51,7 +51,7 @@ async function carregarCavalos() {
   }
 }
 
-async function renderizarCavalos(cavalos) {
+function renderizarCavalos(cavalos) {
   const lista = document.getElementById("lista-cavalos");
   const vazio = document.getElementById("sem-cavalos");
 
@@ -66,10 +66,14 @@ async function renderizarCavalos(cavalos) {
 
   if (vazio) vazio.style.display = "none";
 
-  for (const cavalo of cavalos) {
-    const card = await criarCardCavalo(cavalo, true);
-    lista.appendChild(card);
-  }
+  const fragmento = document.createDocumentFragment();
+
+  cavalos.forEach((cavalo) => {
+    const card = criarCardCavalo(cavalo, true);
+    fragmento.appendChild(card);
+  });
+
+  lista.appendChild(fragmento);
 }
 
 function configurarFiltrosCavalos() {
@@ -125,10 +129,15 @@ async function carregarCavalosDestaque() {
 
     lista.innerHTML = "";
 
-    for (const cavalo of cavalos) {
-      const card = await criarCardCavalo(cavalo, false);
-      lista.appendChild(card);
-    }
+    const fragmento = document.createDocumentFragment();
+
+    cavalos.forEach((cavalo) => {
+      const card = criarCardCavalo(cavalo, false);
+      fragmento.appendChild(card);
+    });
+
+    lista.appendChild(fragmento);
+
   } catch (error) {
     console.error("Erro ao carregar cavalos em destaque:", error);
 
@@ -137,8 +146,10 @@ async function carregarCavalosDestaque() {
   }
 }
 
-async function criarCardCavalo(cavalo, mostrarDescricao = true) {
-  const imagem = await resolverImagemCavalo(cavalo.imagem);
+function criarCardCavalo(cavalo, mostrarDescricao = true) {
+  const imagem = cavalo.imagem && String(cavalo.imagem).trim() !== ""
+    ? `assets/img/cavalos/${String(cavalo.imagem).trim()}`
+    : "assets/img/cavalos/default.jpg";
 
   const card = document.createElement("div");
   card.className = "horse-card";
@@ -148,6 +159,8 @@ async function criarCardCavalo(cavalo, mostrarDescricao = true) {
       <img 
         src="${imagem}" 
         alt="${escapeHtml(cavalo.nome || "Cavalo")}"
+        loading="lazy"
+        decoding="async"
         onerror="this.onerror=null;this.src='assets/img/cavalos/default.jpg';"
       >
     </div>
@@ -180,61 +193,6 @@ function normalizarRespostaCavalos(data) {
   return [];
 }
 
-async function resolverImagemCavalo(imagem) {
-  const fallback = "assets/img/cavalos/default.jpg";
-
-  if (!imagem || String(imagem).trim() === "") {
-    return fallback;
-  }
-
-  const nomeImagem = String(imagem).trim();
-  const candidatos = [];
-
-  if (
-    nomeImagem.startsWith("http://") ||
-    nomeImagem.startsWith("https://")
-  ) {
-    candidatos.push(nomeImagem);
-  }
-
-  if (nomeImagem.includes("assets/img/cavalos/")) {
-    const caminhoNormalizado = nomeImagem.substring(
-      nomeImagem.indexOf("assets/img/cavalos/")
-    );
-    candidatos.push(caminhoNormalizado);
-    candidatos.push("/" + caminhoNormalizado);
-  }
-
-  candidatos.push(`assets/img/cavalos/${nomeImagem}`);
-  candidatos.push(`/public/assets/img/cavalos/${nomeImagem}`);
-  candidatos.push(`../public/assets/img/cavalos/${nomeImagem}`);
-  candidatos.push(`../assets/img/cavalos/${nomeImagem}`);
-  candidatos.push(`assets/img/${nomeImagem}`);
-  candidatos.push(`/public/assets/img/${nomeImagem}`);
-
-  const unicos = [...new Set(candidatos)];
-
-  for (const caminho of unicos) {
-    const existe = await testarImagem(caminho);
-    if (existe) {
-      return caminho;
-    }
-  }
-
-  return fallback;
-}
-
-function testarImagem(src) {
-  return new Promise((resolve) => {
-    const img = new Image();
-
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-
-    img.src = src;
-  });
-}
-
 function formatarPreco(preco) {
   if (preco === null || preco === undefined || preco === "") {
     return "Sob consulta";
@@ -257,7 +215,13 @@ function formatarIdade(idade) {
     return "Não definida";
   }
 
-  return `${idade} anos`;
+  const texto = String(idade).trim();
+
+  if (texto.includes("ano") || texto.includes("mês") || texto.includes("meses")) {
+    return texto;
+  }
+
+  return `${texto} anos`;
 }
 
 function configurarFormularioContacto() {
