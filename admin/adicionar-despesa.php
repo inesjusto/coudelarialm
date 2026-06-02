@@ -17,6 +17,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
     <title>Adicionar Despesa</title>
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="admin-layout">
@@ -103,7 +104,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                         <div id="campos-valor-manual">
                             <div class="campo">
                                 <label for="valor">Valor (€)</label>
-                                <input type="text" id="valor" name="valor" placeholder="Ex.: 150.50">
+                                <input type="text" id="valor" name="valor" placeholder="Ex.: 150,50">
                             </div>
                         </div>
 
@@ -125,12 +126,24 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label for="data_inicio">Data de Início</label>
-                                <input type="date" id="data_inicio" name="data_inicio">
+                                <input 
+                                    type="text" 
+                                    id="data_inicio" 
+                                    name="data_inicio" 
+                                    class="input-data"
+                                    placeholder="Selecione a data"
+                                >
                             </div>
 
                             <div class="campo">
                                 <label for="data_fim">Data de Fim</label>
-                                <input type="date" id="data_fim" name="data_fim">
+                                <input 
+                                    type="text" 
+                                    id="data_fim" 
+                                    name="data_fim" 
+                                    class="input-data"
+                                    placeholder="Selecione a data"
+                                >
                             </div>
 
                             <div class="campo">
@@ -140,7 +153,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label for="preco_embalagem">Preço por Embalagem (€)</label>
-                                <input type="text" id="preco_embalagem" name="preco_embalagem" placeholder="Ex.: 18.50">
+                                <input type="text" id="preco_embalagem" name="preco_embalagem" placeholder="Ex.: 18,50">
                             </div>
 
                             <div class="campo">
@@ -153,7 +166,14 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="data_despesa">Data da Despesa</label>
-                            <input type="date" id="data_despesa" name="data_despesa" required>
+                            <input 
+                                type="text" 
+                                id="data_despesa" 
+                                name="data_despesa" 
+                                class="input-data"
+                                placeholder="Selecione a data"
+                                required
+                            >
                         </div>
 
                         <div class="campo">
@@ -191,6 +211,8 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="assets/js/admin.js"></script>
 
     <script>
@@ -211,6 +233,18 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
             const quantidadePorEmbalagem = document.getElementById('quantidade_por_embalagem');
             const precoEmbalagem = document.getElementById('preco_embalagem');
             const unidade = document.getElementById('unidade');
+
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr('.input-data', {
+                    dateFormat: 'Y-m-d',
+                    locale: 'pt',
+                    allowInput: true,
+                    disableMobile: true,
+                    onChange: function () {
+                        calcularResumoConsumo();
+                    }
+                });
+            }
 
             const categoriasGerais = [
                 'Manutenção',
@@ -292,7 +326,6 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 }
             }
 
-
             function normalizarValor(valor) {
                 if (!valor) return 0;
 
@@ -323,6 +356,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                     .replace('.', ',')
                     .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
             }
+
             function calcularResumoConsumo() {
                 const consumo = normalizarValor(consumoDiario.value);
                 const inicio = dataInicio.value;
@@ -335,8 +369,8 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                     return;
                 }
 
-                const data1 = new Date(inicio);
-                const data2 = new Date(fim);
+                const data1 = new Date(inicio + 'T00:00:00');
+                const data2 = new Date(fim + 'T00:00:00');
 
                 if (data2 < data1) {
                     resumoConsumo.textContent = 'A data de fim não pode ser anterior à data de início.';

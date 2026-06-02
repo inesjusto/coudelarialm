@@ -5,7 +5,7 @@ require_once __DIR__ . '/../backend/conexao.php';
 $stmtClientes = $conn->query("
     SELECT id, nome
     FROM clientes
-    WHERE TRIM(estado) = 'Cliente'
+    WHERE TRIM(LOWER(estado)) = 'cliente'
     ORDER BY nome ASC
 ");
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
@@ -18,6 +18,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
     <title>Adicionar Aula</title>
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="admin-layout">
@@ -84,7 +85,14 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="data_aula">Data da Aula</label>
-                            <input type="date" id="data_aula" name="data_aula" required>
+                            <input 
+                                type="text" 
+                                id="data_aula" 
+                                name="data_aula" 
+                                class="input-data"
+                                placeholder="Selecione a data"
+                                required
+                            >
                         </div>
 
                         <div class="campo">
@@ -112,7 +120,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="preco">Preço (€)</label>
-                            <input type="text" id="preco" name="preco" placeholder="Ex.: 25.00" required>
+                            <input type="text" id="preco" name="preco" placeholder="Ex.: 25,00" required>
                         </div>
 
                         <div class="campo">
@@ -141,10 +149,23 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dataAula = document.getElementById('data_aula');
             const cavaloSelect = document.getElementById('cavalo_id');
+
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr('#data_aula', {
+                    dateFormat: 'Y-m-d',
+                    locale: 'pt',
+                    allowInput: true,
+                    disableMobile: true,
+                    onChange: carregarCavalosDisponiveis
+                });
+            }
 
             if (!dataAula || !cavaloSelect) return;
 

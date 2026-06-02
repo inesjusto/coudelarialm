@@ -42,14 +42,15 @@ $stmtCavalos = $conn->prepare("
     WHERE 
         (
             c.id = :cavalo_atual
-            OR TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
+            OR TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel', 'alugado')
         )
         AND NOT EXISTS (
             SELECT 1
             FROM alugueres a
             WHERE a.cavalo_id = c.id
-              AND a.estado = 'ativo'
-              AND :data_aula BETWEEN a.data_inicio AND a.data_fim
+              AND TRIM(LOWER(a.estado)) IN ('ativo', 'concluido')
+              AND DATE(:data_aula) >= DATE(a.data_inicio)
+              AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
         )
     ORDER BY c.nome ASC
 ");
@@ -73,6 +74,7 @@ function selecionado($valorAtual, $valorOpcao) {
     <title>Editar Aula</title>
     <link rel="stylesheet" href="assets/css/admin.css">
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="admin-layout">
@@ -154,10 +156,12 @@ function selecionado($valorAtual, $valorOpcao) {
                         <div class="campo">
                             <label for="data_aula">Data da Aula</label>
                             <input 
-                                type="date" 
+                                type="text" 
                                 id="data_aula" 
                                 name="data_aula" 
+                                class="input-data"
                                 value="<?= htmlspecialchars($aula['data_aula']) ?>" 
+                                placeholder="Selecione a data"
                                 required
                             >
                         </div>
@@ -259,11 +263,24 @@ function selecionado($valorAtual, $valorOpcao) {
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dataAula = document.getElementById('data_aula');
             const cavaloSelect = document.getElementById('cavalo_id');
             const cavaloAtual = "<?= htmlspecialchars((string)($aula['cavalo_id'] ?? '')) ?>";
+
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr('#data_aula', {
+                    dateFormat: 'Y-m-d',
+                    locale: 'pt',
+                    allowInput: true,
+                    disableMobile: true,
+                    onChange: carregarCavalosDisponiveis
+                });
+            }
 
             if (!dataAula || !cavaloSelect) {
                 return;
