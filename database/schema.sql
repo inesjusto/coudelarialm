@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Tempo de geração: 02-Jun-2026 às 18:08
+-- Tempo de geração: 03-Jun-2026 às 12:29
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -38,8 +38,8 @@ CREATE TABLE `administradores` (
 --
 
 INSERT INTO `administradores` (`id`, `username`, `password`) VALUES
-(1, 'Direção', '$2y$10$alwMYEzh4hevjGj8fkctYelsRfBdjZU2QFtjQB.BYOziMKYT.TJ2m'),
-(2, 'Gestor', '$2y$10$xWCL1AHQA7oAaLQurbNm4.9Nm5al6LEwhTGVMqNh4EtBpQ29sdqmu');
+(1, 'Direção', '$2y$10$poUIuvF41F/LIbZCdmg1n.lns9YNcQb/bYNrM004IBqbFDwTL80aS'),
+(2, 'Gestor', '$2y$10$7ZjHyYzBkc7pKaMQEt92LOYcIn5TxYTARDAs0jTq0tYYkva540TjS');
 
 -- --------------------------------------------------------
 
@@ -54,16 +54,9 @@ CREATE TABLE `alugueres` (
   `data_inicio` date NOT NULL,
   `data_fim` date DEFAULT NULL,
   `preco_diario` decimal(10,2) DEFAULT 0.00,
-  `estado` enum('ativo','concluido','cancelado') DEFAULT 'ativo',
+  `estado` enum('reservado','ativo','concluido','cancelado') NOT NULL DEFAULT 'reservado',
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Extraindo dados da tabela `alugueres`
---
-
-INSERT INTO `alugueres` (`id`, `cliente_id`, `cavalo_id`, `data_inicio`, `data_fim`, `preco_diario`, `estado`, `criado_em`) VALUES
-(1, 10, 10, '2026-05-01', '2026-05-31', 20.00, 'concluido', '2026-06-02 10:43:00');
 
 -- --------------------------------------------------------
 
@@ -84,13 +77,6 @@ CREATE TABLE `aulas` (
   `observacoes` text DEFAULT NULL,
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Extraindo dados da tabela `aulas`
---
-
-INSERT INTO `aulas` (`id`, `cliente_id`, `cavalo_id`, `data_aula`, `hora_inicio`, `hora_fim`, `tipo_aula`, `preco`, `estado`, `observacoes`, `data_criacao`) VALUES
-(1, 12, 4, '2026-05-20', '17:00:00', '18:00:00', 'Avançada', 25.00, 'realizada', NULL, '2026-05-26 11:37:58');
 
 -- --------------------------------------------------------
 
@@ -118,23 +104,15 @@ CREATE TABLE `cavalos` (
 --
 
 INSERT INTO `cavalos` (`id`, `nome`, `raca`, `sexo`, `data_nascimento`, `altura`, `cor`, `preco`, `estado`, `descricao`, `imagem`, `criado_em`) VALUES
-(1, 'Storm Wind', 'Mustang', 'Macho', '2018-03-14', 1.58, 'Tordilha', 7500.00, 'Disponível', 'Cavalo resistente e muito adaptável, com excelente capacidade para trilhos e terrenos irregulares. Possui um temperamento equilibrado, sendo atento e fácil de conduzir. A pelagem tordilha acinzentada juntamente com a crina escura dá-lhe uma aparência marcante e elegante.', 'cavalo_6a0d7103d82f83.60418752.jpg', '2026-05-20 08:29:55'),
-(2, 'Thunder Blaze', 'Quarto de Milha', 'Garanhão', '2016-05-22', 1.63, 'Castanha', 11900.00, 'Reservado', 'Cavalo forte e musculado, com excelente desempenho em trabalho de campo e provas de velocidade. Demonstra um comportamento obediente e seguro, sendo indicado tanto para cavaleiros experientes como intermédios. A sua pelagem castanha brilhante e a boa condição física destacam-no pela elegância e potência.', 'cavalo_6a0d71914d1089.52294933.jpg', '2026-05-20 08:32:17'),
-(3, 'Golden Spirit', 'Puro Sangue Lusitano', 'Fêmea', '2024-04-03', 0.95, 'Baia', 4200.00, 'Em Tratamento', 'Potra jovem de raça Lusitana com excelente estrutura corporal e aparência elegante. Demonstra um comportamento dócil e curioso, habituando-se facilmente ao contacto humano. A pelagem baia clara combinada com a marca branca na face dá-lhe um aspeto muito distinto. Atualmente encontra-se em acompanhamento veterinário preventivo para garantir um crescimento saudável e equilibrado.', 'cavalo_6a0d720b6db424.39327934.jpg', '2026-05-20 08:34:19'),
-(4, 'Imperial do Vale', 'Puro Sangue Lusitano', 'Garanhão', '2015-09-11', 1.66, 'Tordilha', 18500.00, 'Disponível', 'Garanhão Lusitano de excelente presença e movimentos harmoniosos, ideal para dressage e ensino clássico. Demonstra um temperamento calmo, inteligente e muito cooperativo no trabalho diário. A pelagem tordilha clara destaca a sua elegância natural e porte atlético, sendo um cavalo muito apreciado em apresentações equestres.', 'cavalo_6a0d72a0001bb9.68689977.jpg', '2026-05-20 08:36:48'),
-(5, 'Bronze River', 'Puro Sangue Inglês', 'Macho', '2017-05-22', 1.64, 'Castanha', 9800.00, 'Indisponível', 'Cavalo atlético e elegante, com boa resistência física e movimentos leves. Demonstra um comportamento tranquilo no maneio diário, mantendo energia e rapidez durante o exercício. Ideal para passeios longos, treino de salto e trabalho desportivo ligeiro. A pelagem castanha uniforme e a pequena marca branca na testa conferem-lhe um aspeto refinado e harmonioso.', 'cavalo_6a0d73057e5c10.44889231.jpg', '2026-05-20 08:38:29'),
-(6, 'Sierra Dust', 'Paint Horse', 'Fêmea', '2019-08-17', 1.52, 'Pampa', 8600.00, 'Vendido', 'Égua elegante e resistente, conhecida pela sua pelagem pampa castanha e branca bastante marcante. Possui um temperamento dócil e cooperativo, sendo excelente para passeios, lazer e trabalho ligeiro. Demonstra movimentos suaves e boa adaptação a ambientes abertos e trilhos naturais.', 'cavalo_6a0d737ea87288.15318294.jpg', '2026-05-20 08:40:30'),
-(7, 'Shadow Comet', 'Andaluz', 'Garanhão', '2018-02-28', 1.65, 'Castanha Escura', 16700.00, 'Disponível', 'Garanhão Andaluz de grande elegância e presença forte, com movimentos enérgicos e excelente impulsão. Demonstra um temperamento vivo, mas muito inteligente e obediente durante o treino. Ideal para dressage, apresentações e passeios de alto nível. A pelagem castanha escura brilhante combinada com a crina negra longa destaca o seu aspeto nobre e atlético.', 'cavalo_6a0d73e1e8ca99.34697968.jpg', '2026-05-20 08:42:09'),
-(8, 'Silver Meadow', 'Outro', 'Fêmea', '2016-06-09', 1.55, 'Tordilha', 10400.00, 'Reformado', 'Égua tranquila e muito resistente, conhecida pelo seu comportamento dócil e experiência em passeios rurais. Possui uma pelagem tordilha clara com ligeiras marcações acinzentadas, típica da raça Camargue. Apesar de já reformada de trabalhos intensivos, continua apta para atividades leves e contacto com iniciantes, destacando-se pela serenidade e elegância natural.', 'cavalo_6a0d74724a1a39.95329093.jpg', '2026-05-20 08:44:34'),
-(9, 'Misty Thunder', 'Outro', 'Macho', '2018-11-14', 1.47, 'Tordilha Negra', 6900.00, 'Disponível', 'Cavalo compacto e resistente, com excelente adaptação a terrenos difíceis e grande facilidade em trilhos longos. Demonstra um temperamento calmo e amigável, sendo ideal para lazer e equitação recreativa. A pelagem tordilha negra juntamente com a crina clara cria um aspeto muito distinto e elegante. Conhecido pela sua resistência física e facilidade de aprendizagem.', 'cavalo_6a0d74df8bfcc7.81850150.jpg', '2026-05-20 08:46:23'),
-(10, 'Autumn Flame', 'Paint Horse', 'Macho', '2022-04-05', 1.42, 'Pampa', 7300.00, 'Disponível', 'Cavalo jovem com excelente porte e uma pelagem pampa castanha muito marcante. Demonstra curiosidade, energia e facilidade de adaptação ao treino inicial. Possui movimentos leves e boa estrutura física, sendo promissor para lazer, trilhos e equitação recreativa. A larga lista branca na face e as marcas brancas nas patas dão-lhe um aspeto bastante distinto e elegante.', 'cavalo_6a0d754edabc65.27369517.jpg', '2026-05-20 08:48:14'),
-(11, 'Desert Echo', 'Mustang', 'Garanhão', '2019-07-30', 1.57, 'Castanha', 12300.00, 'Disponível', 'Garanhão de grande energia e presença forte, com movimentos rápidos e excelente agilidade. Demonstra um temperamento vivo, mas equilibrado, adaptando-se bem a treino e atividades de resistência. A pelagem escura com reflexos acastanhados destaca a musculatura e o porte atlético. Ideal para trilhos, equitação western e trabalho em campo aberto.', 'cavalo_6a0d75b06a14e6.32768765.jpg', '2026-05-20 08:49:52'),
-(12, 'Golden Horizon', 'Akhal-Teke', 'Fêmea', '2020-05-18', 1.60, 'Outra', 21500.00, 'Reservado', 'Égua elegante e muito refinada, conhecida pela sua resistência e aparência distinta. Possui uma pelagem isabela dourada com brilho natural característico da raça Akhal-Teke. Demonstra um comportamento atento e inteligente, com movimentos suaves e excelente desempenho em equitação desportiva e trilhos longos. Destaca-se pela postura nobre e pela grande agilidade.', 'cavalo_6a0d762e5998e5.74851235.jpg', '2026-05-20 08:51:58'),
-(13, 'Iron Dust', 'Mustang', 'Macho', '2019-10-12', 1.61, 'Castanha', 13800.00, 'Disponível', 'Cavalo robusto e atlético, com excelente resistência e postura firme. Demonstra um temperamento atento e energético, mantendo boa obediência durante o treino e passeios. Indicado para trilhos, trabalho western e atividades de resistência.', 'cavalo_6a0d769bc75d84.38784432.jpg', '2026-05-20 08:53:47'),
-(14, 'Silver Rain', 'Andaluz', 'Fêmea', '2018-03-26', 1.64, 'Tordilha', 15900.00, 'Disponível', 'Égua Andaluz de aparência elegante e porte harmonioso, destacando-se pela sua pelagem tordilha salpicada e movimentos suaves. Possui um temperamento dócil e atento, sendo indicada para dressage, lazer e apresentações equestres. Demonstra excelente equilíbrio corporal e facilidade de aprendizagem, tornando-se uma ótima escolha para cavaleiros intermédios e experientes.', 'cavalo_6a0d770539caa0.86277734.jpg', '2026-05-20 08:55:33'),
-(15, 'Forest King', 'Hanoveriano', 'Macho', '2017-09-07', 1.68, 'Castanha', 14600.00, 'Disponível', 'Cavalo Hanoveriano de porte forte e musculatura bem desenvolvida, ideal para saltos e ensino desportivo. Possui um temperamento equilibrado e tranquilo, demonstrando boa obediência e facilidade no maneio diário. A pelagem castanha brilhante com crina e cauda negras destaca a sua aparência elegante e atlética. Excelente escolha para cavaleiros que procuram resistência, potência e conforto nos movimentos.', 'cavalo_6a0d777b62beb9.60714314.jpg', '2026-05-20 08:57:31'),
-(16, 'Northern Spirit', 'Outro', 'Garanhão', '2018-04-21', 1.50, 'Baia', 13200.00, 'Disponível', 'Garanhão de porte compacto e musculatura forte, típico da raça Fiorde Norueguês. Possui uma pelagem baia dourada com crina bicolor escura, característica muito valorizada na raça. Demonstra um temperamento dócil, resistente e cooperativo, sendo excelente para lazer, trilhos e trabalho rural. Destaca-se pela elegância natural e pela grande resistência física.', 'cavalo_6a0d77c263a6f8.71386815.jpg', '2026-05-20 08:58:42'),
-(17, 'Copper Wind', 'Árabe', 'Fêmea', '2021-06-15', 1.54, 'Alazã', 17400.00, 'Disponível', 'Égua jovem de raça Árabe com excelente elegância e estrutura refinada. Possui uma pelagem alazã uniforme e brilhante, destacando-se pela postura nobre e movimentos leves. Demonstra um temperamento atento, inteligente e muito ágil, sendo ideal para resistência, lazer e apresentações equestres. A sua conformação atlética e expressão alerta tornam-na bastante valorizada.', 'cavalo_6a0d780a81ed43.76445741.jpg', '2026-05-20 08:59:54');
+(1, 'Névoa do Monte', 'Puro Sangue Lusitano', 'Fêmea', '2017-05-14', 1.62, 'Tordilha Rodada', 8500.00, 'Disponível', 'Égua elegante e expressiva, de pelagem tordilha rodada, com porte nobre e presença tranquila. Ideal para lazer, ensino ou trabalho clássico, destacando-se pela beleza e equilíbrio.', 'cavalo_6a1fe8e3418856.75343272.webp', '2026-06-03 08:42:12'),
+(2, 'Rubi da Serra', 'Cruzado Português', 'Macho', '2016-03-22', 1.60, 'Baia', 6750.00, 'Disponível', 'Cavalo baio de presença forte e temperamento calmo, habituado ao campo e de fácil maneio. Uma excelente opção para lazer, passeios e trabalho ligeiro.', 'cavalo_6a1fe925cd42f1.93457711.webp', '2026-06-03 08:43:19'),
+(3, 'Dourado do Vale', 'Cavalo do Sorraia', 'Garanhão', '2018-06-09', 1.55, 'Baia Amarilha', 7900.00, 'Disponível', 'Cavalo de porte atlético e expressão marcante, com pelagem baia amarilha e crinas escuras. Destaca-se pelo movimento solto e pela presença elegante, ideal para lazer ou trabalho em picadeiro.', 'cavalo_6a1fe9950c8620.91863991.webp', '2026-06-03 08:45:10'),
+(4, 'Aurora do Prado', 'Cruzado Português', 'Fêmea', '2024-04-18', 1.32, 'Baia Amarilha', 3200.00, 'Reservado', 'Poldra jovem e encantadora, de expressão doce e pelagem clara com crinas escuras. Promete bom desenvolvimento e destaca-se pelo temperamento tranquilo e curioso.', 'cavalo_6a1fe9cd9e6d75.96811664.webp', '2026-06-03 08:46:07'),
+(5, 'Castor do Bosque', 'Mangalarga Marchador', 'Macho', '2015-07-27', 1.54, 'Alazã Tostada', 5800.00, 'Indisponível', 'Cavalo robusto e sereno, de pelagem alazã tostada e expressão tranquila. Ideal para quem procura um animal de confiança, com presença forte e temperamento equilibrado.', 'cavalo_6a1fea302dd8b2.31692046.webp', '2026-06-03 08:47:46'),
+(6, 'Fidalgo do Pinhal', 'Haflinger', 'Macho', '2023-02-11', 1.38, 'Alazã Amarilha', 2950.00, 'Em Tratamento', 'Jovem cavalo de expressão meiga e pelagem clara, com marca branca destacada na face. Encontra-se em tratamento, mantendo um temperamento dócil e curioso.', 'cavalo_6a1feb3896d239.50541509.webp', '2026-06-03 08:52:10'),
+(7, 'Ventania da Herdade', 'Appaloosa', 'Fêmea', '2019-05-06', 1.57, 'Rosilha', 7250.00, 'Disponível', 'Égua enérgica e elegante, com pelagem rosilha marcada e movimento expressivo. Destaca-se pela presença no campo e pelo temperamento atento, ideal para lazer ou trabalho ligeiro.', 'cavalo_6a1fed0a3b7876.85238318.webp', '2026-06-03 08:59:55'),
+(8, 'Melodia do Sol', 'Palomino', 'Fêmea', '2017-08-19', 1.52, 'Palomina', 6400.00, 'Disponível', 'Égua de pelagem dourada e crinas claras, com expressão doce e porte harmonioso. Destaca-se pela calma e beleza natural, ideal para lazer e passeios.', 'cavalo_6a1fed72a4cd49.41589020.webp', '2026-06-03 09:01:39'),
+(9, 'Sultão da Vinha', 'Cruzado Português', 'Macho', '2011-09-03', 1.61, 'Rosilha', 2500.00, 'Reformado', 'Cavalo experiente e tranquilo, de pelagem rosilha e porte distinto. Ideal para companhia ou vida em campo, com presença serena e olhar dócil.', 'cavalo_6a1fedc38717d7.07688426.webp', '2026-06-03 09:03:00');
 
 -- --------------------------------------------------------
 
@@ -147,6 +125,7 @@ CREATE TABLE `clientes` (
   `nome` varchar(150) NOT NULL,
   `email` varchar(150) NOT NULL,
   `telefone` varchar(30) DEFAULT NULL,
+  `nif` varchar(20) DEFAULT NULL,
   `mensagem` text NOT NULL,
   `tipo_interesse` varchar(50) DEFAULT 'compra',
   `estado` varchar(50) DEFAULT 'potencial',
@@ -157,21 +136,13 @@ CREATE TABLE `clientes` (
 -- Extraindo dados da tabela `clientes`
 --
 
-INSERT INTO `clientes` (`id`, `nome`, `email`, `telefone`, `mensagem`, `tipo_interesse`, `estado`, `criado_em`) VALUES
-(1, 'Ricardo Almeida', 'ricardo.almeida87@gmail.com', '+351 913 482 771', '', 'compra', 'potencial', '2026-05-20 10:34:27'),
-(2, 'Mariana Lopes', 'mariana.lopes.equestre@outlook.com', '+351 926 140 553', '', 'visita', 'contactado', '2026-05-20 10:35:09'),
-(3, 'Tiago Ferreira', 'tiagoferreira.cf@hotmail.com', '+351 918 662 104', '', 'informacao', 'potencial', '2026-05-20 10:35:50'),
-(4, 'Beatriz Cardoso', 'beatriz.cardoso22@gmail.com', '+351 936 517 820', '', 'compra', 'cliente', '2026-05-20 10:36:20'),
-(5, 'Hugo Martins', 'hugomartins.ranch@mail.com', '+351 912 904 445', '', 'visita', 'contactado', '2026-05-20 10:36:52'),
-(6, 'Catarina Neves', 'catarina.neves.eq@gmail.com', '+351 927 315 991', '', 'informacao', 'potencial', '2026-05-20 10:37:26'),
-(7, 'João Figueiredo', 'joao.figueiredo91@outlook.pt', '+351 914 770 268', '', 'compra', 'cliente', '2026-05-20 10:38:00'),
-(8, 'Leonor Baptista', 'leonor.baptista.equine@gmail.com', '+351 932 884 510', '', 'visita', 'potencial', '2026-05-20 10:38:31'),
-(9, 'Sofia Mendes', 'sofia.mendes98@gmail.com', '+351 917 408 226', '', 'compra', 'cliente', '2026-05-20 10:39:20'),
-(10, 'André Ribeiro', 'andre.ribeiro.eq@outlook.com', '+351 924 661 380', '', 'compra', 'cliente', '2026-05-20 10:39:49'),
-(11, 'Inês Carvalho', 'inescarvalho.equine@gmail.com', '+351 932 770 441', '', 'compra', 'cliente', '2026-05-20 10:40:18'),
-(12, 'Duarte Silva', 'duarte.silva.trails@hotmail.com', '+351 915 804 197', '', 'compra', 'cliente', '2026-05-20 10:40:51'),
-(13, 'Marta Correia', 'martacorreia.eq@mail.com', '+351 926 113 502', '', 'compra', 'cliente', '2026-05-20 10:41:14'),
-(14, 'Gonçalo Pires', 'goncalopires91@gmail.com', '+351 912 447 818', '', 'compra', 'cliente', '2026-05-20 10:41:39');
+INSERT INTO `clientes` (`id`, `nome`, `email`, `telefone`, `nif`, `mensagem`, `tipo_interesse`, `estado`, `criado_em`) VALUES
+(1, 'Mariana Silva', 'mariana.silva@email.com', '912345678', NULL, '', 'compra', 'potencial', '2026-06-03 09:06:02'),
+(2, 'João Martins', 'joao.martins@email.com', '934567890', NULL, '', 'informacao', 'contactado', '2026-06-03 09:06:34'),
+(3, 'Beatriz Costa', 'beatriz.costa@email.com', '919876543', NULL, '', 'visita', 'potencial', '2026-06-03 09:07:22'),
+(4, 'Tiago Ferreira', 'tiago.ferreira@email.com', '936789012', '245789123', '', 'compra', 'cliente', '2026-06-03 09:07:57'),
+(5, 'Inês Rodrigues', 'ines.rodrigues@email.com', '927654321', '289456732', '', 'compra', 'cliente', '2026-06-03 09:08:27'),
+(6, 'Miguel Almeida', 'miguel.almeida@email.com', '914328765', '256987341', '', 'compra', 'cliente', '2026-06-03 09:08:50');
 
 -- --------------------------------------------------------
 
@@ -191,22 +162,8 @@ CREATE TABLE `clientes_cavalos` (
 --
 
 INSERT INTO `clientes_cavalos` (`id`, `cliente_id`, `cavalo_id`, `criado_em`) VALUES
-(1, 1, 4, '2026-05-20 10:34:27'),
-(2, 1, 14, '2026-05-20 10:34:27'),
-(3, 2, 12, '2026-05-20 10:35:09'),
-(4, 4, 10, '2026-05-20 10:36:20'),
-(5, 5, 11, '2026-05-20 10:36:52'),
-(6, 5, 13, '2026-05-20 10:36:52'),
-(7, 6, 16, '2026-05-20 10:37:26'),
-(8, 7, 2, '2026-05-20 10:38:00'),
-(9, 8, 17, '2026-05-20 10:38:31'),
-(10, 8, 8, '2026-05-20 10:38:31'),
-(11, 9, 12, '2026-05-20 10:39:20'),
-(12, 10, 15, '2026-05-20 10:39:49'),
-(13, 12, 5, '2026-05-20 10:40:51'),
-(14, 12, 6, '2026-05-20 10:40:51'),
-(15, 13, 10, '2026-05-20 10:41:14'),
-(16, 14, 9, '2026-05-20 10:41:39');
+(2, 1, 7, '2026-06-03 09:06:41'),
+(3, 3, 3, '2026-06-03 09:07:22');
 
 -- --------------------------------------------------------
 
@@ -273,15 +230,13 @@ CREATE TABLE `fornecedores` (
 --
 
 INSERT INTO `fornecedores` (`id`, `nome`, `nif`, `telefone`, `email`, `morada`, `tipo_fornecedor`, `observacoes`, `data_criacao`) VALUES
-(1, 'AgroFeno Ibérica', '514872390', '+351 242 881 304', 'geral@agrofenoiberica.pt', 'Zona Industrial de Santarém, Lote 14, 2005-002 Santarém', 'Feno', 'Entregas semanais para grandes encomendas.', '2026-05-26 11:03:29'),
-(2, 'EquiVet Clínica Veterinária', '509334187', '+351 918 440 772', 'atendimento@equivet.pt', 'Rua das Cavalariças nº 18, 7000-221 Évora', 'Veterinário', 'Serviço de urgência 24h disponível.', '2026-05-26 11:04:12'),
-(3, 'Ferragens do Casco', '517903621', '+351 927 118 540', 'ferrador.cascos@gmail.com', 'Avenida Rural 55, 2100-144 Coruche', 'Ferrador', 'Especializado em ferraduras ortopédicas.', '2026-05-26 11:04:45'),
-(4, 'NutriHorse Portugal', '513287044', '+351 932 774 608', 'vendas@nutrihorse.pt', 'Rua do Prado nº 9, 3810-455 Aveiro', 'Alimentação', NULL, '2026-05-26 11:05:13'),
-(5, 'Transporte Equestre Almeida', '516490832', '+351 914 228 330', 'transportes.almeida@outlook.pt', 'Estrada Nacional 4, km 92, 7050-302 Montemor-o-Novo', 'Transporte', 'Transporte nacional e internacional de cavalos.', '2026-05-26 11:05:44'),
-(6, 'Palhas & Companhia', '510228971', '+351 936 005 194', 'encomendas@palhasecompanhia.pt', 'Rua da Fonte Nova 73, 2300-601 Tomar', 'Palha', NULL, '2026-05-26 11:06:10'),
-(7, 'EquiMed Farma', '519004572', '+351 919 660 287', 'suporte@equimedfarma.pt', 'Parque Empresarial do Ribatejo, Lote 7, 2080-101 Almeirim', 'Medicamentos', NULL, '2026-05-26 11:06:46'),
-(8, 'Lusoequestre Equipamentos', '515772144', '+351 926 511 432', 'comercial@lusoequestre.pt', 'Rua da Feira nº 31, 4750-803 Barcelos', 'Equipamento', 'Especializado em selas, cabeçadas e acessórios.', '2026-05-26 11:07:19'),
-(9, 'RuralFix Serviços', '518337905', '+351 912 345 880', 'ruralfix.manutencao@gmail.com', 'Caminho das Oliveiras, 8600-421 Lagos', 'Manutenção', 'Reparação de cercas, boxes e estruturas equestres.', '2026-05-26 11:07:54');
+(1, 'AgroRação Lusitana', '514782936', '912345678', 'geral@agroracaolusitana.pt', 'Rua das Quintas, nº 24, 2000-456 Santarém', 'Alimentação', NULL, '2026-06-03 09:28:41'),
+(2, 'Palhas do Ribatejo', '508193742', '934876210', 'encomendas@palhasdoribatejo.pt', 'Estrada Nacional 118, km 42, 2130-120 Benavente', 'Palha', NULL, '2026-06-03 09:29:14'),
+(3, 'Fenos & Campos', '516209873', '962114589', 'geral@fenosecampos.pt', 'Rua do Campo Verde, nº 7, 7350-203 Elvas', 'Feno', NULL, '2026-06-03 09:29:43'),
+(4, 'Clínica Veterinária EquusCare', '507648219', '913908456', 'clinica@equuscare.pt', 'Avenida dos Animais, nº 15, 7005-321 Évora', 'Veterinário', NULL, '2026-06-03 09:30:52'),
+(5, 'Ferrador João Martins', '221459876', '919 332 145', 'joao.martins.ferrador@gmail.com', 'Rua da Ferradura, nº 10, 2040-112 Rio Maior', 'Ferrador', NULL, '2026-06-03 09:31:16'),
+(6, 'FarmaEquina Portugal', '515734982', '961778234', 'vendas@farmaequina.pt', 'Rua da Saúde Animal, nº 18, 2560-098 Torres Vedras', 'Medicamentos', NULL, '2026-06-03 09:31:42'),
+(7, 'EquiStore Equipamentos', '517293640', '914555902', 'apoio@equistore.pt', 'Rua dos Arreios, nº 32, 4705-145 Braga', 'Equipamento', NULL, '2026-06-03 09:33:01');
 
 -- --------------------------------------------------------
 
@@ -299,13 +254,6 @@ CREATE TABLE `vendas_cavalos` (
   `observacoes` text DEFAULT NULL,
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Extraindo dados da tabela `vendas_cavalos`
---
-
-INSERT INTO `vendas_cavalos` (`id`, `cliente_id`, `cavalo_id`, `data_venda`, `valor`, `metodo_pagamento`, `observacoes`, `data_criacao`) VALUES
-(1, 10, 10, '2026-06-02', 7300.00, 'Transferência Bancária', NULL, '2026-06-02 14:26:49');
 
 --
 -- Índices para tabelas despejadas
@@ -397,31 +345,31 @@ ALTER TABLE `administradores`
 -- AUTO_INCREMENT de tabela `alugueres`
 --
 ALTER TABLE `alugueres`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `cavalos`
 --
 ALTER TABLE `cavalos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de tabela `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `clientes_cavalos`
 --
 ALTER TABLE `clientes_cavalos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `consumos_cavalos`
@@ -439,13 +387,13 @@ ALTER TABLE `despesas`
 -- AUTO_INCREMENT de tabela `fornecedores`
 --
 ALTER TABLE `fornecedores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de tabela `vendas_cavalos`
 --
 ALTER TABLE `vendas_cavalos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Restrições para despejos de tabelas
