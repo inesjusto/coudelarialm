@@ -49,11 +49,7 @@ try {
 
     $cavalo_id = (int) $aluguer['cavalo_id'];
 
-    /*
-        Se o aluguer for concluído manualmente:
-        - estado passa para concluido
-        - data_fim passa para hoje
-    */
+
     if ($estado === 'concluido') {
         $stmtAtualizarAluguer = $conn->prepare("
             UPDATE alugueres
@@ -79,10 +75,6 @@ try {
         ]);
     }
 
-    /*
-        Se for ativado manualmente, o cavalo passa para Alugado.
-        Normalmente isto será feito automaticamente pelo atualizar-alugueres.php.
-    */
     if ($estado === 'ativo') {
         $stmtAtualizarCavalo = $conn->prepare("
             UPDATE cavalos
@@ -103,11 +95,6 @@ try {
         ]);
     }
 
-    /*
-        Se for concluído ou cancelado:
-        - só volta o cavalo para Disponível se não existir outro aluguer ativo hoje.
-        - alugueres reservados futuros não devem deixar o cavalo como Alugado.
-    */
     if ($estado === 'concluido' || $estado === 'cancelado') {
         $stmtVerificarAtivoHoje = $conn->prepare("
             SELECT id
@@ -139,11 +126,6 @@ try {
         }
     }
 
-    /*
-        Se ficar reservado:
-        - o cavalo não deve ficar Alugado.
-        - se não houver aluguer ativo hoje, volta a Disponível.
-    */
     if ($estado === 'reservado') {
         $stmtVerificarAtivoHoje = $conn->prepare("
             SELECT id
