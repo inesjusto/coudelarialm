@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -17,6 +18,7 @@ include __DIR__ . '/../backend/proteger.php';
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -108,6 +110,7 @@ include __DIR__ . '/../backend/proteger.php';
 
                         <div class="campo">
                             <label for="sexo">Sexo</label>
+
                             <select id="sexo" name="sexo">
                                 <option value="">Selecione</option>
                                 <option value="Macho">Macho</option>
@@ -119,6 +122,7 @@ include __DIR__ . '/../backend/proteger.php';
                         <div class="campo campo-data-idade">
                             <div>
                                 <label for="data_nascimento">Data de Nascimento</label>
+
                                 <input
                                     type="text"
                                     id="data_nascimento"
@@ -177,6 +181,7 @@ include __DIR__ . '/../backend/proteger.php';
 
                         <div class="campo">
                             <label for="estado">Estado</label>
+
                             <select id="estado" name="estado">
                                 <option value="">Selecione</option>
                                 <option value="Disponível">Disponível</option>
@@ -224,7 +229,11 @@ include __DIR__ . '/../backend/proteger.php';
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
     <script>
+        /* =========================
+           CALENDÁRIO DA DATA DE NASCIMENTO
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof flatpickr !== 'undefined') {
                 flatpickr('.input-data', {
@@ -236,6 +245,7 @@ include __DIR__ . '/../backend/proteger.php';
             }
         });
     </script>
+
     <script src="assets/js/admin.js"></script>
 </body>
 </html>

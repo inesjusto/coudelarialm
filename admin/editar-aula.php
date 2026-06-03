@@ -63,9 +63,10 @@ $stmtCavalos->execute([
 $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
 function selecionado($valorAtual, $valorOpcao) {
-    return (string)$valorAtual === (string)$valorOpcao ? 'selected' : '';
+    return (string) $valorAtual === (string) $valorOpcao ? 'selected' : '';
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -82,6 +83,7 @@ function selecionado($valorAtual, $valorOpcao) {
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -115,19 +117,20 @@ function selecionado($valorAtual, $valorOpcao) {
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/editar-aula.php" method="POST">
-                        <input 
-                            type="hidden" 
-                            name="id" 
+                        <input
+                            type="hidden"
+                            name="id"
                             value="<?= htmlspecialchars($aula['id']) ?>"
                         >
 
                         <div class="campo">
                             <label for="cliente_id">Cliente</label>
+
                             <select id="cliente_id" name="cliente_id">
                                 <option value="">Sem cliente</option>
 
                                 <?php foreach ($clientes as $cliente): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($cliente['id']) ?>"
                                         <?= selecionado($aula['cliente_id'], $cliente['id']) ?>
                                     >
@@ -139,11 +142,12 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="cavalo_id">Cavalo</label>
+
                             <select id="cavalo_id" name="cavalo_id">
                                 <option value="">Sem cavalo</option>
 
                                 <?php foreach ($cavalos as $cavalo): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($cavalo['id']) ?>"
                                         <?= selecionado($aula['cavalo_id'], $cavalo['id']) ?>
                                     >
@@ -155,12 +159,13 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="data_aula">Data da Aula</label>
-                            <input 
-                                type="text" 
-                                id="data_aula" 
-                                name="data_aula" 
+
+                            <input
+                                type="text"
+                                id="data_aula"
+                                name="data_aula"
                                 class="input-data"
-                                value="<?= htmlspecialchars($aula['data_aula']) ?>" 
+                                value="<?= htmlspecialchars($aula['data_aula']) ?>"
                                 placeholder="Selecione a data"
                                 required
                             >
@@ -168,28 +173,31 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="hora_inicio">Hora de Início</label>
-                            <input 
-                                type="time" 
-                                id="hora_inicio" 
-                                name="hora_inicio" 
-                                value="<?= htmlspecialchars(substr($aula['hora_inicio'], 0, 5)) ?>" 
+
+                            <input
+                                type="time"
+                                id="hora_inicio"
+                                name="hora_inicio"
+                                value="<?= htmlspecialchars(substr($aula['hora_inicio'], 0, 5)) ?>"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="hora_fim">Hora de Fim</label>
-                            <input 
-                                type="time" 
-                                id="hora_fim" 
-                                name="hora_fim" 
-                                value="<?= htmlspecialchars(substr($aula['hora_fim'], 0, 5)) ?>" 
+
+                            <input
+                                type="time"
+                                id="hora_fim"
+                                name="hora_fim"
+                                value="<?= htmlspecialchars(substr($aula['hora_fim'], 0, 5)) ?>"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="tipo_aula">Tipo de Aula</label>
+
                             <select id="tipo_aula" name="tipo_aula">
                                 <option value="" <?= selecionado($aula['tipo_aula'], '') ?>>Selecione</option>
                                 <option value="Individual" <?= selecionado($aula['tipo_aula'], 'Individual') ?>>Individual</option>
@@ -203,11 +211,12 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="preco">Preço (€)</label>
-                            <input 
-                                type="text" 
-                                id="preco" 
-                                name="preco" 
-                                value="<?= htmlspecialchars(number_format((float)$aula['preco'], 2, ',', '.')) ?>" 
+
+                            <input
+                                type="text"
+                                id="preco"
+                                name="preco"
+                                value="<?= htmlspecialchars(number_format((float) $aula['preco'], 2, ',', '.')) ?>"
                                 placeholder="Ex.: 25,00"
                                 required
                             >
@@ -215,6 +224,7 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="estado">Estado</label>
+
                             <select id="estado" name="estado">
                                 <option value="marcada" <?= selecionado($aula['estado'], 'marcada') ?>>Marcada</option>
                                 <option value="realizada" <?= selecionado($aula['estado'], 'realizada') ?>>Realizada</option>
@@ -224,9 +234,10 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         <div class="campo">
                             <label for="observacoes">Observações</label>
-                            <textarea 
-                                id="observacoes" 
-                                name="observacoes" 
+
+                            <textarea
+                                id="observacoes"
+                                name="observacoes"
                                 rows="4"
                             ><?= htmlspecialchars($aula['observacoes'] ?? '') ?></textarea>
                         </div>
@@ -242,15 +253,15 @@ function selecionado($valorAtual, $valorOpcao) {
                         </div>
                     </form>
 
-                    <form 
-                        action="../backend/apagar-aula.php" 
-                        method="POST" 
-                        onsubmit="return confirm('Tens a certeza que queres apagar esta aula?');" 
+                    <form
+                        action="../backend/apagar-aula.php"
+                        method="POST"
+                        onsubmit="return confirm('Tens a certeza que queres apagar esta aula?');"
                         style="margin-top: 20px;"
                     >
-                        <input 
-                            type="hidden" 
-                            name="id" 
+                        <input
+                            type="hidden"
+                            name="id"
                             value="<?= htmlspecialchars($aula['id']) ?>"
                         >
 
@@ -267,10 +278,13 @@ function selecionado($valorAtual, $valorOpcao) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
     <script>
+        /* =========================
+           CALENDÁRIO DA DATA DA AULA
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             const dataAula = document.getElementById('data_aula');
             const cavaloSelect = document.getElementById('cavalo_id');
-            const cavaloAtual = "<?= htmlspecialchars((string)($aula['cavalo_id'] ?? '')) ?>";
+            const cavaloAtual = "<?= htmlspecialchars((string) ($aula['cavalo_id'] ?? '')) ?>";
 
             if (typeof flatpickr !== 'undefined') {
                 flatpickr('#data_aula', {
@@ -286,6 +300,9 @@ function selecionado($valorAtual, $valorOpcao) {
                 return;
             }
 
+            /* =========================
+               CAVALOS DISPONÍVEIS PARA AULA
+            ========================= */
             async function carregarCavalosDisponiveis() {
                 const data = dataAula.value;
 
@@ -321,7 +338,6 @@ function selecionado($valorAtual, $valorOpcao) {
 
                         cavaloSelect.appendChild(option);
                     });
-
                 } catch (erro) {
                     console.error('Erro ao carregar cavalos disponíveis:', erro);
                 }

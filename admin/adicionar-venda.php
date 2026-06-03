@@ -3,7 +3,6 @@ include __DIR__ . '/../backend/proteger.php';
 require_once __DIR__ . '/../backend/conexao.php';
 require_once __DIR__ . '/../backend/funcoes-formatacao.php';
 
-
 $stmtClientes = $conn->prepare("
     SELECT 
         MIN(id) AS id,
@@ -52,6 +51,7 @@ function mostrarErroVenda($erro) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -67,6 +67,7 @@ function mostrarErroVenda($erro) {
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -100,9 +101,9 @@ function mostrarErroVenda($erro) {
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/cadastrar-venda.php" method="POST" id="form-adicionar-venda">
-
                         <div class="campo">
                             <label>Cliente</label>
+
                             <select name="cliente_id" required>
                                 <option value="" disabled selected>Selecione</option>
 
@@ -120,6 +121,7 @@ function mostrarErroVenda($erro) {
 
                         <div class="campo">
                             <label for="cavalo_id">Cavalo</label>
+
                             <select id="cavalo_id" name="cavalo_id" required>
                                 <option value="" disabled selected>Selecione</option>
 
@@ -127,7 +129,7 @@ function mostrarErroVenda($erro) {
                                     <option value="" disabled>Não existem cavalos disponíveis</option>
                                 <?php else: ?>
                                     <?php foreach ($cavalos as $cavalo): ?>
-                                        <option 
+                                        <option
                                             value="<?= htmlspecialchars($cavalo['id']) ?>"
                                             data-preco="<?= htmlspecialchars(formatarValorInput($cavalo['preco'] ?? 0)) ?>"
                                         >
@@ -140,28 +142,31 @@ function mostrarErroVenda($erro) {
 
                         <div class="campo">
                             <label for="data_venda">Data da Venda</label>
-                            <input 
-                                type="date" 
-                                id="data_venda" 
-                                name="data_venda" 
-                                value="<?= date('Y-m-d') ?>" 
+
+                            <input
+                                type="date"
+                                id="data_venda"
+                                name="data_venda"
+                                value="<?= date('Y-m-d') ?>"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="valor">Valor (€)</label>
-                            <input 
-                                type="text" 
-                                id="valor" 
-                                name="valor" 
-                                placeholder="Ex.: 5000 ou 5.000,00" 
+
+                            <input
+                                type="text"
+                                id="valor"
+                                name="valor"
+                                placeholder="Ex.: 5000 ou 5.000,00"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="metodo_pagamento">Método de Pagamento</label>
+
                             <select id="metodo_pagamento" name="metodo_pagamento">
                                 <option value="">Selecione</option>
                                 <option value="Dinheiro">Dinheiro</option>
@@ -174,9 +179,10 @@ function mostrarErroVenda($erro) {
 
                         <div class="campo">
                             <label for="observacoes">Observações</label>
-                            <textarea 
-                                id="observacoes" 
-                                name="observacoes" 
+
+                            <textarea
+                                id="observacoes"
+                                name="observacoes"
                                 rows="5"
                             ></textarea>
                         </div>
@@ -198,7 +204,6 @@ function mostrarErroVenda($erro) {
                         <?php else: ?>
                             <p id="mensagem-formulario" class="mensagem-formulario"></p>
                         <?php endif; ?>
-
                     </form>
                 </div>
             </section>
@@ -208,6 +213,9 @@ function mostrarErroVenda($erro) {
     <script src="assets/js/admin.js"></script>
 
     <script>
+        /* =========================
+           PREENCHIMENTO AUTOMÁTICO DO VALOR DA VENDA
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             const selectCavalo = document.getElementById('cavalo_id');
             const inputValor = document.getElementById('valor');

@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -19,6 +20,7 @@ include __DIR__ . '/../backend/proteger.php';
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -52,6 +54,7 @@ include __DIR__ . '/../backend/proteger.php';
             <section class="admin-tabela-wrapper">
                 <div class="tabela-container">
                     <h2>Calendário de Aulas</h2>
+
                     <div id="calendario-aulas"></div>
                 </div>
             </section>

@@ -27,9 +27,10 @@ function formatarDataVenda($data) {
 }
 
 function formatarValorVenda($valor) {
-    return number_format((float)$valor, 2, ',', '.') . ' €';
+    return number_format((float) $valor, 2, ',', '.') . ' €';
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -45,6 +46,7 @@ function formatarValorVenda($valor) {
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -117,14 +119,14 @@ function formatarValorVenda($valor) {
                                     <td><?= htmlspecialchars(formatarDataVenda($venda['data_venda'])) ?></td>
                                     <td><?= htmlspecialchars(formatarValorVenda($venda['valor'])) ?></td>
                                     <td>
-                                        <?= !empty($venda['metodo_pagamento']) 
-                                            ? htmlspecialchars($venda['metodo_pagamento']) 
-                                            : '-' 
+                                        <?= !empty($venda['metodo_pagamento'])
+                                            ? htmlspecialchars($venda['metodo_pagamento'])
+                                            : '-'
                                         ?>
                                     </td>
                                     <td>
-                                        <a 
-                                            href="fatura-venda.php?id=<?= htmlspecialchars($venda['id']) ?>" 
+                                        <a
+                                            href="fatura-venda.php?id=<?= htmlspecialchars($venda['id']) ?>"
                                             class="btn-editar"
                                             target="_blank"
                                         >

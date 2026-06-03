@@ -80,6 +80,7 @@ $estadosPagamento = [
     'cancelado' => 'Cancelado'
 ];
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -96,6 +97,7 @@ $estadosPagamento = [
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -129,10 +131,10 @@ $estadosPagamento = [
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/editar-despesa.php" method="POST" novalidate>
-                        <input 
-                            type="hidden" 
-                            id="id" 
-                            name="id" 
+                        <input
+                            type="hidden"
+                            id="id"
+                            name="id"
                             value="<?= htmlspecialchars($despesa['id']) ?>"
                         >
 
@@ -143,7 +145,7 @@ $estadosPagamento = [
                                 <option value="">Sem fornecedor</option>
 
                                 <?php foreach ($fornecedores as $fornecedor): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($fornecedor['id']) ?>"
                                         <?= selecionado($despesa['fornecedor_id'] ?? '', $fornecedor['id']) ?>
                                     >
@@ -160,7 +162,7 @@ $estadosPagamento = [
                                 <option value="">Selecione</option>
 
                                 <?php foreach ($categorias as $categoria): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($categoria) ?>"
                                         <?= selecionado($despesa['categoria'] ?? '', $categoria) ?>
                                     >
@@ -173,9 +175,9 @@ $estadosPagamento = [
                         <div class="campo">
                             <label for="descricao">Descrição</label>
 
-                            <textarea 
-                                id="descricao" 
-                                name="descricao" 
+                            <textarea
+                                id="descricao"
+                                name="descricao"
                                 rows="4"
                             ><?= htmlspecialchars($despesa['descricao'] ?? '') ?></textarea>
                         </div>
@@ -183,10 +185,10 @@ $estadosPagamento = [
                         <div class="campo">
                             <label for="valor">Valor (€)</label>
 
-                            <input 
-                                type="text" 
-                                id="valor" 
-                                name="valor" 
+                            <input
+                                type="text"
+                                id="valor"
+                                name="valor"
                                 value="<?= htmlspecialchars(formatarValorInput($despesa['valor'] ?? '')) ?>"
                                 placeholder="Ex.: 150,50"
                                 required
@@ -222,9 +224,9 @@ $estadosPagamento = [
                             <div class="campo">
                                 <label for="data_inicio_calculo">Data de Início</label>
 
-                                <input 
-                                    type="text" 
-                                    id="data_inicio_calculo" 
+                                <input
+                                    type="text"
+                                    id="data_inicio_calculo"
                                     class="input-data"
                                     placeholder="Selecione a data"
                                 >
@@ -233,9 +235,9 @@ $estadosPagamento = [
                             <div class="campo">
                                 <label for="data_fim_calculo">Data de Fim</label>
 
-                                <input 
-                                    type="text" 
-                                    id="data_fim_calculo" 
+                                <input
+                                    type="text"
+                                    id="data_fim_calculo"
                                     class="input-data"
                                     placeholder="Selecione a data"
                                 >
@@ -263,10 +265,10 @@ $estadosPagamento = [
                         <div class="campo">
                             <label for="data_despesa">Data da Despesa</label>
 
-                            <input 
-                                type="text" 
-                                id="data_despesa" 
-                                name="data_despesa" 
+                            <input
+                                type="text"
+                                id="data_despesa"
+                                name="data_despesa"
                                 class="input-data"
                                 value="<?= htmlspecialchars($despesa['data_despesa'] ?? '') ?>"
                                 placeholder="Selecione a data"
@@ -281,7 +283,7 @@ $estadosPagamento = [
                                 <option value="">Selecione</option>
 
                                 <?php foreach ($metodosPagamento as $metodo): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($metodo) ?>"
                                         <?= selecionado($despesa['metodo_pagamento'] ?? '', $metodo) ?>
                                     >
@@ -296,7 +298,7 @@ $estadosPagamento = [
 
                             <select id="estado_pagamento" name="estado_pagamento">
                                 <?php foreach ($estadosPagamento as $valor => $texto): ?>
-                                    <option 
+                                    <option
                                         value="<?= htmlspecialchars($valor) ?>"
                                         <?= selecionado($despesa['estado_pagamento'] ?? 'pendente', $valor) ?>
                                     >
@@ -328,6 +330,9 @@ $estadosPagamento = [
     <script src="assets/js/admin.js"></script>
 
     <script>
+        /* =========================
+           RECÁLCULO AUTOMÁTICO DA DESPESA
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof flatpickr !== 'undefined') {
                 flatpickr('.input-data', {
@@ -354,6 +359,9 @@ $estadosPagamento = [
             const precoEmbalagem = document.getElementById('preco_embalagem');
             const unidade = document.getElementById('unidade');
 
+            /* =========================
+               NORMALIZAÇÃO DE VALORES
+            ========================= */
             function normalizarValor(valor) {
                 if (!valor) return 0;
 
@@ -375,9 +383,13 @@ $estadosPagamento = [
                 }
 
                 const numero = parseFloat(valor);
+
                 return isNaN(numero) ? 0 : numero;
             }
 
+            /* =========================
+               FORMATAÇÃO DE VALORES
+            ========================= */
             function formatarValor(valor) {
                 return `${Number(valor || 0)
                     .toFixed(2)
@@ -385,6 +397,9 @@ $estadosPagamento = [
                     .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
             }
 
+            /* =========================
+               CÁLCULO DO CONSUMO
+            ========================= */
             function calcularResumoConsumo() {
                 if (!resumoConsumo) return;
 

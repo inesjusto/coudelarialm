@@ -186,6 +186,7 @@ try {
 
     ob_start();
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -315,7 +316,6 @@ try {
     </style>
 </head>
 <body>
-
     <div class="topo">
         <h1>Coudelaria Lima Monteiro</h1>
 
@@ -339,6 +339,7 @@ try {
 
         <div class="card">
             <span>Lucro Geral</span>
+
             <strong class="<?= $lucroGeral >= 0 ? 'positivo' : 'negativo' ?>">
                 <?= number_format($lucroGeral, 2, ',', '.') ?> €
             </strong>
@@ -396,6 +397,7 @@ try {
                     <tr>
                         <td colspan="2">Sem despesas registadas neste período.</td>
                     </tr>
+
                     <tr class="linha-total">
                         <th>Total das Despesas</th>
                         <th><?= number_format($despesasTotal, 2, ',', '.') ?> €</th>
@@ -433,6 +435,7 @@ try {
                     <tr>
                         <td colspan="2">Sem custos associados a cavalos neste período.</td>
                     </tr>
+
                     <tr class="linha-total">
                         <th>Total dos Custos por Cavalo</th>
                         <th><?= number_format($totalCustosCavalos, 2, ',', '.') ?> €</th>
@@ -457,9 +460,9 @@ try {
     <div class="rodape">
         Documento gerado automaticamente pelo sistema da Coudelaria Lima Monteiro.
     </div>
-
 </body>
 </html>
+
 <?php
     $html = ob_get_clean();
 
@@ -470,7 +473,6 @@ try {
     $dompdf->stream($nomeFicheiro, [
         'Attachment' => false
     ]);
-
 } catch (Exception $e) {
     die('Erro ao gerar PDF: ' . $e->getMessage());
 }

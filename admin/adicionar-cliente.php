@@ -26,6 +26,7 @@ function mensagemErroCliente($erro) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -41,6 +42,7 @@ function mensagemErroCliente($erro) {
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -74,7 +76,6 @@ function mensagemErroCliente($erro) {
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/cadastrar-cliente.php" method="POST" novalidate>
-
                         <div class="campo">
                             <label for="nome">Nome</label>
                             <input type="text" id="nome" name="nome" required>
@@ -92,19 +93,21 @@ function mensagemErroCliente($erro) {
 
                         <div class="campo">
                             <label for="nif">NIF</label>
-                            <input 
-                                type="text" 
-                                id="nif" 
-                                name="nif" 
-                                maxlength="9" 
+
+                            <input
+                                type="text"
+                                id="nif"
+                                name="nif"
+                                maxlength="9"
                                 pattern="[0-9]{9}"
                                 inputmode="numeric"
                                 placeholder="Ex.: 123456789"
-                                >
+                            >
                         </div>
 
                         <div class="campo">
                             <label for="tipo_interesse">Tipo de interesse</label>
+
                             <select id="tipo_interesse" name="tipo_interesse" required>
                                 <option value="" selected disabled>Selecione</option>
                                 <option value="compra">Compra</option>
@@ -115,6 +118,7 @@ function mensagemErroCliente($erro) {
 
                         <div class="campo">
                             <label for="estado">Estado</label>
+
                             <select id="estado" name="estado" required>
                                 <option value="" selected disabled>Selecione</option>
                                 <option value="potencial">Potencial</option>
@@ -125,6 +129,7 @@ function mensagemErroCliente($erro) {
 
                         <div class="campo">
                             <label for="interesse">Interessado em cavalo</label>
+
                             <select id="interesse" name="interesse" onchange="toggleCavalo()" required>
                                 <option value="" selected disabled>Selecione</option>
                                 <option value="nao">Não</option>
@@ -158,7 +163,6 @@ function mensagemErroCliente($erro) {
                         <?php else: ?>
                             <p id="mensagem-formulario" class="mensagem-formulario"></p>
                         <?php endif; ?>
-
                     </form>
                 </div>
             </section>
@@ -166,6 +170,9 @@ function mensagemErroCliente($erro) {
     </div>
 
     <script>
+        /* =========================
+           CAMPO DE CAVALOS ASSOCIADOS
+        ========================= */
         function toggleCavalo() {
             const interesse = document.getElementById('interesse').value;
             const campoCavalo = document.getElementById('campo-cavalo');

@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -16,6 +17,7 @@ include __DIR__ . '/../backend/proteger.php';
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -76,6 +78,7 @@ include __DIR__ . '/../backend/proteger.php';
 
                         <div class="campo">
                             <label for="tipo_fornecedor">Tipo de Fornecedor</label>
+
                             <select id="tipo_fornecedor" name="tipo_fornecedor">
                                 <option value="">Selecione</option>
                                 <option value="Alimentação">Alimentação</option>

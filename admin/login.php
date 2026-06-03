@@ -1,8 +1,10 @@
 <?php
 session_start();
+
 $erro = $_SESSION['erro_login'] ?? '';
 unset($_SESSION['erro_login']);
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -17,6 +19,7 @@ unset($_SESSION['erro_login']);
         <div class="login-box">
             <a href="../public/index.html" class="login-logo-link">
                 <img src="assets/img/logo.png" alt="Logo da Coudelaria" class="login-logo">
+
                 <div class="login-brand">
                     <h1>Coudelaria</h1>
                     <h2>Lima Monteiro</h2>

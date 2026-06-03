@@ -26,7 +26,7 @@ function calcularReceitaAteHoje($dataInicio, $dataFim, $precoDiario) {
     $limite = $hoje < $fim ? $hoje : $fim;
     $diasDecorridos = calcularDias($dataInicio, $limite->format('Y-m-d'));
 
-    return $diasDecorridos * (float)$precoDiario;
+    return $diasDecorridos * (float) $precoDiario;
 }
 
 $stmtAlugueresAtivos = $conn->query("SELECT COUNT(*) FROM alugueres WHERE estado = 'ativo'");
@@ -96,6 +96,7 @@ $ultimaVenda = $stmtUltimaVenda->fetch(PDO::FETCH_ASSOC);
 
 $anoAtual = (int) date('Y');
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -112,6 +113,7 @@ $anoAtual = (int) date('Y');
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -150,48 +152,50 @@ $anoAtual = (int) date('Y');
                         <a href="vendas.php" class="botao-principal">Gerir Vendas</a>
 
                         <div class="pdf-financeiro-box">
-    <div class="pdf-financeiro-info">
-        <span class="pdf-financeiro-label">Relatório financeiro</span>
-        <strong>Exportar resumo financeiro</strong>
-        <small>Escolha o período e gere um PDF com receitas, despesas e lucro.</small>
-    </div>
+                            <div class="pdf-financeiro-info">
+                                <span class="pdf-financeiro-label">Relatório financeiro</span>
+                                <strong>Exportar resumo financeiro</strong>
+                                <small>Escolha o período e gere um PDF com receitas, despesas e lucro.</small>
+                            </div>
 
-    <form action="exportar-financeiro.php" method="GET" target="_blank" class="form-pdf-financeiro">
-        <div class="campo-pdf">
-            <label for="ano-pdf">Ano</label>
-            <select id="ano-pdf" name="ano" required>
-                <?php for ($ano = $anoAtual; $ano >= 2024; $ano--): ?>
-                    <option value="<?= htmlspecialchars($ano) ?>">
-                        <?= htmlspecialchars($ano) ?>
-                    </option>
-                <?php endfor; ?>
-            </select>
-        </div>
+                            <form action="exportar-financeiro.php" method="GET" target="_blank" class="form-pdf-financeiro">
+                                <div class="campo-pdf">
+                                    <label for="ano-pdf">Ano</label>
 
-        <div class="campo-pdf">
-            <label for="mes-pdf">Período</label>
-            <select id="mes-pdf" name="mes">
-                <option value="">Ano completo</option>
-                <option value="1">Janeiro</option>
-                <option value="2">Fevereiro</option>
-                <option value="3">Março</option>
-                <option value="4">Abril</option>
-                <option value="5">Maio</option>
-                <option value="6">Junho</option>
-                <option value="7">Julho</option>
-                <option value="8">Agosto</option>
-                <option value="9">Setembro</option>
-                <option value="10">Outubro</option>
-                <option value="11">Novembro</option>
-                <option value="12">Dezembro</option>
-            </select>
-        </div>
+                                    <select id="ano-pdf" name="ano" required>
+                                        <?php for ($ano = $anoAtual; $ano >= 2024; $ano--): ?>
+                                            <option value="<?= htmlspecialchars($ano) ?>">
+                                                <?= htmlspecialchars($ano) ?>
+                                            </option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </div>
 
-        <button type="submit" class="botao-pdf-financeiro">
-            Gerar PDF
-        </button>
-    </form>
-</div>
+                                <div class="campo-pdf">
+                                    <label for="mes-pdf">Período</label>
+
+                                    <select id="mes-pdf" name="mes">
+                                        <option value="">Ano completo</option>
+                                        <option value="1">Janeiro</option>
+                                        <option value="2">Fevereiro</option>
+                                        <option value="3">Março</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Maio</option>
+                                        <option value="6">Junho</option>
+                                        <option value="7">Julho</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Setembro</option>
+                                        <option value="10">Outubro</option>
+                                        <option value="11">Novembro</option>
+                                        <option value="12">Dezembro</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="botao-pdf-financeiro">
+                                    Gerar PDF
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -336,6 +340,7 @@ $anoAtual = (int) date('Y');
 
                     <div class="stat-card destaque-azul">
                         <span class="stat-label">Última Venda</span>
+
                         <strong class="stat-value" style="font-size: 1rem;">
                             <?php if ($ultimaVenda): ?>
                                 <?= htmlspecialchars($ultimaVenda['cavalo_nome']) ?>

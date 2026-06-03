@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -16,6 +17,7 @@ include __DIR__ . '/../backend/proteger.php';
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -49,7 +51,12 @@ include __DIR__ . '/../backend/proteger.php';
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/editar-fornecedor.php" method="POST" novalidate>
-                        <input type="hidden" id="id" name="id" value="<?php echo htmlspecialchars($_GET['id'] ?? ''); ?>">
+                        <input
+                            type="hidden"
+                            id="id"
+                            name="id"
+                            value="<?php echo htmlspecialchars($_GET['id'] ?? ''); ?>"
+                        >
 
                         <div class="campo">
                             <label for="nome">Nome</label>
@@ -78,6 +85,7 @@ include __DIR__ . '/../backend/proteger.php';
 
                         <div class="campo">
                             <label for="tipo_fornecedor">Tipo de Fornecedor</label>
+
                             <select id="tipo_fornecedor" name="tipo_fornecedor">
                                 <option value="">Selecione</option>
                                 <option value="Alimentação">Alimentação</option>
@@ -111,6 +119,9 @@ include __DIR__ . '/../backend/proteger.php';
     </div>
 
     <script>
+        /* =========================
+           CARREGAMENTO DOS DADOS DO FORNECEDOR
+        ========================= */
         document.addEventListener('DOMContentLoaded', async function () {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
@@ -139,7 +150,6 @@ include __DIR__ . '/../backend/proteger.php';
                 document.getElementById('morada').value = fornecedor.morada ?? '';
                 document.getElementById('tipo_fornecedor').value = fornecedor.tipo_fornecedor ?? '';
                 document.getElementById('observacoes').value = fornecedor.observacoes ?? '';
-
             } catch (erro) {
                 alert('Erro ao carregar os dados do fornecedor.');
                 console.error(erro);

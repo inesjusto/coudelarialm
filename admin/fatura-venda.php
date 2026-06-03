@@ -55,16 +55,17 @@ if (!$venda) {
 }
 
 function e($valor) {
-    return htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
 }
 
 function formatarData($data) {
     if (!$data) return '-';
+
     return date('d/m/Y', strtotime($data));
 }
 
 function formatarValor($valor) {
-    return number_format((float)$valor, 2, ',', '.') . ' €';
+    return number_format((float) $valor, 2, ',', '.') . ' €';
 }
 
 function calcularIdade($dataNascimento) {
@@ -83,15 +84,15 @@ function calcularIdade($dataNascimento) {
     }
 }
 
-$numeroFatura = 'VC-' . str_pad((string)$venda['id'], 5, '0', STR_PAD_LEFT);
+$numeroFatura = 'VC-' . str_pad((string) $venda['id'], 5, '0', STR_PAD_LEFT);
 $dataAtual = date('d/m/Y');
 $idadeCavalo = calcularIdade($venda['cavalo_data_nascimento']);
 
 $nifCoudelaria = '512345678';
-$nifCliente = trim((string)($venda['cliente_nif'] ?? ''));
+$nifCliente = trim((string) ($venda['cliente_nif'] ?? ''));
 
 $taxaIva = 0.23;
-$totalComIva = (float)$venda['valor'];
+$totalComIva = (float) $venda['valor'];
 $valorSemIva = $totalComIva / (1 + $taxaIva);
 $valorIva = $totalComIva - $valorSemIva;
 
@@ -103,6 +104,7 @@ $dompdf = new Dompdf($options);
 
 ob_start();
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -302,9 +304,7 @@ ob_start();
         }
     </style>
 </head>
-
 <body>
-
     <div class="topo">
         <h1>Coudelaria Lima Monteiro</h1>
 
@@ -435,17 +435,17 @@ ob_start();
         <h2>Declaração de Venda</h2>
 
         <p>
-            A Coudelaria Lima Monteiro, com o NIF 
-            <strong><?= e($nifCoudelaria) ?></strong>, declara que vendeu ao cliente 
+            A Coudelaria Lima Monteiro, com o NIF
+            <strong><?= e($nifCoudelaria) ?></strong>, declara que vendeu ao cliente
             <strong><?= e($venda['cliente_nome']) ?></strong>
             <?php if ($nifCliente !== ''): ?>
                 , com o NIF <strong><?= e($nifCliente) ?></strong>,
             <?php else: ?>
                 , identificado como <strong>Consumidor final</strong>,
             <?php endif; ?>
-            o cavalo <strong><?= e($venda['cavalo_nome']) ?></strong>, 
-            pelo valor total de <strong><?= e(formatarValor($totalComIva)) ?></strong>, 
-            incluindo IVA à taxa de 23%, na data de 
+            o cavalo <strong><?= e($venda['cavalo_nome']) ?></strong>,
+            pelo valor total de <strong><?= e(formatarValor($totalComIva)) ?></strong>,
+            incluindo IVA à taxa de 23%, na data de
             <strong><?= e(formatarData($venda['data_venda'])) ?></strong>.
         </p>
 
@@ -517,9 +517,9 @@ ob_start();
     <div class="rodape">
         Documento gerado automaticamente pelo sistema da Coudelaria Lima Monteiro.
     </div>
-
 </body>
 </html>
+
 <?php
 $html = ob_get_clean();
 

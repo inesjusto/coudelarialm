@@ -24,15 +24,19 @@ $stmtClienteCavalos = $conn->prepare("
     FROM clientes_cavalos 
     WHERE cliente_id = :cliente_id
 ");
-$stmtClienteCavalos->execute([':cliente_id' => $id]);
-$cavalosSelecionados = $stmtClienteCavalos->fetchAll(PDO::FETCH_COLUMN);
 
+$stmtClienteCavalos->execute([
+    ':cliente_id' => $id
+]);
+
+$cavalosSelecionados = $stmtClienteCavalos->fetchAll(PDO::FETCH_COLUMN);
 $cavalosSelecionados = array_map('intval', $cavalosSelecionados);
 
 $interesse = !empty($cavalosSelecionados) ? 'sim' : 'nao';
 $tipoInteresseAtual = $cliente['tipo_interesse'] ?? '';
 $estadoAtual = $cliente['estado'] ?? '';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -48,6 +52,7 @@ $estadoAtual = $cliente['estado'] ?? '';
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -85,42 +90,46 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                         <div class="campo">
                             <label for="nome">Nome</label>
-                            <input 
-                                type="text" 
-                                id="nome" 
-                                name="nome" 
-                                value="<?= htmlspecialchars($cliente['nome']) ?>" 
+
+                            <input
+                                type="text"
+                                id="nome"
+                                name="nome"
+                                value="<?= htmlspecialchars($cliente['nome']) ?>"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="email">Email</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                value="<?= htmlspecialchars($cliente['email']) ?>" 
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value="<?= htmlspecialchars($cliente['email']) ?>"
                                 required
                             >
                         </div>
 
                         <div class="campo">
                             <label for="telefone">Telefone</label>
-                            <input 
-                                type="text" 
-                                id="telefone" 
-                                name="telefone" 
+
+                            <input
+                                type="text"
+                                id="telefone"
+                                name="telefone"
                                 value="<?= htmlspecialchars($cliente['telefone'] ?? '') ?>"
                             >
                         </div>
 
                         <div class="campo">
                             <label for="nif">NIF</label>
-                            <input 
-                                type="text" 
-                                id="nif" 
-                                name="nif" 
+
+                            <input
+                                type="text"
+                                id="nif"
+                                name="nif"
                                 maxlength="20"
                                 placeholder="Ex.: 123456789"
                                 value="<?= htmlspecialchars($cliente['nif'] ?? '') ?>"
@@ -129,6 +138,7 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                         <div class="campo">
                             <label for="tipo_interesse">Tipo de interesse</label>
+
                             <select id="tipo_interesse" name="tipo_interesse" required>
                                 <option value="" disabled <?= $tipoInteresseAtual === '' ? 'selected' : '' ?>>Selecione</option>
                                 <option value="compra" <?= $tipoInteresseAtual === 'compra' ? 'selected' : '' ?>>Compra</option>
@@ -139,6 +149,7 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                         <div class="campo">
                             <label for="estado">Estado</label>
+
                             <select id="estado" name="estado" required>
                                 <option value="" disabled <?= $estadoAtual === '' ? 'selected' : '' ?>>Selecione</option>
                                 <option value="potencial" <?= $estadoAtual === 'potencial' ? 'selected' : '' ?>>Potencial</option>
@@ -149,6 +160,7 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                         <div class="campo">
                             <label for="interesse">Interessado em cavalo</label>
+
                             <select id="interesse" name="interesse" onchange="toggleCavalo()" required>
                                 <option value="nao" <?= $interesse === 'nao' ? 'selected' : '' ?>>Não</option>
                                 <option value="sim" <?= $interesse === 'sim' ? 'selected' : '' ?>>Sim</option>
@@ -160,8 +172,10 @@ $estadoAtual = $cliente['estado'] ?? '';
 
                             <select id="cavalos" name="cavalos[]" multiple>
                                 <?php foreach ($cavalos as $cavalo): ?>
-                                    <option value="<?= htmlspecialchars($cavalo['id']) ?>"
-                                        <?= in_array((int) $cavalo['id'], $cavalosSelecionados, true) ? 'selected' : '' ?>>
+                                    <option
+                                        value="<?= htmlspecialchars($cavalo['id']) ?>"
+                                        <?= in_array((int) $cavalo['id'], $cavalosSelecionados, true) ? 'selected' : '' ?>
+                                    >
                                         <?= htmlspecialchars($cavalo['nome']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -181,6 +195,9 @@ $estadoAtual = $cliente['estado'] ?? '';
     </div>
 
     <script>
+        /* =========================
+           CAMPO DE CAVALOS ASSOCIADOS
+        ========================= */
         function toggleCavalo() {
             const interesse = document.getElementById('interesse').value;
             const campoCavalo = document.getElementById('campo-cavalo');

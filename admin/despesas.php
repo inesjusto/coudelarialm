@@ -1,6 +1,7 @@
 <?php
 include __DIR__ . '/../backend/proteger.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -12,11 +13,11 @@ include __DIR__ . '/../backend/proteger.php';
 </head>
 <body>
     <div class="admin-layout">
-
         <aside class="admin-sidebar">
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -38,7 +39,6 @@ include __DIR__ . '/../backend/proteger.php';
         </aside>
 
         <main class="admin-main">
-
             <header class="admin-header admin-header-flex">
                 <div class="admin-header-texto">
                     <h1>Despesas</h1>
@@ -54,9 +54,7 @@ include __DIR__ . '/../backend/proteger.php';
 
             <section class="admin-tabela-wrapper">
                 <div class="tabela-container">
-
                     <table class="admin-tabela">
-
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -79,14 +77,10 @@ include __DIR__ . '/../backend/proteger.php';
                                 </td>
                             </tr>
                         </tbody>
-
                     </table>
-
                 </div>
             </section>
-
         </main>
-
     </div>
 
     <script src="assets/js/admin.js"></script>

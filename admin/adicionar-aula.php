@@ -10,6 +10,7 @@ $stmtClientes = $conn->query("
 ");
 $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -26,6 +27,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -61,6 +63,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
                     <form action="../backend/cadastrar-aula.php" method="POST" novalidate>
                         <div class="campo">
                             <label for="cliente_id">Cliente</label>
+
                             <select id="cliente_id" name="cliente_id">
                                 <option value="">Sem cliente</option>
 
@@ -78,6 +81,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="cavalo_id">Cavalo</label>
+
                             <select id="cavalo_id" name="cavalo_id">
                                 <option value="">Escolha primeiro a data da aula</option>
                             </select>
@@ -85,10 +89,11 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="data_aula">Data da Aula</label>
-                            <input 
-                                type="text" 
-                                id="data_aula" 
-                                name="data_aula" 
+
+                            <input
+                                type="text"
+                                id="data_aula"
+                                name="data_aula"
                                 class="input-data"
                                 placeholder="Selecione a data"
                                 required
@@ -107,6 +112,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="tipo_aula">Tipo de Aula</label>
+
                             <select id="tipo_aula" name="tipo_aula">
                                 <option value="">Selecione</option>
                                 <option value="Individual">Individual</option>
@@ -125,6 +131,7 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="estado">Estado</label>
+
                             <select id="estado" name="estado">
                                 <option value="marcada">Marcada</option>
                                 <option value="realizada">Realizada</option>
@@ -153,6 +160,9 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
     <script>
+        /* =========================
+           SELECÇÃO DA DATA DA AULA
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             const dataAula = document.getElementById('data_aula');
             const cavaloSelect = document.getElementById('cavalo_id');
@@ -169,6 +179,9 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
 
             if (!dataAula || !cavaloSelect) return;
 
+            /* =========================
+               CAVALOS DISPONÍVEIS PARA AULA
+            ========================= */
             async function carregarCavalosDisponiveis() {
                 const data = dataAula.value;
 
@@ -196,7 +209,6 @@ $clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
                         option.textContent = cavalo.nome;
                         cavaloSelect.appendChild(option);
                     });
-
                 } catch (erro) {
                     console.error('Erro ao carregar cavalos disponíveis:', erro);
                     cavaloSelect.innerHTML = '<option value="">Erro ao carregar cavalos</option>';

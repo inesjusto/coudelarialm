@@ -1,3 +1,6 @@
+/* =========================
+   CONFIGURAÇÕES GERAIS
+========================= */
 const TIPOS_IMAGEM_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const TAMANHO_MAXIMO_IMAGEM = 20 * 1024 * 1024;
 
@@ -6,6 +9,9 @@ let graficoClientesTipo = null;
 let graficoClientesEstado = null;
 let graficoRacasDetalhe = null;
 
+/* =========================
+   FUNÇÕES AUXILIARES GERAIS
+========================= */
 function pedidoComSucesso(resultado) {
     return resultado?.sucesso === true || resultado?.status === 'success';
 }
@@ -27,15 +33,12 @@ function normalizarPreco(valor) {
     const temPonto = valor.includes('.');
 
     if (temVirgula && temPonto) {
-        // Formato português: 1.000,00
         valor = valor.replace(/\./g, '').replace(',', '.');
     } else if (temVirgula && !temPonto) {
-        // Formato português simples: 25,00
         valor = valor.replace(',', '.');
     } else if (temPonto && !temVirgula) {
         const partes = valor.split('.');
 
-        // 1.000 como separador de milhar. 25.00 fica decimal.
         if (partes.length === 2 && partes[1].length === 3) {
             valor = valor.replace(/\./g, '');
         }
@@ -83,9 +86,9 @@ function formatarTextoApresentacao(valor, fallback = '-') {
     if (valor === null || valor === undefined) return fallback;
 
     let texto = valor.toString().trim().toLowerCase();
+
     if (texto === '') return fallback;
 
-    // Mapa de correções com acentos
     const mapa = {
         'informacao': 'Informação',
         'visita': 'Visita',
@@ -94,15 +97,17 @@ function formatarTextoApresentacao(valor, fallback = '-') {
 
     if (mapa[texto]) return mapa[texto];
 
-    // substituir underscores por espaço
     texto = texto.replace(/_/g, ' ');
 
-    // primeira letra maiúscula
     return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+/* =========================
+   TABELA DE CAVALOS
+========================= */
 async function carregarTabelaCavalos() {
     const tabela = document.getElementById('tabela-cavalos');
+
     if (!tabela) return;
 
     try {
@@ -138,20 +143,20 @@ async function carregarTabelaCavalos() {
             const linha = document.createElement('tr');
 
             linha.innerHTML = `
-    <td>${cavalo.id ?? '-'}</td>
-    <td><strong>${cavalo.nome ?? '-'}</strong></td>
-    <td>${formatarTextoApresentacao(cavalo.sexo)}</td>
-    <td>${cavalo.idade ?? '-'}</td>
-    <td>${formatarTextoApresentacao(cavalo.raca)}</td>
-    <td>${formatarPreco(cavalo.preco)}</td>
-    <td>${formatarTextoApresentacao(cavalo.estado)}</td>
-    <td>
-    <div class="acoes">
-            <button class="btn-editar" onclick="editarCavalo(${cavalo.id})">Editar</button>
-            <button class="btn-apagar" onclick="apagarCavalo(${cavalo.id})">Apagar</button>
-        </div>
-    </td>
-`;
+                <td>${cavalo.id ?? '-'}</td>
+                <td><strong>${cavalo.nome ?? '-'}</strong></td>
+                <td>${formatarTextoApresentacao(cavalo.sexo)}</td>
+                <td>${cavalo.idade ?? '-'}</td>
+                <td>${formatarTextoApresentacao(cavalo.raca)}</td>
+                <td>${formatarPreco(cavalo.preco)}</td>
+                <td>${formatarTextoApresentacao(cavalo.estado)}</td>
+                <td>
+                    <div class="acoes">
+                        <button class="btn-editar" onclick="editarCavalo(${cavalo.id})">Editar</button>
+                        <button class="btn-apagar" onclick="apagarCavalo(${cavalo.id})">Apagar</button>
+                    </div>
+                </td>
+            `;
 
             tabela.appendChild(linha);
         });
@@ -161,6 +166,7 @@ async function carregarTabelaCavalos() {
                 <td colspan="7" class="mensagem-vazia">Erro ao carregar os cavalos.</td>
             </tr>
         `;
+
         console.error('Erro ao carregar tabela de cavalos:', erro);
     }
 }
@@ -171,6 +177,7 @@ function editarCavalo(id) {
 
 async function apagarCavalo(id) {
     const confirmar = confirm('Tens a certeza que queres apagar este cavalo?');
+
     if (!confirmar) return;
 
     try {
@@ -196,11 +203,15 @@ async function apagarCavalo(id) {
     }
 }
 
+/* =========================
+   VALIDAÇÃO E PRÉ-VISUALIZAÇÃO DE IMAGENS
+========================= */
 function validarImagemSelecionada(file, obrigatoria = false) {
     if (!file) {
         if (obrigatoria) {
             return { valida: false, erro: 'Selecione uma imagem.' };
         }
+
         return { valida: true, erro: '' };
     }
 
@@ -239,6 +250,7 @@ function configurarPreviewImagem() {
                 previewImagem.src = '';
                 previewImagem.style.display = 'none';
             }
+
             return;
         }
 
@@ -246,12 +258,14 @@ function configurarPreviewImagem() {
 
         if (file) {
             if (nomeImagem) nomeImagem.textContent = file.name;
+
             if (previewImagem) {
                 previewImagem.src = URL.createObjectURL(file);
                 previewImagem.style.display = 'block';
             }
         } else {
             if (nomeImagem) nomeImagem.textContent = 'Nenhum ficheiro selecionado';
+
             if (previewImagem && formAdicionar) {
                 previewImagem.src = '';
                 previewImagem.style.display = 'none';
@@ -260,8 +274,12 @@ function configurarPreviewImagem() {
     });
 }
 
+/* =========================
+   FORMULÁRIO DE ADICIONAR CAVALO
+========================= */
 function configurarFormularioAdicionar() {
     const formAdicionar = document.getElementById('form-adicionar-cavalo');
+
     if (!formAdicionar) return;
 
     formAdicionar.addEventListener('submit', async function (event) {
@@ -278,6 +296,7 @@ function configurarFormularioAdicionar() {
         }
 
         if (erroImagem) erroImagem.textContent = '';
+
         if (mensagem) {
             mensagem.textContent = '';
             mensagem.classList.remove('sucesso', 'erro');
@@ -326,6 +345,7 @@ function configurarFormularioAdicionar() {
                 const previewImagem = document.getElementById('preview-imagem');
 
                 if (nomeImagem) nomeImagem.textContent = 'Nenhum ficheiro selecionado';
+
                 if (previewImagem) {
                     previewImagem.src = '';
                     previewImagem.style.display = 'none';
@@ -342,6 +362,7 @@ function configurarFormularioAdicionar() {
             }
         } catch (erro) {
             console.error('Erro ao adicionar cavalo:', erro);
+
             if (mensagem) {
                 mensagem.textContent = 'Erro ao adicionar cavalo.';
                 mensagem.classList.add('erro');
@@ -350,6 +371,9 @@ function configurarFormularioAdicionar() {
     });
 }
 
+/* =========================
+   FORMULÁRIO DE EDITAR CAVALO
+========================= */
 function obterParametroId() {
     const parametros = new URLSearchParams(window.location.search);
     return parametros.get('id');
@@ -357,6 +381,7 @@ function obterParametroId() {
 
 async function carregarDadosCavaloParaEdicao() {
     const formEditar = document.getElementById('form-editar-cavalo');
+
     if (!formEditar) return;
 
     const id = obterParametroId();
@@ -402,18 +427,21 @@ async function carregarDadosCavaloParaEdicao() {
         document.getElementById('descricao').value = cavalo.descricao ?? '';
 
         const preview = document.getElementById('preview-imagem');
+
         if (preview && cavalo.imagem) {
             preview.src = `../public/assets/img/cavalos/${cavalo.imagem}`;
             preview.style.display = 'block';
         }
     } catch (erro) {
         console.error('Erro ao carregar dados do cavalo:', erro);
+
         if (mensagem) mensagem.textContent = 'Erro ao carregar os dados do cavalo.';
     }
 }
 
 function configurarFormularioEditar() {
     const formEditar = document.getElementById('form-editar-cavalo');
+
     if (!formEditar) return;
 
     carregarDadosCavaloParaEdicao();
@@ -432,6 +460,7 @@ function configurarFormularioEditar() {
         }
 
         if (erroImagem) erroImagem.textContent = '';
+
         if (mensagem) {
             mensagem.textContent = '';
             mensagem.classList.remove('sucesso', 'erro');
@@ -489,6 +518,7 @@ function configurarFormularioEditar() {
             }
         } catch (erro) {
             console.error('Erro ao editar cavalo:', erro);
+
             if (mensagem) {
                 mensagem.textContent = 'Erro ao editar cavalo.';
                 mensagem.classList.add('erro');
@@ -497,8 +527,12 @@ function configurarFormularioEditar() {
     });
 }
 
+/* =========================
+   TABELA DE CLIENTES
+========================= */
 async function carregarTabelaClientes() {
     const tabela = document.getElementById('tabela-clientes');
+
     if (!tabela) return;
 
     try {
@@ -548,6 +582,7 @@ async function carregarTabelaClientes() {
         });
     } catch (erro) {
         console.error('Erro ao carregar clientes:', erro);
+
         tabela.innerHTML = `
             <tr>
                 <td colspan="8" class="mensagem-vazia">Erro ao carregar clientes.</td>
@@ -562,6 +597,7 @@ function editarCliente(id) {
 
 async function apagarCliente(id) {
     const confirmar = confirm('Tens a certeza que queres apagar este cliente?');
+
     if (!confirmar) return;
 
     try {
@@ -587,8 +623,12 @@ async function apagarCliente(id) {
     }
 }
 
+/* =========================
+   FORMULÁRIO DE EDITAR CLIENTE
+========================= */
 async function carregarClienteEdicao() {
     const form = document.getElementById('form-editar-cliente');
+
     if (!form) return;
 
     const params = new URLSearchParams(window.location.search);
@@ -614,6 +654,7 @@ async function carregarClienteEdicao() {
 
 function configurarEditarCliente() {
     const form = document.getElementById('form-editar-cliente');
+
     if (!form) return;
 
     carregarClienteEdicao();
@@ -622,6 +663,7 @@ function configurarEditarCliente() {
         e.preventDefault();
 
         const mensagem = document.getElementById('mensagem-formulario');
+
         if (mensagem) {
             mensagem.textContent = '';
             mensagem.classList.remove('sucesso', 'erro');
@@ -659,6 +701,7 @@ function configurarEditarCliente() {
             }
         } catch (erro) {
             console.error('Erro ao editar cliente:', erro);
+
             if (mensagem) {
                 mensagem.textContent = 'Erro ao editar cliente.';
                 mensagem.classList.add('erro');
@@ -667,6 +710,9 @@ function configurarEditarCliente() {
     });
 }
 
+/* =========================
+   GRÁFICOS - FUNÇÕES AUXILIARES
+========================= */
 function destruirGrafico(instancia) {
     if (instancia) {
         instancia.destroy();
@@ -688,14 +734,20 @@ function obterPaleta(quantidade) {
     ];
 
     const cores = [];
+
     for (let i = 0; i < quantidade; i++) {
         cores.push(base[i % base.length]);
     }
+
     return cores;
 }
 
+/* =========================
+   GRÁFICOS DOS CAVALOS
+========================= */
 async function carregarGraficoCavalos(agrupamento = 'sexo') {
     const canvas = document.getElementById('grafico-cavalos');
+
     if (!canvas) return;
 
     try {
@@ -772,13 +824,15 @@ async function carregarGraficoCavalos(agrupamento = 'sexo') {
     }
 }
 
+/* =========================
+   GRÁFICOS DOS CLIENTES
+========================= */
 async function carregarGraficoClientesTipo() {
-
     const canvas = document.getElementById('grafico-clientes-tipo');
+
     if (!canvas) return;
 
     try {
-
         const resposta = await fetch('../backend/stats-clientes.php?agrupamento=tipo');
         const resultado = await resposta.json();
 
@@ -824,12 +878,9 @@ async function carregarGraficoClientesTipo() {
         destruirGrafico(graficoClientesTipo);
 
         graficoClientesTipo = new Chart(canvas, {
-
             type: 'doughnut',
-
             data: {
                 labels: labels,
-
                 datasets: [{
                     data: valores,
                     backgroundColor: obterPaleta(labels.length),
@@ -837,11 +888,9 @@ async function carregarGraficoClientesTipo() {
                     borderWidth: 4
                 }]
             },
-
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-
                 plugins: {
                     legend: {
                         labels: {
@@ -851,23 +900,17 @@ async function carregarGraficoClientesTipo() {
                 }
             }
         });
-
     } catch (erro) {
-
-        console.error(
-            'Erro ao carregar gráfico tipo clientes:',
-            erro
-        );
+        console.error('Erro ao carregar gráfico tipo clientes:', erro);
     }
 }
 
 async function carregarGraficoClientesEstado() {
-
     const canvas = document.getElementById('grafico-clientes-estado');
+
     if (!canvas) return;
 
     try {
-
         const resposta = await fetch('../backend/stats-clientes.php?agrupamento=interesse_cavalo');
         const resultado = await resposta.json();
 
@@ -877,20 +920,15 @@ async function carregarGraficoClientesEstado() {
         }
 
         const dados = Array.isArray(resultado.dados) ? resultado.dados : [];
-
         const labels = dados.map(item => item.label || 'Sem estado');
-
         const valores = dados.map(item => Number(item.total) || 0);
 
         destruirGrafico(graficoClientesEstado);
 
         graficoClientesEstado = new Chart(canvas, {
-
             type: 'doughnut',
-
             data: {
                 labels: labels,
-
                 datasets: [{
                     data: valores,
                     backgroundColor: obterPaleta(labels.length),
@@ -898,11 +936,9 @@ async function carregarGraficoClientesEstado() {
                     borderWidth: 4
                 }]
             },
-
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-
                 plugins: {
                     legend: {
                         labels: {
@@ -912,18 +948,14 @@ async function carregarGraficoClientesEstado() {
                 }
             }
         });
-
     } catch (erro) {
-
-        console.error(
-    'Erro ao carregar gráfico de interesse em cavalos:',
-    erro
-);
+        console.error('Erro ao carregar gráfico de interesse em cavalos:', erro);
     }
 }
 
 async function carregarGraficoRacasDetalhe() {
     const canvas = document.getElementById('grafico-racas-detalhe');
+
     if (!canvas) return;
 
     try {
@@ -991,9 +1023,7 @@ async function carregarGraficoRacasDetalhe() {
 }
 
 function configurarFiltrosGraficos() {
-
     function ativarBotoes(containerId, callback) {
-
         const container = document.getElementById(containerId);
 
         if (!container) return;
@@ -1001,27 +1031,25 @@ function configurarFiltrosGraficos() {
         const botoes = container.querySelectorAll('.filtro-btn');
 
         botoes.forEach(btn => {
-
             btn.addEventListener('click', () => {
-
                 botoes.forEach(b => b.classList.remove('ativo'));
 
                 btn.classList.add('ativo');
 
                 callback(btn.dataset.value);
-
             });
-
         });
-
     }
 
-    // Apenas filtros dos cavalos
     ativarBotoes('filtro-cavalos', carregarGraficoCavalos);
 }
 
+/* =========================
+   TABELA DE FORNECEDORES
+========================= */
 async function carregarTabelaFornecedores() {
     const tabela = document.getElementById('tabela-fornecedores');
+
     if (!tabela) return;
 
     try {
@@ -1079,6 +1107,7 @@ async function carregarTabelaFornecedores() {
                 <td colspan="7" class="mensagem-vazia">Erro ao carregar fornecedores.</td>
             </tr>
         `;
+
         console.error('Erro ao carregar fornecedores:', erro);
     }
 }
@@ -1089,6 +1118,7 @@ function editarFornecedor(id) {
 
 async function apagarFornecedor(id) {
     const confirmar = confirm('Tens a certeza que queres apagar este fornecedor?');
+
     if (!confirmar) return;
 
     try {
@@ -1114,8 +1144,12 @@ async function apagarFornecedor(id) {
     }
 }
 
+/* =========================
+   TABELA DE DESPESAS
+========================= */
 async function carregarTabelaDespesas() {
     const tabela = document.getElementById('tabela-despesas');
+
     if (!tabela) return;
 
     try {
@@ -1207,6 +1241,7 @@ function editarDespesa(id) {
 
 async function apagarDespesa(id) {
     const confirmar = confirm('Tens a certeza que queres apagar esta despesa?');
+
     if (!confirmar) return;
 
     try {
@@ -1232,8 +1267,12 @@ async function apagarDespesa(id) {
     }
 }
 
+/* =========================
+   SELECT DE FORNECEDORES
+========================= */
 async function carregarSelectFornecedores() {
     const select = document.getElementById('fornecedor_id');
+
     if (!select) return;
 
     try {
@@ -1253,6 +1292,9 @@ async function carregarSelectFornecedores() {
     }
 }
 
+/* =========================
+   ESTATÍSTICAS FINANCEIRAS
+========================= */
 let graficoDespesasCategorias = null;
 let graficoCustoCavalos = null;
 
@@ -1261,9 +1303,7 @@ function formatarEuros(valor) {
 }
 
 async function carregarStatsFinanceiro() {
-
     try {
-
         const resposta = await fetch('../backend/stats-financeiro.php');
 
         if (!resposta.ok) {
@@ -1277,40 +1317,31 @@ async function carregarStatsFinanceiro() {
             return;
         }
 
-        // RECEITAS
         const receitaTotal = document.getElementById('financeiro-receita-total');
 
         if (receitaTotal) {
-            receitaTotal.textContent =
-                `${Number(dados.receita_total || 0).toFixed(2)} €`;
+            receitaTotal.textContent = `${Number(dados.receita_total || 0).toFixed(2)} €`;
         }
 
         const receitaVendas = document.getElementById('financeiro-receita-vendas');
 
-if (receitaVendas) {
-    receitaVendas.textContent =
-        `${Number(dados.receita_vendas || 0).toFixed(2)} €`;
-}
+        if (receitaVendas) {
+            receitaVendas.textContent = `${Number(dados.receita_vendas || 0).toFixed(2)} €`;
+        }
 
-        // DESPESAS TOTAIS
         const despesasTotal = document.getElementById('financeiro-despesas-total');
 
         if (despesasTotal) {
-            despesasTotal.textContent =
-                `${Number(dados.despesas_total || 0).toFixed(2)} €`;
+            despesasTotal.textContent = `${Number(dados.despesas_total || 0).toFixed(2)} €`;
         }
 
-        // LUCRO GERAL
         const lucroGeral = document.getElementById('financeiro-lucro-geral');
 
         if (lucroGeral) {
-
             const valorLucro = Number(dados.lucro_geral || 0);
 
-            lucroGeral.textContent =
-                `${valorLucro.toFixed(2)} €`;
+            lucroGeral.textContent = `${valorLucro.toFixed(2)} €`;
 
-            // Cor dinâmica
             if (valorLucro >= 0) {
                 lucroGeral.style.color = '#16a34a';
             } else {
@@ -1318,49 +1349,38 @@ if (receitaVendas) {
             }
         }
 
-        // DESPESAS MÊS
         const totalMes = document.getElementById('financeiro-total-mes');
 
         if (totalMes) {
-            totalMes.textContent =
-                `${Number(dados.total_mes || 0).toFixed(2)} €`;
+            totalMes.textContent = `${Number(dados.total_mes || 0).toFixed(2)} €`;
         }
 
-        // DESPESAS ANO
         const totalAno = document.getElementById('financeiro-total-ano');
 
         if (totalAno) {
-            totalAno.textContent =
-                `${Number(dados.total_ano || 0).toFixed(2)} €`;
+            totalAno.textContent = `${Number(dados.total_ano || 0).toFixed(2)} €`;
         }
 
-        // PENDENTES
         const totalPendente = document.getElementById('financeiro-total-pendente');
 
         if (totalPendente) {
-            totalPendente.textContent =
-                `${Number(dados.total_pendente || 0).toFixed(2)} €`;
+            totalPendente.textContent = `${Number(dados.total_pendente || 0).toFixed(2)} €`;
         }
 
-        // GRÁFICO CATEGORIAS
         const canvasCategorias = document.getElementById('grafico-despesas-categorias');
 
         if (canvasCategorias && dados.categorias?.length) {
-
             const labels = dados.categorias.map(item => item.categoria);
             const valores = dados.categorias.map(item => Number(item.total));
 
             new Chart(canvasCategorias, {
                 type: 'doughnut',
-
                 data: {
                     labels: labels,
-
                     datasets: [{
                         data: valores
                     }]
                 },
-
                 options: {
                     responsive: true,
                     maintainAspectRatio: false
@@ -1368,44 +1388,38 @@ if (receitaVendas) {
             });
         }
 
-        // GRÁFICO CUSTOS CAVALOS
         const canvasCavalos = document.getElementById('grafico-custo-cavalos');
 
         if (canvasCavalos && dados.custos_cavalos?.length) {
-
             const labels = dados.custos_cavalos.map(item => item.cavalo);
             const valores = dados.custos_cavalos.map(item => Number(item.total));
 
             new Chart(canvasCavalos, {
                 type: 'bar',
-
                 data: {
                     labels: labels,
-
                     datasets: [{
                         label: 'Custos (€)',
                         data: valores
                     }]
                 },
-
                 options: {
                     responsive: true,
                     maintainAspectRatio: false
                 }
             });
         }
-
     } catch (erro) {
-
-        console.error(
-            'Erro ao carregar estatísticas financeiras:',
-            erro
-        );
+        console.error('Erro ao carregar estatísticas financeiras:', erro);
     }
 }
 
+/* =========================
+   TABELA DE AULAS
+========================= */
 async function carregarTabelaAulas() {
     const tabela = document.getElementById('tabela-aulas');
+
     if (!tabela) return;
 
     try {
@@ -1458,7 +1472,6 @@ async function carregarTabelaAulas() {
 
             tabela.appendChild(linha);
         });
-
     } catch (erro) {
         console.error('Erro ao carregar aulas:', erro);
 
@@ -1478,8 +1491,12 @@ async function apagarAula(id) {
     alert('A função de apagar aula será criada depois.');
 }
 
+/* =========================
+   SELECT DE CLIENTES
+========================= */
 async function carregarSelectClientes() {
     const select = document.getElementById('cliente_id');
+
     if (!select) return;
 
     try {
@@ -1499,8 +1516,12 @@ async function carregarSelectClientes() {
     }
 }
 
+/* =========================
+   CALENDÁRIO DE AULAS
+========================= */
 function carregarCalendarioAulas() {
     const calendarioEl = document.getElementById('calendario-aulas');
+
     if (!calendarioEl) return;
 
     const calendario = new FullCalendar.Calendar(calendarioEl, {
@@ -1523,7 +1544,7 @@ function carregarCalendarioAulas() {
 
         events: '../backend/eventos-aulas.php',
 
-        eventClick: function(info) {
+        eventClick: function (info) {
             info.jsEvent.preventDefault();
 
             const id = info.event.id;
@@ -1537,6 +1558,9 @@ function carregarCalendarioAulas() {
     calendario.render();
 }
 
+/* =========================
+   CÁLCULO DA IDADE DO CAVALO
+========================= */
 function calcularIdadePorData(dataNascimento) {
     if (!dataNascimento) return '—';
 
@@ -1622,6 +1646,9 @@ function calcularIdadeCavalo() {
     }
 }
 
+/* =========================
+   EVENTOS DA DATA DE NASCIMENTO
+========================= */
 document.addEventListener('DOMContentLoaded', function () {
     const inputData = document.getElementById('data_nascimento');
 
@@ -1631,7 +1658,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
+/* =========================
+   INICIALIZAÇÃO DO ADMIN
+========================= */
 document.addEventListener('DOMContentLoaded', () => {
     configurarPreviewImagem();
     configurarFormularioAdicionar();

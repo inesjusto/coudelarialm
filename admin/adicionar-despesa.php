@@ -9,6 +9,7 @@ $stmtCavalos = $conn->query("
 ");
 $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -25,6 +26,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
             <a href="../public/index.html" class="sidebar-logo-link">
                 <div class="sidebar-logo">
                     <img src="assets/img/logo.png" alt="Logo da Coudelaria">
+
                     <div class="sidebar-titulo">
                         <h2>Coudelaria</h2>
                         <h3>Lima Monteiro</h3>
@@ -58,9 +60,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
             <section class="admin-form-wrapper">
                 <div class="form-container">
                     <form action="../backend/cadastrar-despesa.php" method="POST" novalidate>
-
                         <div class="campo">
                             <label for="tipo_registo">Tipo de Despesa</label>
+
                             <select id="tipo_registo" name="tipo_registo" required>
                                 <option value="manual">Despesa geral da coudelaria</option>
                                 <option value="cavalo">Despesa de cavalo</option>
@@ -69,6 +71,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="fornecedor_id">Fornecedor</label>
+
                             <select id="fornecedor_id" name="fornecedor_id">
                                 <option value="">Sem fornecedor</option>
                             </select>
@@ -77,6 +80,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                         <div id="campo-cavalo" style="display: none;">
                             <div class="campo">
                                 <label for="cavalo_id">Cavalo</label>
+
                                 <select id="cavalo_id" name="cavalo_id">
                                     <option value="">Selecione o cavalo</option>
 
@@ -91,6 +95,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="categoria">Categoria</label>
+
                             <select id="categoria" name="categoria" required>
                                 <option value="">Selecione</option>
                             </select>
@@ -116,6 +121,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label for="unidade">Unidade</label>
+
                                 <select id="unidade" name="unidade">
                                     <option value="kg">kg</option>
                                     <option value="g">g</option>
@@ -126,10 +132,11 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label for="data_inicio">Data de Início</label>
-                                <input 
-                                    type="text" 
-                                    id="data_inicio" 
-                                    name="data_inicio" 
+
+                                <input
+                                    type="text"
+                                    id="data_inicio"
+                                    name="data_inicio"
                                     class="input-data"
                                     placeholder="Selecione a data"
                                 >
@@ -137,10 +144,11 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label for="data_fim">Data de Fim</label>
-                                <input 
-                                    type="text" 
-                                    id="data_fim" 
-                                    name="data_fim" 
+
+                                <input
+                                    type="text"
+                                    id="data_fim"
+                                    name="data_fim"
                                     class="input-data"
                                     placeholder="Selecione a data"
                                 >
@@ -158,6 +166,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="campo">
                                 <label>Resumo do Cálculo</label>
+
                                 <div class="mensagem-formulario" id="resumo-consumo">
                                     Preencha os campos para calcular automaticamente o custo.
                                 </div>
@@ -166,10 +175,11 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="data_despesa">Data da Despesa</label>
-                            <input 
-                                type="text" 
-                                id="data_despesa" 
-                                name="data_despesa" 
+
+                            <input
+                                type="text"
+                                id="data_despesa"
+                                name="data_despesa"
                                 class="input-data"
                                 placeholder="Selecione a data"
                                 required
@@ -178,6 +188,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="metodo_pagamento">Método de Pagamento</label>
+
                             <select id="metodo_pagamento" name="metodo_pagamento">
                                 <option value="">Selecione</option>
                                 <option value="Dinheiro">Dinheiro</option>
@@ -192,6 +203,7 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="campo">
                             <label for="estado_pagamento">Estado do Pagamento</label>
+
                             <select id="estado_pagamento" name="estado_pagamento">
                                 <option value="pendente">Pendente</option>
                                 <option value="pago">Pago</option>
@@ -216,6 +228,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
     <script src="assets/js/admin.js"></script>
 
     <script>
+        /* =========================
+           CONFIGURAÇÃO DAS DESPESAS
+        ========================= */
         document.addEventListener('DOMContentLoaded', function () {
             const tipoRegisto = document.getElementById('tipo_registo');
             const campoCavalo = document.getElementById('campo-cavalo');
@@ -275,6 +290,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 'Suplementos'
             ];
 
+            /* =========================
+               CATEGORIAS DA DESPESA
+            ========================= */
             function preencherCategorias(lista) {
                 categoria.innerHTML = '<option value="">Selecione</option>';
 
@@ -286,6 +304,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 });
             }
 
+            /* =========================
+               LIMPEZA DO CÁLCULO AUTOMÁTICO
+            ========================= */
             function limparCamposCalculo() {
                 consumoDiario.value = '';
                 dataInicio.value = '';
@@ -295,6 +316,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 resumoConsumo.textContent = 'Preencha os campos para calcular automaticamente o custo.';
             }
 
+            /* =========================
+               TIPO DE DESPESA
+            ========================= */
             function atualizarTipoDespesa() {
                 if (tipoRegisto.value === 'cavalo') {
                     campoCavalo.style.display = 'block';
@@ -307,6 +331,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 atualizarCamposCategoria();
             }
 
+            /* =========================
+               CAMPOS DA CATEGORIA
+            ========================= */
             function atualizarCamposCategoria() {
                 const categoriaSelecionada = categoria.value;
                 const deveCalcular = tipoRegisto.value === 'cavalo' && categoriasComCalculo.includes(categoriaSelecionada);
@@ -326,6 +353,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 }
             }
 
+            /* =========================
+               NORMALIZAÇÃO DE VALORES
+            ========================= */
             function normalizarValor(valor) {
                 if (!valor) return 0;
 
@@ -350,6 +380,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                 return isNaN(numero) ? 0 : numero;
             }
 
+            /* =========================
+               FORMATAÇÃO DE VALORES
+            ========================= */
             function formatarValor(valor) {
                 return `${Number(valor || 0)
                     .toFixed(2)
@@ -357,6 +390,9 @@ $cavalos = $stmtCavalos->fetchAll(PDO::FETCH_ASSOC);
                     .replace(/\B(?=(\d{3})+(?!\d))/g, '.')} €`;
             }
 
+            /* =========================
+               CÁLCULO AUTOMÁTICO DO CONSUMO
+            ========================= */
             function calcularResumoConsumo() {
                 const consumo = normalizarValor(consumoDiario.value);
                 const inicio = dataInicio.value;

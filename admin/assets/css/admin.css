@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@600;700&display=swap');
 
+/* =========================
+   VARIÁVEIS GERAIS
+========================= */
 :root {
     --cor-fundo: #1A1D2B;
     --cor-destaque: #00C853;
@@ -11,6 +14,9 @@
     --cor-borda: rgba(255, 255, 255, 0.08);
 }
 
+/* =========================
+   REPOSIÇÃO GERAL
+========================= */
 * {
     margin: 0;
     padding: 0;
@@ -28,7 +34,9 @@ a {
     color: inherit;
 }
 
-/* LAYOUT */
+/* =========================
+   LAYOUT ADMINISTRATIVO
+========================= */
 .admin-layout {
     min-height: 100vh;
     display: grid;
@@ -39,7 +47,7 @@ a {
     background-color: var(--cor-sidebar);
     border-right: 1px solid var(--cor-borda);
     padding: 24px 18px;
-    box-shadow: inset -1px 0 0 rgba(255,255,255,0.03);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
 }
 
 .sidebar-logo-link {
@@ -61,7 +69,7 @@ a {
     max-width: 100%;
     height: auto;
     border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.22);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
 }
 
 .sidebar-titulo {
@@ -130,7 +138,9 @@ a {
     padding: 24px;
 }
 
-/* HEADER */
+/* =========================
+   CABEÇALHO ADMINISTRATIVO
+========================= */
 .admin-header {
     margin-bottom: 18px;
 }
@@ -190,7 +200,9 @@ a {
     flex-wrap: wrap;
 }
 
-/* BOTÕES */
+/* =========================
+   BOTÕES
+========================= */
 .botao-principal,
 .botao-secundario,
 .botao-adicionar {
@@ -269,7 +281,9 @@ a {
     border: 1px solid var(--cor-borda);
 }
 
-/* STATS */
+/* =========================
+   CARTÕES DE ESTATÍSTICAS
+========================= */
 .dashboard-cards,
 .stats-grid {
     display: grid;
@@ -283,7 +297,7 @@ a {
     position: relative;
     overflow: hidden;
     background: linear-gradient(145deg, #24283B, #1f2335);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 22px;
     min-height: 130px;
@@ -297,7 +311,7 @@ a {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
     pointer-events: none;
 }
 
@@ -364,7 +378,9 @@ a {
     line-height: 1.5;
 }
 
-/* GRÁFICOS */
+/* =========================
+   GRÁFICOS
+========================= */
 .graficos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -382,7 +398,7 @@ a {
     position: relative;
     overflow: hidden;
     background: linear-gradient(160deg, #24283B, #1d2132);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 18px;
     min-height: 280px;
@@ -427,16 +443,18 @@ a {
     letter-spacing: -0.2px;
 }
 
-/* BOTÕES MODERNOS DOS GRÁFICOS */
+/* =========================
+   FILTROS DOS GRÁFICOS
+========================= */
 .grafico-filtros {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 4px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .filtro-btn {
@@ -454,7 +472,7 @@ a {
 
 .filtro-btn:hover {
     color: #FFFFFF;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .filtro-btn.ativo {
@@ -483,7 +501,9 @@ a {
     display: block;
 }
 
-/* TABELA */
+/* =========================
+   TABELAS
+========================= */
 .admin-tabela-wrapper {
     width: 100%;
 }
@@ -562,7 +582,9 @@ td strong {
     border-radius: 10px;
 }
 
-/* FORMULÁRIOS */
+/* =========================
+   FORMULÁRIOS
+========================= */
 .admin-form-wrapper {
     display: flex;
     justify-content: center;
@@ -578,10 +600,6 @@ td strong {
     border: 1px solid var(--cor-borda);
 }
 
-/* ========================= */
-/* FORMULÁRIOS */
-/* ========================= */
-
 .campo {
     margin-bottom: 18px;
 }
@@ -593,7 +611,6 @@ td strong {
     font-weight: 600;
 }
 
-/* INPUTS NORMAIS (SEM ALTERAÇÃO) */
 .campo input,
 .campo textarea {
     width: 100%;
@@ -611,57 +628,41 @@ td strong {
     color: var(--texto-secundario);
 }
 
-/* ========================= */
-/* SELECTS (DESTACADOS) */
-/* ========================= */
-
 .campo select {
     width: 100%;
     padding: 12px 42px 12px 14px;
-
     border-radius: 10px;
     border: 1px solid rgba(0, 200, 83, 0.35);
-
     background: linear-gradient(145deg, #24283B, #1f2335);
     color: #FFFFFF;
-
     font-family: 'Inter', sans-serif;
     font-size: 15px;
-
     cursor: pointer;
     transition: all 0.25s ease;
-
-    /* remove estilo nativo */
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-
-    /* seta moderna */
     background-image: url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
 }
 
-/* HOVER */
 .campo select:hover {
     border-color: var(--cor-destaque);
     box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.15);
 }
 
-/* FOCUS */
 .campo select:focus {
     outline: none;
     border-color: var(--cor-destaque);
     box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.25);
 }
 
-/* OPTIONS */
 .campo select option {
     background-color: #24283B;
     color: #FFFFFF;
 }
 
-/* FOCUS INPUTS (mantém coerência) */
 .campo input:focus,
 .campo textarea:focus {
     outline: none;
@@ -681,6 +682,9 @@ td strong {
     color: var(--texto-secundario);
 }
 
+/* =========================
+   UPLOAD DE IMAGEM
+========================= */
 .upload-container {
     display: flex;
     align-items: center;
@@ -734,7 +738,9 @@ td strong {
     border: 1px solid var(--cor-borda);
 }
 
-/* LOGIN */
+/* =========================
+   LOGIN
+========================= */
 .login-body {
     min-height: 100vh;
     background: linear-gradient(135deg, #1A1D2B, #111522);
@@ -829,7 +835,9 @@ td strong {
     text-align: center;
 }
 
-/* RESPONSIVO */
+/* =========================
+   RESPONSIVIDADE GERAL
+========================= */
 @media (max-width: 900px) {
     .admin-layout {
         grid-template-columns: 1fr;
@@ -936,16 +944,14 @@ td strong {
     }
 
     .stats-grid,
-.dashboard-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
+    .dashboard-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 /* =========================
-   FLATPICKR - CALENDÁRIO ADMIN
+   FLATPICKR - CALENDÁRIO ADMINISTRATIVO
 ========================= */
-
 .flatpickr-calendar {
     background: #24283B !important;
     border: 1px solid rgba(255, 255, 255, 0.10) !important;
@@ -956,7 +962,6 @@ td strong {
     overflow: hidden !important;
 }
 
-/* Topo do calendário */
 .flatpickr-months {
     background: #1A1D2B !important;
     padding-top: 8px !important;
@@ -974,7 +979,6 @@ td strong {
     padding-top: 2px !important;
 }
 
-/* Dropdown do mês */
 .flatpickr-current-month .flatpickr-monthDropdown-months {
     background: #1A1D2B !important;
     color: #FFFFFF !important;
@@ -991,7 +995,6 @@ td strong {
     color: #FFFFFF !important;
 }
 
-/* Ano */
 .flatpickr-current-month input.cur-year {
     color: #FFFFFF !important;
     background: transparent !important;
@@ -999,7 +1002,6 @@ td strong {
     box-shadow: none !important;
 }
 
-/* Setas */
 .flatpickr-prev-month,
 .flatpickr-next-month {
     color: #FFFFFF !important;
@@ -1012,7 +1014,6 @@ td strong {
     fill: #00C853 !important;
 }
 
-/* Dias da semana */
 .flatpickr-weekdays {
     background: #1A1D2B !important;
 }
@@ -1023,7 +1024,6 @@ span.flatpickr-weekday {
     font-weight: 600 !important;
 }
 
-/* Área dos dias */
 .flatpickr-days {
     background: #24283B !important;
 }
@@ -1033,7 +1033,6 @@ span.flatpickr-weekday {
     padding: 8px !important;
 }
 
-/* Dias */
 .flatpickr-day {
     color: #FFFFFF !important;
     border-radius: 10px !important;
@@ -1041,21 +1040,18 @@ span.flatpickr-weekday {
     transition: 0.2s ease !important;
 }
 
-/* Hover */
 .flatpickr-day:hover {
     background: rgba(0, 200, 83, 0.16) !important;
     border-color: rgba(0, 200, 83, 0.35) !important;
     color: #FFFFFF !important;
 }
 
-/* Dia atual */
 .flatpickr-day.today {
     border-color: #00C853 !important;
     color: #00C853 !important;
     background: rgba(0, 200, 83, 0.08) !important;
 }
 
-/* Dia selecionado */
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
 .flatpickr-day.endRange,
@@ -1068,13 +1064,11 @@ span.flatpickr-weekday {
     box-shadow: 0 6px 14px rgba(0, 200, 83, 0.25) !important;
 }
 
-/* Dias fora do mês */
 .flatpickr-day.prevMonthDay,
 .flatpickr-day.nextMonthDay {
     color: rgba(255, 255, 255, 0.28) !important;
 }
 
-/* Dias desativados */
 .flatpickr-day.flatpickr-disabled,
 .flatpickr-day.flatpickr-disabled:hover,
 .flatpickr-day.disabled,
@@ -1085,7 +1079,6 @@ span.flatpickr-weekday {
     cursor: not-allowed !important;
 }
 
-/* Input de hora, caso algum calendário use horas */
 .flatpickr-time {
     background: #24283B !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -1102,7 +1095,6 @@ span.flatpickr-weekday {
     background: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Setinhas dos inputs numéricos */
 .flatpickr-time .numInputWrapper span.arrowUp:after {
     border-bottom-color: #FFFFFF !important;
 }
@@ -1111,7 +1103,6 @@ span.flatpickr-weekday {
     border-top-color: #FFFFFF !important;
 }
 
-/* Campo com Flatpickr */
 .input-data {
     cursor: pointer;
 }
@@ -1121,39 +1112,34 @@ span.flatpickr-weekday {
     box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.18) !important;
 }
 
-/* ===== ESPAÇAMENTO ALUGUERES ===== */
-
-/* Espaço entre form e tabela */
+/* =========================
+   ESPAÇAMENTO DOS ALUGUERES
+========================= */
 .admin-form-wrapper {
     margin-bottom: 40px;
 }
 
-/* Espaço acima da tabela */
 .tabela-container {
     margin-top: 20px;
 }
 
-/* Espaço no header */
 .admin-header-flex {
     margin-bottom: 30px;
 }
 
-/* Melhorar espaçamento interno da tabela */
 .admin-tabela th,
 .admin-tabela td {
     padding: 18px 20px;
 }
 
-/* Dar mais "respiração" às linhas */
 .admin-tabela tbody tr {
     transition: background 0.2s;
 }
 
 .admin-tabela tbody tr:hover {
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
 }
 
-/* Espaço entre título do form e os campos */
 .form-container h2 {
     margin-bottom: 20px;
 }
@@ -1170,7 +1156,9 @@ span.flatpickr-weekday {
     }
 }
 
-/* SEÇÕES DA DASHBOARD */
+/* =========================
+   SECÇÕES DA DASHBOARD
+========================= */
 .dashboard-secao {
     margin-top: 40px;
     padding-top: 10px;
@@ -1199,74 +1187,72 @@ span.flatpickr-weekday {
     line-height: 1.5;
 }
 
-.badge-tipo{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:6px 12px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:0.3px;
+/* =========================
+   ETIQUETAS E TEXTO AUXILIAR
+========================= */
+.badge-tipo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
-.badge-geral{
-    background:#e5e7eb;
-    color:#374151;
+.badge-geral {
+    background: #e5e7eb;
+    color: #374151;
 }
 
-.badge-cavalo{
-    background:#dcfce7;
-    color:#166534;
+.badge-cavalo {
+    background: #dcfce7;
+    color: #166534;
 }
 
-.badge-automática{
-    background:#dbeafe;
-    color:#1d4ed8;
+.badge-automática {
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
-.texto-fraco{
-    color:#9ca3af;
+.texto-fraco {
+    color: #9ca3af;
 }
 
 /* =========================
    CALENDÁRIO DE AULAS
 ========================= */
-
 #calendario-aulas {
     background: #1e293b;
     padding: 20px;
     border-radius: 18px;
     color: #ffffff;
     overflow: hidden;
+    margin-top: 0;
 }
 
-/* Estrutura geral */
 .fc {
     color: #ffffff;
     font-size: 14px;
 }
 
-/* Altura */
 .fc .fc-view-harness {
     min-height: 520px;
 }
 
-/* Toolbar */
 .fc .fc-toolbar {
     margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 12px;
 }
 
-/* Título */
 .fc .fc-toolbar-title {
     color: #ffffff;
     font-size: 26px;
     font-weight: 700;
 }
 
-/* Botões */
 .fc .fc-button {
     border-radius: 10px !important;
     padding: 8px 14px !important;
@@ -1283,7 +1269,6 @@ span.flatpickr-weekday {
     background: linear-gradient(135deg, #16a34a, #15803d) !important;
 }
 
-/* Cabeçalho dias */
 .fc .fc-col-header-cell {
     background: #0f172a;
     padding: 12px 0;
@@ -1296,7 +1281,6 @@ span.flatpickr-weekday {
     font-weight: 700;
 }
 
-/* Dias */
 .fc .fc-daygrid-day {
     background: #1e293b;
 }
@@ -1308,19 +1292,16 @@ span.flatpickr-weekday {
     padding: 8px;
 }
 
-/* Dia atual */
 .fc .fc-day-today {
     background: rgba(34, 197, 94, 0.12) !important;
 }
 
-/* Bordas */
 .fc .fc-scrollgrid,
 .fc .fc-scrollgrid td,
 .fc .fc-scrollgrid th {
     border-color: #334155 !important;
 }
 
-/* Eventos */
 .fc-event {
     border: none !important;
     border-radius: 8px !important;
@@ -1335,13 +1316,11 @@ span.flatpickr-weekday {
     opacity: 0.9;
 }
 
-/* Texto eventos */
 .fc-event-title,
 .fc-event-time {
     color: #ffffff !important;
 }
 
-/* Dias fora do mês */
 .fc .fc-day-other {
     background: #172033;
 }
@@ -1350,22 +1329,14 @@ span.flatpickr-weekday {
     color: #64748b;
 }
 
-/* Scroll */
 .fc-scroller {
     overflow: hidden !important;
 }
 
-/* Evita que a tabela cole nas laterais */
 .admin-tabela-wrapper .admin-tabela {
     margin-top: 0;
 }
 
-/* Calendário com espaço correto */
-#calendario-aulas {
-    margin-top: 0;
-}
-
-/* Corrigir espaçamento da lista de aulas */
 .admin-tabela-wrapper .tabela-container {
     padding: 26px !important;
     box-sizing: border-box;
@@ -1382,6 +1353,9 @@ span.flatpickr-weekday {
     margin-top: 22px;
 }
 
+/* =========================
+   CAMPO DE DATA E IDADE
+========================= */
 .campo-data-idade {
     display: grid;
     grid-template-columns: 1fr 180px;
@@ -1411,9 +1385,8 @@ span.flatpickr-weekday {
 }
 
 /* =========================
-   FORNECEDORES
+   TABELA DE FORNECEDORES
 ========================= */
-
 #tabela-fornecedores .telefone-fornecedor {
     min-width: 170px;
     white-space: nowrap;
@@ -1437,9 +1410,8 @@ span.flatpickr-weekday {
 }
 
 /* =========================
-   CLIENTES
+   TABELA DE CLIENTES
 ========================= */
-
 #tabela-clientes {
     table-layout: fixed;
     width: 100%;
@@ -1474,9 +1446,8 @@ span.flatpickr-weekday {
 }
 
 /* =========================
-   DESPESAS
+   TABELA DE DESPESAS
 ========================= */
-
 #tabela-despesas {
     table-layout: fixed;
     width: 100%;
@@ -1548,9 +1519,8 @@ span.flatpickr-weekday {
 }
 
 /* =========================
-   FORMULÁRIO PDF FINANCEIRO
+   FORMULÁRIO DO PDF FINANCEIRO
 ========================= */
-
 .pdf-financeiro-box {
     width: 100%;
     margin-top: 18px;
@@ -1636,8 +1606,7 @@ span.flatpickr-weekday {
     padding: 0 42px 0 14px;
     border-radius: 12px;
     border: 1px solid rgba(0, 200, 83, 0.30);
-    background:
-        linear-gradient(145deg, #24283B, #1f2335);
+    background: linear-gradient(145deg, #24283B, #1f2335);
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -1645,11 +1614,9 @@ span.flatpickr-weekday {
     outline: none;
     cursor: pointer;
     transition: 0.2s ease;
-
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-
     background-image:
         url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"),
         linear-gradient(145deg, #24283B, #1f2335);
