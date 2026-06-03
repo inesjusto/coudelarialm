@@ -1,299 +1,332 @@
+/* =========================
+   MENU DE NAVEGAÇÃO
+========================= */
 const menuToggle = document.getElementById("menu-toggle");
 const navbar = document.getElementById("navbar");
 
 let todosOsCavalos = [];
 
 if (menuToggle && navbar) {
-  menuToggle.addEventListener("click", () => {
-    navbar.classList.toggle("show");
-  });
+    menuToggle.addEventListener("click", () => {
+        navbar.classList.toggle("show");
+    });
 }
 
+/* =========================
+   INICIALIZAÇÃO DA PÁGINA
+========================= */
 document.addEventListener("DOMContentLoaded", () => {
-  carregarCavalos();
-  carregarCavalosDestaque();
-  configurarFormularioContacto();
+    carregarCavalos();
+    carregarCavalosDestaque();
+    configurarFormularioContacto();
 });
 
+/* =========================
+   CARREGAMENTO DOS CAVALOS
+========================= */
 async function carregarCavalos() {
-  const lista = document.getElementById("lista-cavalos");
-  const loading = document.getElementById("loading-cavalos");
-  const erro = document.getElementById("erro-cavalos");
-  const vazio = document.getElementById("sem-cavalos");
+    const lista = document.getElementById("lista-cavalos");
+    const loading = document.getElementById("loading-cavalos");
+    const erro = document.getElementById("erro-cavalos");
+    const vazio = document.getElementById("sem-cavalos");
 
-  if (!lista) return;
+    if (!lista) return;
 
-  try {
-    const response = await fetch("../backend/listar-cavalos.php?publico=1");
+    try {
+        const response = await fetch("../backend/listar-cavalos.php?publico=1");
 
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ao carregar cavalos: ${response.status}`);
-    }
+        if (!response.ok) {
+            throw new Error(`Erro HTTP ao carregar cavalos: ${response.status}`);
+        }
 
-    const data = await response.json();
-    todosOsCavalos = normalizarRespostaCavalos(data);
+        const data = await response.json();
+        todosOsCavalos = normalizarRespostaCavalos(data);
 
-    if (loading) loading.style.display = "none";
+        if (loading) loading.style.display = "none";
 
-    if (!Array.isArray(todosOsCavalos) || todosOsCavalos.length === 0) {
-      if (vazio) vazio.style.display = "block";
-      return;
-    }
+        if (!Array.isArray(todosOsCavalos) || todosOsCavalos.length === 0) {
+            if (vazio) vazio.style.display = "block";
+            return;
+        }
 
-    renderizarCavalos(todosOsCavalos);
-    configurarFiltrosCavalos();
-
-  } catch (error) {
-    console.error("Erro ao carregar cavalos:", error);
-
-    if (loading) loading.style.display = "none";
-    if (erro) erro.style.display = "block";
-  }
-}
-
-function renderizarCavalos(cavalos) {
-  const lista = document.getElementById("lista-cavalos");
-  const vazio = document.getElementById("sem-cavalos");
-
-  if (!lista) return;
-
-  lista.innerHTML = "";
-
-  if (!Array.isArray(cavalos) || cavalos.length === 0) {
-    if (vazio) vazio.style.display = "block";
-    return;
-  }
-
-  if (vazio) vazio.style.display = "none";
-
-  const fragmento = document.createDocumentFragment();
-
-  cavalos.forEach((cavalo) => {
-    const card = criarCardCavalo(cavalo, true);
-    fragmento.appendChild(card);
-  });
-
-  lista.appendChild(fragmento);
-}
-
-function configurarFiltrosCavalos() {
-  const botoes = document.querySelectorAll(".horse-filter-btn");
-
-  if (!botoes.length) return;
-
-  botoes.forEach((botao) => {
-    botao.addEventListener("click", () => {
-      botoes.forEach((b) => b.classList.remove("active"));
-      botao.classList.add("active");
-
-      const sexo = botao.dataset.sexo;
-
-      if (sexo === "todos") {
         renderizarCavalos(todosOsCavalos);
-        return;
-      }
+        configurarFiltrosCavalos();
+    } catch (error) {
+        console.error("Erro ao carregar cavalos:", error);
 
-      const filtrados = todosOsCavalos.filter((cavalo) => {
-        return String(cavalo.sexo || "").toLowerCase() === sexo.toLowerCase();
-      });
-
-      renderizarCavalos(filtrados);
-    });
-  });
+        if (loading) loading.style.display = "none";
+        if (erro) erro.style.display = "block";
+    }
 }
 
-async function carregarCavalosDestaque() {
-  const lista = document.getElementById("lista-cavalos-destaque");
-  const loading = document.getElementById("loading-cavalos-destaque");
-  const erro = document.getElementById("erro-cavalos-destaque");
-  const vazio = document.getElementById("sem-cavalos-destaque");
+/* =========================
+   APRESENTAÇÃO DOS CAVALOS
+========================= */
+function renderizarCavalos(cavalos) {
+    const lista = document.getElementById("lista-cavalos");
+    const vazio = document.getElementById("sem-cavalos");
 
-  if (!lista) return;
-
-  try {
-    const response = await fetch("../backend/listar-cavalos.php?publico=1");
-
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ao carregar cavalos em destaque: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const cavalos = normalizarRespostaCavalos(data).slice(0, 3);
-
-    if (loading) loading.style.display = "none";
-
-    if (!Array.isArray(cavalos) || cavalos.length === 0) {
-      if (vazio) vazio.style.display = "block";
-      return;
-    }
+    if (!lista) return;
 
     lista.innerHTML = "";
+
+    if (!Array.isArray(cavalos) || cavalos.length === 0) {
+        if (vazio) vazio.style.display = "block";
+        return;
+    }
+
+    if (vazio) vazio.style.display = "none";
 
     const fragmento = document.createDocumentFragment();
 
     cavalos.forEach((cavalo) => {
-      const card = criarCardCavalo(cavalo, false);
-      fragmento.appendChild(card);
+        const card = criarCardCavalo(cavalo, true);
+        fragmento.appendChild(card);
     });
 
     lista.appendChild(fragmento);
-
-  } catch (error) {
-    console.error("Erro ao carregar cavalos em destaque:", error);
-
-    if (loading) loading.style.display = "none";
-    if (erro) erro.style.display = "block";
-  }
 }
 
-function criarCardCavalo(cavalo, mostrarDescricao = true) {
-  const imagem = cavalo.imagem && String(cavalo.imagem).trim() !== ""
-    ? `assets/img/cavalos/${String(cavalo.imagem).trim()}`
-    : "assets/img/cavalos/default.jpg";
+/* =========================
+   FILTROS DOS CAVALOS
+========================= */
+function configurarFiltrosCavalos() {
+    const botoes = document.querySelectorAll(".horse-filter-btn");
 
-  const card = document.createElement("div");
-  card.className = "horse-card";
+    if (!botoes.length) return;
 
-  card.innerHTML = `
-    <div class="horse-image">
-      <img 
-  src="${imagem}" 
-  alt="${escapeHtml(cavalo.nome || "Cavalo")}"
-  loading="lazy"
-  decoding="async"
-  width="600"
-  height="400"
-  onerror="this.onerror=null;this.src='assets/img/cavalos/default.jpg';"
-      >
-    </div>
+    botoes.forEach((botao) => {
+        botao.addEventListener("click", () => {
+            botoes.forEach((b) => b.classList.remove("active"));
+            botao.classList.add("active");
 
-    <div class="horse-content">
-      <h3>${escapeHtml(cavalo.nome || "Sem nome")}</h3>
-      <p><strong>Raça:</strong> ${escapeHtml(cavalo.raca || "Não definida")}</p>
-      <p><strong>Sexo:</strong> ${escapeHtml(cavalo.sexo || "Não definido")}</p>
-      <p><strong>Idade:</strong> ${escapeHtml(formatarIdade(cavalo.idade))}</p>
-      <p><strong>Preço:</strong> ${escapeHtml(formatarPreco(cavalo.preco, cavalo.preco_formatado))}</p>
-      ${
-        mostrarDescricao
-          ? `<p><strong>Descrição:</strong> ${escapeHtml(cavalo.descricao || "Sem descrição disponível.")}</p>`
-          : ""
-      }
-      <a href="${mostrarDescricao ? "contactos.html" : "cavalos.html"}" class="btn btn-outline">
-        ${mostrarDescricao ? "Pedir Informações" : "Ver Mais"}
-      </a>
-    </div>
-  `;
+            const sexo = botao.dataset.sexo;
 
-  return card;
+            if (sexo === "todos") {
+                renderizarCavalos(todosOsCavalos);
+                return;
+            }
+
+            const filtrados = todosOsCavalos.filter((cavalo) => {
+                return String(cavalo.sexo || "").toLowerCase() === sexo.toLowerCase();
+            });
+
+            renderizarCavalos(filtrados);
+        });
+    });
 }
 
-function normalizarRespostaCavalos(data) {
-  if (Array.isArray(data)) return data;
-  if (data && Array.isArray(data.cavalos)) return data.cavalos;
-  if (data && Array.isArray(data.data)) return data.data;
-  if (data && Array.isArray(data.resultado)) return data.resultado;
-  return [];
-}
+/* =========================
+   CAVALOS EM DESTAQUE
+========================= */
+async function carregarCavalosDestaque() {
+    const lista = document.getElementById("lista-cavalos-destaque");
+    const loading = document.getElementById("loading-cavalos-destaque");
+    const erro = document.getElementById("erro-cavalos-destaque");
+    const vazio = document.getElementById("sem-cavalos-destaque");
 
-function formatarPreco(preco, precoFormatado = "") {
-  if (precoFormatado && String(precoFormatado).trim() !== "") {
-    return String(precoFormatado);
-  }
-
-  if (preco === null || preco === undefined || preco === "") {
-    return "Sob consulta";
-  }
-
-  const valor = Number(preco);
-
-  if (Number.isNaN(valor)) {
-    return String(preco);
-  }
-
-  return `${valor
-    .toFixed(2)
-    .replace(".", ",")
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} €`;
-}
-
-function formatarIdade(idade) {
-  if (idade === null || idade === undefined || idade === "") {
-    return "Não definida";
-  }
-
-  const texto = String(idade).trim();
-
-  if (texto.includes("ano") || texto.includes("mês") || texto.includes("meses")) {
-    return texto;
-  }
-
-  return `${texto} anos`;
-}
-
-function configurarFormularioContacto() {
-  const formularioContacto = document.querySelector(".contact-form");
-  const mensagemContacto = document.getElementById("mensagem-contacto");
-
-  if (!formularioContacto) return;
-
-  formularioContacto.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const botao = formularioContacto.querySelector('button[type="submit"]');
-    const textoOriginal = botao ? botao.textContent : "";
-
-    if (mensagemContacto) {
-      mensagemContacto.textContent = "";
-      mensagemContacto.className = "mensagem-contacto";
-    }
-
-    if (botao) {
-      botao.disabled = true;
-      botao.textContent = "A enviar...";
-    }
+    if (!lista) return;
 
     try {
-      const formData = new FormData(formularioContacto);
+        const response = await fetch("../backend/listar-cavalos.php?publico=1");
 
-      const response = await fetch("../backend/enviar-contacto.php", {
-        method: "POST",
-        body: formData
-      });
+        if (!response.ok) {
+            throw new Error(`Erro HTTP ao carregar cavalos em destaque: ${response.status}`);
+        }
 
-      const resultado = await response.json();
+        const data = await response.json();
+        const cavalos = normalizarRespostaCavalos(data).slice(0, 3);
 
-      if (mensagemContacto) {
-        mensagemContacto.textContent = resultado.mensagem;
-        mensagemContacto.className = resultado.sucesso
-          ? "mensagem-contacto sucesso"
-          : "mensagem-contacto erro";
-      }
+        if (loading) loading.style.display = "none";
 
-      if (resultado.sucesso) {
-        formularioContacto.reset();
-      }
+        if (!Array.isArray(cavalos) || cavalos.length === 0) {
+            if (vazio) vazio.style.display = "block";
+            return;
+        }
 
+        lista.innerHTML = "";
+
+        const fragmento = document.createDocumentFragment();
+
+        cavalos.forEach((cavalo) => {
+            const card = criarCardCavalo(cavalo, false);
+            fragmento.appendChild(card);
+        });
+
+        lista.appendChild(fragmento);
     } catch (error) {
-      console.error("Erro ao enviar formulário:", error);
+        console.error("Erro ao carregar cavalos em destaque:", error);
 
-      if (mensagemContacto) {
-        mensagemContacto.textContent = "Erro ao enviar mensagem. Tente novamente.";
-        mensagemContacto.className = "mensagem-contacto erro";
-      }
-    } finally {
-      if (botao) {
-        botao.disabled = false;
-        botao.textContent = textoOriginal;
-      }
+        if (loading) loading.style.display = "none";
+        if (erro) erro.style.display = "block";
     }
-  });
 }
 
+/* =========================
+   CARTÃO DO CAVALO
+========================= */
+function criarCardCavalo(cavalo, mostrarDescricao = true) {
+    const imagem = cavalo.imagem && String(cavalo.imagem).trim() !== ""
+        ? `assets/img/cavalos/${String(cavalo.imagem).trim()}`
+        : "assets/img/cavalos/default.jpg";
+
+    const card = document.createElement("div");
+    card.className = "horse-card";
+
+    card.innerHTML = `
+        <div class="horse-image">
+            <img
+                src="${imagem}"
+                alt="${escapeHtml(cavalo.nome || "Cavalo")}"
+                loading="lazy"
+                decoding="async"
+                width="600"
+                height="400"
+                onerror="this.onerror=null;this.src='assets/img/cavalos/default.jpg';"
+            >
+        </div>
+
+        <div class="horse-content">
+            <h3>${escapeHtml(cavalo.nome || "Sem nome")}</h3>
+            <p><strong>Raça:</strong> ${escapeHtml(cavalo.raca || "Não definida")}</p>
+            <p><strong>Sexo:</strong> ${escapeHtml(cavalo.sexo || "Não definido")}</p>
+            <p><strong>Idade:</strong> ${escapeHtml(formatarIdade(cavalo.idade))}</p>
+            <p><strong>Preço:</strong> ${escapeHtml(formatarPreco(cavalo.preco, cavalo.preco_formatado))}</p>
+            ${
+                mostrarDescricao
+                    ? `<p><strong>Descrição:</strong> ${escapeHtml(cavalo.descricao || "Sem descrição disponível.")}</p>`
+                    : ""
+            }
+            <a href="${mostrarDescricao ? "contactos.html" : "cavalos.html"}" class="btn btn-outline">
+                ${mostrarDescricao ? "Pedir Informações" : "Ver Mais"}
+            </a>
+        </div>
+    `;
+
+    return card;
+}
+
+/* =========================
+   NORMALIZAÇÃO DA RESPOSTA DOS CAVALOS
+========================= */
+function normalizarRespostaCavalos(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.cavalos)) return data.cavalos;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.resultado)) return data.resultado;
+    return [];
+}
+
+/* =========================
+   FORMATAÇÃO DO PREÇO
+========================= */
+function formatarPreco(preco, precoFormatado = "") {
+    if (precoFormatado && String(precoFormatado).trim() !== "") {
+        return String(precoFormatado);
+    }
+
+    if (preco === null || preco === undefined || preco === "") {
+        return "Sob consulta";
+    }
+
+    const valor = Number(preco);
+
+    if (Number.isNaN(valor)) {
+        return String(preco);
+    }
+
+    return `${valor
+        .toFixed(2)
+        .replace(".", ",")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")} €`;
+}
+
+/* =========================
+   FORMATAÇÃO DA IDADE
+========================= */
+function formatarIdade(idade) {
+    if (idade === null || idade === undefined || idade === "") {
+        return "Não definida";
+    }
+
+    const texto = String(idade).trim();
+
+    if (texto.includes("ano") || texto.includes("mês") || texto.includes("meses")) {
+        return texto;
+    }
+
+    return `${texto} anos`;
+}
+
+/* =========================
+   FORMULÁRIO DE CONTACTO
+========================= */
+function configurarFormularioContacto() {
+    const formularioContacto = document.querySelector(".contact-form");
+    const mensagemContacto = document.getElementById("mensagem-contacto");
+
+    if (!formularioContacto) return;
+
+    formularioContacto.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const botao = formularioContacto.querySelector('button[type="submit"]');
+        const textoOriginal = botao ? botao.textContent : "";
+
+        if (mensagemContacto) {
+            mensagemContacto.textContent = "";
+            mensagemContacto.className = "mensagem-contacto";
+        }
+
+        if (botao) {
+            botao.disabled = true;
+            botao.textContent = "A enviar...";
+        }
+
+        try {
+            const formData = new FormData(formularioContacto);
+
+            const response = await fetch("../backend/enviar-contacto.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const resultado = await response.json();
+
+            if (mensagemContacto) {
+                mensagemContacto.textContent = resultado.mensagem;
+                mensagemContacto.className = resultado.sucesso
+                    ? "mensagem-contacto sucesso"
+                    : "mensagem-contacto erro";
+            }
+
+            if (resultado.sucesso) {
+                formularioContacto.reset();
+            }
+        } catch (error) {
+            console.error("Erro ao enviar formulário:", error);
+
+            if (mensagemContacto) {
+                mensagemContacto.textContent = "Erro ao enviar mensagem. Tente novamente.";
+                mensagemContacto.className = "mensagem-contacto erro";
+            }
+        } finally {
+            if (botao) {
+                botao.disabled = false;
+                botao.textContent = textoOriginal;
+            }
+        }
+    });
+}
+
+/* =========================
+   PROTECÇÃO CONTRA HTML INDEVIDO
+========================= */
 function escapeHtml(valor) {
-  return String(valor)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
