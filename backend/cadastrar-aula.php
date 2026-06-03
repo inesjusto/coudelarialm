@@ -8,8 +8,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$clienteId = isset($_POST['cliente_id']) && $_POST['cliente_id'] !== '' ? (int) $_POST['cliente_id'] : null;
-$cavaloId = isset($_POST['cavalo_id']) && $_POST['cavalo_id'] !== '' ? (int) $_POST['cavalo_id'] : null;
+$clienteId = isset($_POST['cliente_id']) && $_POST['cliente_id'] !== '' 
+    ? (int) $_POST['cliente_id'] 
+    : null;
+
+$cavaloId = isset($_POST['cavalo_id']) && $_POST['cavalo_id'] !== '' 
+    ? (int) $_POST['cavalo_id'] 
+    : null;
 
 $dataAula = trim($_POST['data_aula'] ?? '');
 $horaInicio = trim($_POST['hora_inicio'] ?? '');
@@ -42,6 +47,10 @@ if ($preco < 0) {
 }
 
 try {
+    /*
+        Validar cliente, se existir cliente selecionado.
+        Só permite clientes com estado Cliente.
+    */
     if ($clienteId !== null) {
         $stmtCliente = $conn->prepare("
             SELECT id
@@ -60,21 +69,31 @@ try {
         }
     }
 
-    $stmtCavalo = $conn->prepare("
-    SELECT c.id
-    FROM cavalos c
-    WHERE c.id = :cavalo_id
-      AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel', 'alugado')
-      AND NOT EXISTS (
-          SELECT 1
-          FROM alugueres a
-          WHERE a.cavalo_id = c.id
-            AND TRIM(LOWER(a.estado)) IN ('ativo', 'concluido')
-            AND DATE(:data_aula) >= DATE(a.data_inicio)
-            AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
-      )
-    LIMIT 1
-");
+    /*
+        Validar cavalo, se existir cavalo selecionado.
+
+        Regras:
+        - Só pode marcar aula com cavalo Disponível.
+        - Se o cavalo tiver aluguer ativo ou reservado nessa data, bloqueia.
+        - Aluguer cancelado não bloqueia.
+        - Aluguer concluído não bloqueia.
+    */
+    if ($cavaloId !== null) {
+        $stmtCavalo = $conn->prepare("
+            SELECT c.id
+            FROM cavalos c
+            WHERE c.id = :cavalo_id
+              AND TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM alugueres a
+                  WHERE a.cavalo_id = c.id
+                    AND TRIM(LOWER(a.estado)) IN ('ativo', 'reservado')
+                    AND DATE(:data_aula) >= DATE(a.data_inicio)
+                    AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
+              )
+            LIMIT 1
+        ");
 
         $stmtCavalo->execute([
             ':cavalo_id' => $cavaloId,
@@ -84,6 +103,7 @@ try {
         if (!$stmtCavalo->fetch(PDO::FETCH_ASSOC)) {
             die('Este cavalo não está disponível na data selecionada.');
         }
+    }
 
     $stmt = $conn->prepare("
         INSERT INTO aulas (

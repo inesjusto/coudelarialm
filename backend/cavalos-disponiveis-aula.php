@@ -20,26 +20,18 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
 }
 
 try {
-    /*
-        Regras:
-        - Só permite cavalos com estado Disponível ou Alugado.
-        - Vendido, Reservado, Indisponível, Em Tratamento, Reformado não aparecem.
-        - Se existir aluguer ativo ou concluído que apanhe a data da aula, o cavalo não aparece.
-        - Aluguer cancelado não bloqueia.
-        - Se data_fim for NULL num aluguer ativo, considera alugado por tempo indefinido.
-    */
-
+    
     $stmt = $conn->prepare("
         SELECT 
             c.id,
             c.nome
         FROM cavalos c
-        WHERE TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel', 'alugado')
+        WHERE TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
           AND NOT EXISTS (
               SELECT 1
               FROM alugueres a
               WHERE a.cavalo_id = c.id
-                AND TRIM(LOWER(a.estado)) IN ('ativo', 'concluido')
+                AND TRIM(LOWER(a.estado)) IN ('ativo', 'reservado')
                 AND DATE(:data_aula) >= DATE(a.data_inicio)
                 AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
           )

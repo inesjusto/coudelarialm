@@ -549,6 +549,11 @@ td strong {
     border-radius: 10px;
 }
 
+.mensagem-erro:empty,
+.erro-upload:empty {
+    display: none;
+}
+
 .mensagem-sucesso {
     color: #86efac !important;
     background: rgba(34, 197, 94, 0.10);

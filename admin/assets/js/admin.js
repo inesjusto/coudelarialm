@@ -380,6 +380,7 @@ async function carregarDadosCavaloParaEdicao() {
         document.getElementById('nome').value = cavalo.nome ?? '';
         document.getElementById('sexo').value = cavalo.sexo ?? '';
         document.getElementById('data_nascimento').value = cavalo.data_nascimento ?? '';
+        calcularIdadeCavalo();
         document.getElementById('raca').value = cavalo.raca ?? '';
 
         if (document.getElementById('altura')) {
@@ -1579,6 +1580,56 @@ function configurarCalculoIdadeFormulario() {
     atualizar();
 }
 
+function calcularIdadeCavalo() {
+    const inputData = document.getElementById('data_nascimento');
+    const idadeCalculada = document.getElementById('idade-calculada');
+
+    if (!inputData || !idadeCalculada) {
+        return;
+    }
+
+    const dataNascimento = inputData.value;
+
+    if (!dataNascimento) {
+        idadeCalculada.textContent = '—';
+        return;
+    }
+
+    const nascimento = new Date(dataNascimento + 'T00:00:00');
+    const hoje = new Date();
+
+    if (nascimento > hoje) {
+        idadeCalculada.textContent = 'Data inválida';
+        return;
+    }
+
+    let anos = hoje.getFullYear() - nascimento.getFullYear();
+    let meses = hoje.getMonth() - nascimento.getMonth();
+
+    if (hoje.getDate() < nascimento.getDate()) {
+        meses--;
+    }
+
+    if (meses < 0) {
+        anos--;
+        meses += 12;
+    }
+
+    if (anos > 0) {
+        idadeCalculada.textContent = anos === 1 ? '1 ano' : `${anos} anos`;
+    } else {
+        idadeCalculada.textContent = meses === 1 ? '1 mês' : `${meses} meses`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputData = document.getElementById('data_nascimento');
+
+    if (inputData) {
+        inputData.addEventListener('change', calcularIdadeCavalo);
+        inputData.addEventListener('input', calcularIdadeCavalo);
+    }
+});
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1601,4 +1652,5 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarSelectClientes();
     carregarCalendarioAulas();
     configurarCalculoIdadeFormulario();
+    calcularIdadeCavalo();
 });

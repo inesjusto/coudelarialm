@@ -24,7 +24,7 @@ async function carregarCavalos() {
   if (!lista) return;
 
   try {
-    const response = await fetch("../backend/listar-cavalos.php");
+    const response = await fetch("../backend/listar-cavalos.php?publico=1");
 
     if (!response.ok) {
       throw new Error(`Erro HTTP ao carregar cavalos: ${response.status}`);
@@ -111,7 +111,7 @@ async function carregarCavalosDestaque() {
   if (!lista) return;
 
   try {
-    const response = await fetch("../backend/listar-cavalos.php");
+    const response = await fetch("../backend/listar-cavalos.php?publico=1");
 
     if (!response.ok) {
       throw new Error(`Erro HTTP ao carregar cavalos em destaque: ${response.status}`);

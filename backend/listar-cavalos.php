@@ -3,7 +3,25 @@ require_once __DIR__ . '/conexao.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+$modoPublico = isset($_GET['publico']) && $_GET['publico'] === '1';
+
 try {
+    $wherePublico = '';
+
+    if ($modoPublico) {
+        $wherePublico = "
+            WHERE TRIM(LOWER(c.estado)) IN ('disponível', 'disponivel')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM alugueres a
+                  WHERE a.cavalo_id = c.id
+                    AND TRIM(LOWER(a.estado)) = 'ativo'
+                    AND a.data_inicio <= CURDATE()
+                    AND a.data_fim >= CURDATE()
+              )
+        ";
+    }
+
     $sql = "
         SELECT 
             c.id,
@@ -21,10 +39,13 @@ try {
                     FROM alugueres a
                     WHERE a.cavalo_id = c.id
                       AND TRIM(LOWER(a.estado)) = 'ativo'
+                      AND a.data_inicio <= CURDATE()
+                      AND a.data_fim >= CURDATE()
                 ) THEN 'alugado'
                 ELSE 'disponivel'
             END AS estado_aluguer
         FROM cavalos c
+        $wherePublico
         ORDER BY c.id DESC
     ";
 

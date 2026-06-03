@@ -212,7 +212,7 @@ include __DIR__ . '/../backend/proteger.php';
                             <input type="file" id="imagem" name="imagem" accept="image/*" hidden>
 
                             <p class="ajuda-upload">Formatos permitidos: JPG, JPEG, PNG, WEBP. Tamanho máximo 20MB.</p>
-                            <p id="erro-imagem" class="mensagem-erro"></p>
+                            <p id="erro-imagem" class="mensagem-erro" style="display: none;"></p>
                         </div>
 
                         <div id="mensagem-formulario" class="mensagem-formulario"></div>
