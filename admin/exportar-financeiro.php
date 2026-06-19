@@ -69,15 +69,7 @@ try {
         SELECT COALESCE(SUM(
             CASE
                 WHEN fim_calculo < inicio_calculo THEN 0
-                ELSE (
-                    (
-                        DATEDIFF(fim_calculo, inicio_calculo) + 1
-                        + CASE 
-                            WHEN fim_calculo > inicio_calculo THEN 1
-                            ELSE 0
-                          END
-                    ) * preco_diario
-                )
+                ELSE ((DATEDIFF(fim_calculo, inicio_calculo) + 1) * preco_diario)
             END
         ), 0) AS total
         FROM (

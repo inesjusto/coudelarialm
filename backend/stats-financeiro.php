@@ -25,21 +25,13 @@ try {
         - concluido conta até data_fim.
         - nunca calcula valores negativos.
         - usa a regra dos alugueres:
-          10/06 até 20/06 = 12 dias.
+          conta data de início e data de fim.
     */
     $sqlReceitaAlugueres = "
         SELECT COALESCE(SUM(
             CASE
                 WHEN fim_calculo < inicio_calculo THEN 0
-                ELSE (
-                    (
-                        DATEDIFF(fim_calculo, inicio_calculo) + 1
-                        + CASE 
-                            WHEN fim_calculo > inicio_calculo THEN 1
-                            ELSE 0
-                          END
-                    ) * preco_diario
-                )
+                ELSE ((DATEDIFF(fim_calculo, inicio_calculo) + 1) * preco_diario)
             END
         ), 0) AS total
         FROM (

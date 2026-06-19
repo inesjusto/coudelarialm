@@ -96,7 +96,7 @@ try {
                   SELECT 1
                   FROM alugueres a
                   WHERE a.cavalo_id = c.id
-                    AND TRIM(LOWER(a.estado)) = 'ativo'
+                    AND COALESCE(TRIM(LOWER(a.estado)), '') != 'cancelado'
                     AND DATE(:data_aula) BETWEEN DATE(a.data_inicio) AND DATE(COALESCE(a.data_fim, '9999-12-31'))
               )
             LIMIT 1

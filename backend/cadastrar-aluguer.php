@@ -97,17 +97,18 @@ try {
 
     /*
         Bloqueia alugueres sobrepostos:
-        Se já existir um aluguer ativo ou reservado do mesmo cavalo
+        Se já existir um aluguer não cancelado do mesmo cavalo
         dentro do mesmo intervalo de datas, não deixa criar.
     */
     $stmtVerificarSobreposicao = $conn->prepare("
         SELECT id
         FROM alugueres
         WHERE cavalo_id = :cavalo_id
-          AND TRIM(LOWER(estado)) IN ('ativo', 'reservado')
+          AND COALESCE(TRIM(LOWER(estado)), '') != 'cancelado'
           AND data_inicio <= :data_fim
           AND COALESCE(data_fim, '9999-12-31') >= :data_inicio
         LIMIT 1
+        FOR UPDATE
     ");
 
     $stmtVerificarSobreposicao->execute([

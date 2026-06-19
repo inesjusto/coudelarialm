@@ -15,13 +15,7 @@ function calcularDiasAluguer($dataInicio, $dataFim = null) {
         return 0;
     }
 
-    $dias = $inicio->diff($fim)->days + 1;
-
-    if ($fim > $inicio) {
-        $dias++;
-    }
-
-    return $dias;
+    return $inicio->diff($fim)->days + 1;
 }
 
 function formatarData($data) {
@@ -118,7 +112,7 @@ function mensagemErroAluguer($erro) {
         case 'cavalo':
             return 'Só é possível alugar cavalos com estado Disponível.';
         case 'sobreposicao':
-            return 'Este cavalo já tem um aluguer ativo ou reservado nesse período.';
+            return 'Este cavalo já tem um aluguer nesse período.';
         case 'guardar':
             return 'Ocorreu um erro ao criar o aluguer. Tente novamente.';
         default:
@@ -416,13 +410,8 @@ function mensagemSucessoAluguer($sucesso) {
                 if (dataFim < dataInicio) return 0;
 
                 const diferenca = dataFim - dataInicio;
-                let dias = Math.floor(diferenca / (1000 * 60 * 60 * 24)) + 1;
 
-                if (dataFim > dataInicio) {
-                    dias++;
-                }
-
-                return dias;
+                return Math.floor(diferenca / (1000 * 60 * 60 * 24)) + 1;
             }
 
             /* =========================

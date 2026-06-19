@@ -74,9 +74,8 @@ try {
 
         Regras:
         - Só pode marcar aula com cavalo Disponível.
-        - Se o cavalo tiver aluguer ativo ou reservado nessa data, bloqueia.
+        - Se o cavalo tiver aluguer não cancelado nessa data, bloqueia.
         - Aluguer cancelado não bloqueia.
-        - Aluguer concluído não bloqueia.
     */
     if ($cavaloId !== null) {
         $stmtCavalo = $conn->prepare("
@@ -88,7 +87,7 @@ try {
                   SELECT 1
                   FROM alugueres a
                   WHERE a.cavalo_id = c.id
-                    AND TRIM(LOWER(a.estado)) IN ('ativo', 'reservado')
+                    AND COALESCE(TRIM(LOWER(a.estado)), '') != 'cancelado'
                     AND DATE(:data_aula) >= DATE(a.data_inicio)
                     AND DATE(:data_aula) <= DATE(COALESCE(a.data_fim, '9999-12-31'))
               )
